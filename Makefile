@@ -21,16 +21,27 @@ endif
 #################################################################################
 
 ## Get data	
-get_data: ./data/raw/canonical-greekLit-master/repo.xml
+get_data: ./data/raw/treebank_data-master/README.md ./data/raw/Greek-Dependency-Trees-master/README.md
 
-./data/raw/canonical-greekLit-master/repo.xml: ./data/raw/data.zip
-	unzip ./data/raw/data.zip -d ./data/raw/
-	touch ./data/raw/canonical-greekLit-master/repo.xml
+./data/raw/treebank_data-master/README.md: ./data/raw/zip/perseus.zip
+	unzip ./data/raw/zip/perseus.zip -d ./data/raw/
+	touch ./data/raw/treebank_data-master/README.md
 
-./data/raw/data.zip:
-	curl -Lo ./data/raw/data.zip https://github.com/PerseusDL/canonical-greekLit/archive/master.zip
-	touch ./data/raw/data.zip
-	
+./data/raw/zip/perseus.zip: ./data/raw/zip/
+	curl -Lo ./data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
+	touch ./data/raw/zip/perseus.zip
+
+./data/raw/Greek-Dependency-Trees-master/README.md: ./data/raw/zip/gorman.zip
+	unzip ./data/raw/zip/gorman.zip -d ./data/raw/
+	touch ./data/raw/Greek-Dependency-Trees-master/README.md
+
+./data/raw/zip/gorman.zip: ./data/raw/zip/
+	curl -Lo ./data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
+	touch ./data/raw/zip/perseus.zip
+
+./data/raw/zip/:
+	mkdir ./data/raw/zip/
+
 ## Make Dataset
 process_data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
