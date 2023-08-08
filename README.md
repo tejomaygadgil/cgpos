@@ -4,10 +4,10 @@ My process of building a functional Part-of-Speech Tagger for a rather complex l
 
 ## Part-of-speech tagging in English is pretty easy 
 
-Most sentences follow a Subject-Verb-Object ordering:
+English sentences follow Subject-Verb-Object:
 ![img/SVO.png](img/SVO.png)
 
-And word endings are relatively simple:
+Word endings are pretty simple:
 ![img/conj.png](img/conj.png)
 
 ## Greek is a hard language
