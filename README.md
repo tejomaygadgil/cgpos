@@ -4,7 +4,9 @@ My process of building a functional Part-of-Speech Tagger for a rather complex l
 
 ## Part-of-speech tagging in English is pretty easy 
 
-English sentences follow Subject-Verb-Object:
+English has features that make it relatively easy to determine part-of-speech. 
+
+Sentences follow Subject-Verb-Object:
 ![img/SVO.png](img/SVO.png)
 
 Word endings are pretty simple:
