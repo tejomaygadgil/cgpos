@@ -7,9 +7,11 @@ My process of building a functional Part-of-Speech Tagger for a rather complex l
 English has features that make it relatively easy to determine part-of-speech. 
 
 Sentences follow Subject-Verb-Object:
+
 ![img/SVO.png](img/SVO.png)
 
 Word endings are pretty simple:
+
 ![img/conj.png](img/conj.png)
 
 ## Greek is a hard language
