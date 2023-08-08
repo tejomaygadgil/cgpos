@@ -1,7 +1,40 @@
-3decl
+3decl: Part-of-Speech (POS) Tagging Classical Greek 
 ==============================
+My process of building a functional Part-of-Speech Tagger for a rather complex language: Classical Greek.
 
-Anything goes in the 3rd declension.
+## Part-of-speech tagging in English is pretty easy 
+
+Most sentences follow a Subject-Verb-Object ordering:
+![img/SVO.png](img/SVO.png)
+
+And word endings are relatively simple:
+![img/conj.png](img/conj.png)
+
+## Greek is a hard language
+
+But what if that wasn't true?
+
+What if words could appear practically in any order, and part-of-speech was determined by an absurdly complex system of word endings?
+
+With its 3 declensions of adjectives and nouns (inflected by number, person, gender), 2 families of verbs (conjugated by person, number, aspect, mood, voice), difficulty of participles (verbs that act line nouns), mystery of particles (don't ask)...
+
+Enter Classical Greek!
+
+![img/greek.png](img/greek.png)
+*Conjugation table for one tense of the verb φύω, to appear. φύω has 5 other tenses!*
+
+## POS Classical Greek = NLP perfection
+
+The subtle flexibility of the Greek language makes it perfect to study NLP with! 
+
+To that end, here's how I built and evaluated a Part-of-Speech tagging system for Classical Greek.
+
+# Steps
+## Previous work shows 
+
+## Treebanks 
+
+## 
 
 Project Organization
 ------------
