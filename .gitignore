@@ -8,6 +8,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+.venv
 build/
 develop-eggs/
 dist/
@@ -21,7 +22,8 @@ sdist/
 var/
 *.egg-info/
 .installed.cfg
-*.egg
+*.egg'
+venv
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -76,9 +78,6 @@ target/
 .ipynb_checkpoints/
 .virtual_documents/
 
-# exclude data from source control by default
-/data/
-
 # Mac OS-specific storage files
 .DS_Store
 
@@ -86,5 +85,10 @@ target/
 *.swp
 *.swo
 
-# Mypy cache
+# Caches
 .mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Hydra logs
+outputs
