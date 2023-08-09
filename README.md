@@ -1,4 +1,4 @@
-3decl: Part-of-Speech (POS) Tagging Classical Greek 
+`cgpos`: Part-of-Speech (POS) Tagging Classical Greek 
 ==============================
 My process of building a functional Part-of-Speech Tagger for a rather complex language: Classical Greek.
 
