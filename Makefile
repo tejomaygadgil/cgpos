@@ -10,30 +10,34 @@
 # COMMANDS                                                                      #
 #################################################################################
 ## Get data
-get_data: ./data/raw/treebank_data-master/README.md ./data/raw/Greek-Dependency-Trees-master/README.md
+get_data: data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
 
-./data/raw/treebank_data-master/README.md: ./data/raw/zip/perseus.zip
-	unzip ./data/raw/zip/perseus.zip -d ./data/raw/
-	touch ./data/raw/treebank_data-master/README.md
+data/raw/treebank_data-master/README.md: data/raw/zip/perseus.zip
+	unzip data/raw/zip/perseus.zip -d data/raw
+	touch data/raw/treebank_data-master/README.md
 
-./data/raw/zip/perseus.zip: ./data/raw/zip/
-	curl -Lo ./data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
-	touch ./data/raw/zip/perseus.zip
+data/raw/zip/perseus.zip: data/raw/zip
+	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
+	touch data/raw/zip/perseus.zip
 
-./data/raw/Greek-Dependency-Trees-master/README.md: ./data/raw/zip/gorman.zip
-	unzip ./data/raw/zip/gorman.zip -d ./data/raw/
-	touch ./data/raw/Greek-Dependency-Trees-master/README.md
+data/raw/Greek-Dependency-Trees-master/README.md: data/raw/zip/gorman.zip
+	unzip data/raw/zip/gorman.zip -d ./data/raw
+	touch data/raw/Greek-Dependency-Trees-master/README.md
 
-./data/raw/zip/gorman.zip: ./data/raw/zip/
-	curl -Lo ./data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
-	touch ./data/raw/zip/perseus.zip
+data/raw/zip/gorman.zip: data/raw/zip
+	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
+	touch data/raw/zip/perseus.zip
 
-./data/raw/zip/:
-	mkdir -p ./data/raw/zip/
+data/raw/zip: init_data_dir
+	mkdir -p data/raw/zip
+
+## Initialize data directory
+init_data_dir:
+	mkdir -p data/raw data/processed data/interim data/external
 
 ## Remove data
-remove_data:
-	rm -rf ./data/raw/*
+remove_data: make_data_dir
+	rm -rf data/raw/*
 
 ## Activate poetry environment
 activate_poetry: install_poetry
