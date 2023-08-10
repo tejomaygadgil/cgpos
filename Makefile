@@ -36,7 +36,7 @@ init_data_dir:
 	mkdir -p data/raw data/processed data/interim data/external
 
 ## Remove data
-remove_data: make_data_dir
+remove_data: init_data_dir
 	rm -rf data/raw/*
 
 ## Activate poetry environment
