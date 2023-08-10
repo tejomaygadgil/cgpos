@@ -20,7 +20,7 @@ But what if that wasn't true?
 
 What if words could appear practically in any order, and part-of-speech was determined by an absurdly complex system of word endings?
 
-With its nouns and adjectives (3 separate declensions of number, person, gender), verbs (2 types conjugated by person, number, aspect, mood, voice), participles (verbs declined like nouns), and particles (don't ask)...
+With its nouns and adjectives (3 separate declensions of number, person, case), verbs (2 types conjugated by person, number, aspect, mood, voice), participles (verbs declined like nouns), and particles (don't ask)...
 
 Enter Classical Greek!
 
