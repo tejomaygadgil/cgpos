@@ -20,8 +20,8 @@ def read_perseus(config: DictConfig):
 
     # Set import and export directories
     abs_dir = get_abs_dir()
-    import_dir = os.path.join(abs_dir, config.data_dir.perseus)
-    export_dir = os.path.join(abs_dir, config.data_dir.processed, "perseus.pkl")
+    import_dir = os.path.join(abs_dir, config.perseus.raw_dir)
+    export_dir = os.path.join(abs_dir, config.perseus.processed)
 
     # Get files
     files = os.listdir(import_dir)
