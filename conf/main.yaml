@@ -1,0 +1,7 @@
+data_dir:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  external: data/external
+  perseus: data/raw/treebank_data-master/v2.0/Greek/nonArethusaCompliant/
+  
