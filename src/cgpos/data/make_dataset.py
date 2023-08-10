@@ -19,9 +19,8 @@ def read_perseus(config: DictConfig):
     logger.info("Processing Perseus data:")
 
     # Set import and export directories
-    abs_dir = get_abs_dir()
-    import_dir = os.path.join(abs_dir, config.perseus.raw_dir)
-    export_dir = os.path.join(abs_dir, config.perseus.processed)
+    import_dir = get_abs_dir(config.perseus.raw_dir)
+    export_dir = get_abs_dir(config.perseus.processed)
 
     # Get files
     files = os.listdir(import_dir)
@@ -52,6 +51,19 @@ def read_perseus(config: DictConfig):
     logging.info(f"Exporting to {export_dir}")
     with open(export_dir, "wb") as file:
         pickle.dump(data, file)
+
+
+@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+def load_perseus(config: DictConfig):
+    """
+    Loads processed perseus.pkl.
+    """
+    perseus_path = get_abs_dir(config.perseus.processed)
+
+    with open(perseus_path, "rb") as file:
+        data = pickle.load(file)
+
+    return data
 
 
 if __name__ == "__main__":
