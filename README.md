@@ -1,4 +1,4 @@
-⚡🏺🏛 Part-of-Speech Tagging for Classical Greek ⚡️🏺🏛
+⚡🏺🏛 POS Tagging for Classical Greek ⚡️🏺🏛
 ==============================
 I built an NLP model that does Part-of-Speech Tagging for Classical Greek.
 
