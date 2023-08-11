@@ -20,8 +20,8 @@ Also, word endings are pretty simple:
 
 ![img/conj.png](img/conj.png)
 
-And lastly, we have a lot of it:
-![image](https://github.com/tejomaygadgil/cgpos/assets/10650758/47daf1fa-92d6-464d-b3ba-2b73eeb2ca05)
+And lastly, we have *a lot* of it:
+![img.png](img/eng_tokens.png)
 
 ## Greek is hard
 
@@ -33,9 +33,9 @@ Secondly, part-of-speech is determined by an absurdly complex system of word end
 ![img/greek.png](img/greek.png)
 *Present tense conjugation the verb φύω, to appear. φύω has 5 other tenses*
 
-And that's not even mentioning participles (verbs declined like nouns), particles (don't ask), moods (subjunctive, optative), voices (active, passive, and *middle*) that elude scholars to this day...
+(And that's not even mentioning participles (verbs declined like nouns), particles (don't ask), moods (subjunctive, optative), voices (active, passive, and *middle*) that elude scholars to this day...)
 
-Determining Part-of-Speech for CG is a lot.
+Another thing to consider is the _kind_ of Greek we have access to: most of it is lofty poetry, religious texts, and philosophical treatises.
 
 ## POS Classical Greek is a test of NLP 
 
