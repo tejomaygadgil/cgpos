@@ -36,13 +36,21 @@ def read_perseus(config: DictConfig):
         tree = ET.parse(file_dir)
         root = tree.getroot()
 
-        # Iterate through sentences
+        # Get title and author
+        work_attrib = {}
+        for field in ["author", "title"]:
+            element = list(root.iter(field))
+            if len(element):  # Some files are missing author info
+                work_attrib[field] = element[0].text
+
+        # Get POS tags
         for sentence in root.iter("sentence"):
-            sentence_attrib = sentence.attrib
+            sentence_attrib = sentence.attrib.copy()
             sentence_attrib["sentence_id"] = sentence_attrib.pop("id")  # Rename
             for word in sentence:
-                word_attrib = word.attrib
+                word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
+                word_attrib.update(work_attrib)
                 data.append(word_attrib)
 
     logging.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
