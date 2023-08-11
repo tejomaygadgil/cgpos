@@ -7,38 +7,8 @@
 
 
 #################################################################################
-# COMMANDS                                                                      #
+# SETUP                                                                      #
 #################################################################################
-## Get data
-get_data: data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
-
-data/raw/treebank_data-master/README.md: data/raw/zip/perseus.zip
-	unzip data/raw/zip/perseus.zip -d data/raw
-	touch data/raw/treebank_data-master/README.md
-
-data/raw/zip/perseus.zip: data/raw/zip
-	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
-	touch data/raw/zip/perseus.zip
-
-data/raw/Greek-Dependency-Trees-master/README.md: data/raw/zip/gorman.zip
-	unzip data/raw/zip/gorman.zip -d ./data/raw
-	touch data/raw/Greek-Dependency-Trees-master/README.md
-
-data/raw/zip/gorman.zip: data/raw/zip
-	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
-	touch data/raw/zip/perseus.zip
-
-data/raw/zip: init_data_dir
-	mkdir -p data/raw/zip
-
-## Initialize data directory
-init_data_dir:
-	mkdir -p data/raw data/processed data/interim data/external
-
-## Remove data
-remove_data: init_data_dir
-	rm -rf data/raw/*
-
 ## Activate poetry environment
 activate_poetry: install_poetry
 	poetry shell
@@ -55,8 +25,35 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
+## Make Perseus dataset
+make_dataset: | data/processed/perseus.pkl
 
+data/processed/perseus.pkl: | get_data
+	python src/cgpos/data/make_dataset.py
 
+## Get and unzip data
+get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
+
+data/raw/treebank_data-master/README.md: | data/raw/zip
+	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
+	unzip data/raw/zip/perseus.zip -d data/raw
+
+data/raw/Greek-Dependency-Trees-master/README.md: | data/raw/zip
+	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
+	unzip data/raw/zip/gorman.zip -d data/raw
+
+data/raw/zip: | init_data_dir
+	mkdir $@
+
+## Initialize data directory
+init_data_dir: | data/raw data/processed data/interim data/external
+
+data/raw data/processed data/interim data/external:
+	mkdir -p $@
+
+## Remove data
+remove_data: init_data_dir
+	rm -rf data/raw/* data/processed/* data/interim/* data/external/*
 
 #################################################################################
 # Self Documenting Commands                                                     #
