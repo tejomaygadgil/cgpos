@@ -22,7 +22,7 @@ def get_abs_dir(path):
 GREEK_LOWER = set(range(0x03B1, 0x03CA))
 GREEK_UPPER = set(range(0x0391, 0x03AA))
 GREEK_CHARACTERS = set.union(GREEK_LOWER, GREEK_UPPER)
-GREEK_DIACRITICS = {  #  Data from `greek_accentuation` library
+GREEK_DIACRITICS = {  # Data from `greek_accentuation` library
     ord(mark.value)
     for mark_set in [
         Breathing,
