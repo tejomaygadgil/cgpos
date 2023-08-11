@@ -6,7 +6,7 @@ Greek is a hard, low-resource language.
 
 Developing a great POS Tagger will require a lot of attention to detail, smart feature engineering, and a thoughtful approach to model selection. 
 
-Let us motivate the task by providing a background on some of the difficulties.
+Let us motivate the task by providing background on the difficulties.
 
 ##  English Part-of-Speech Tagging is kind of easy 
 
