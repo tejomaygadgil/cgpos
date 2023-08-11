@@ -1,37 +1,46 @@
-`cgpos`: Part-of-Speech (POS) Tagging Classical Greek 
+`cgpos`: Classical Greek Part-of-Speech Tagging 
 ==============================
-My process of building a functional Part-of-Speech Tagger for a rather complex language: Classical Greek.
+I built an NLP model that does Part-of-Speech Tagging for Classical Greek.
 
-## Part-of-speech tagging in English is pretty easy 
+Greek is a hard, low-resource language.
 
-English has features that make it relatively easy to determine part-of-speech. 
+Developing a great POS Tagger will require a lot of attention to detail, smart feature engineering, and a thoughtful approach to model selection. 
 
-Sentences follow Subject-Verb-Object:
+Let me motivate the task by providing a background on some of the difficulties.
+
+##  English Part-of-Speech Tagging is kind of easy 
+
+English makes it easy to figure out part-of-speech. 
+
+First off, most sentences follow a strict Subject-Verb-Object order:
 
 ![img/SVO.png](img/SVO.png)
 
-Word endings are pretty simple:
+Also, word endings are pretty simple:
 
 ![img/conj.png](img/conj.png)
 
+Of course real English gets more complex than this. But what about Greek? 
+
 ## Greek is a hard language
 
-But what if that wasn't true?
+Greek is the opposite of English in many ways.
 
-What if words could appear practically in any order, and part-of-speech was determined by an absurdly complex system of word endings?
+For one, the words can appear in any order (and they do). 
 
-With its nouns and adjectives (3 separate declensions of number, person, case), verbs (2 types conjugated by person, number, aspect, mood, voice), participles (verbs declined like nouns), and particles (don't ask)...
-
-Enter Classical Greek!
-
+Secondly, part-of-speech is determined by an absurdly complex system of word endings:
 ![img/greek.png](img/greek.png)
-*Conjugation table for one tense of the verb φύω, to appear. φύω has 5 other tenses!*
+*Present tense conjugation the verb φύω, to appear. φύω has 5 other tenses*
 
-## POS Classical Greek = NLP perfection
+And that's not even mentioning participles (verbs declined like nouns), particles (don't ask), moods (subjunctive, optative), voices (active, passive, and *middle*) that elude scholars to this day...
 
-The subtle flexibility of the Greek language makes it perfect to study NLP with! 
+Determining Part-of-Speech for CG is a lot.
 
-To that end, here's how I built and evaluated a Part-of-Speech tagging system for Classical Greek.
+## POS Classical Greek is a test of NLP 
+
+The difficulty and fluidity of Classical Greek makes it a perfect language to study NLP (-- and vice-versa!)
+
+Developing a great POS Tagger will require a lot of attention to detail, smart feature engineering, and a thoughtful approach to model selection. 
 
 # Steps
 ## Previous work shows 
