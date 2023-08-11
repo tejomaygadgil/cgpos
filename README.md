@@ -32,7 +32,7 @@ Firstly, the words can appear in any order (and they do).
 
 Secondly, part-of-speech is determined by an extremely complex system of word endings:
 ![img/greek.png](img/greek.png)
-*Present tense conjugation one verb φύω, to appear. There are 5 other tenses*
+*Present tense conjugation for one verb φύω, to appear. There are 5 other tenses*
 
 Lastly, we do not have a lot of Greek, and we do have is largely the most difficult and abstruse subset of the language: namely, poetry, philosophical dialogue, and religious texts.
 
