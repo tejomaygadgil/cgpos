@@ -6,13 +6,13 @@ Greek is a hard, low-resource language.
 
 Developing a great POS Tagger will require a lot of attention to detail, smart feature engineering, and a thoughtful approach to model selection. 
 
-Let me motivate the task by providing a background on some of the difficulties.
+Let us motivate the task by providing a background on some of the difficulties.
 
 ##  English Part-of-Speech Tagging is kind of easy 
 
 English makes it easy to figure out part-of-speech. 
 
-First off, most sentences follow a strict Subject-Verb-Object order:
+First off, sentences typically follow a strict Subject-Verb-Object order:
 
 ![img/SVO.png](img/SVO.png)
 
@@ -20,11 +20,12 @@ Also, word endings are pretty simple:
 
 ![img/conj.png](img/conj.png)
 
-Of course real English gets more complex than this. But what about Greek? 
+And lastly, we have a lot of it:
+![image](https://github.com/tejomaygadgil/cgpos/assets/10650758/47daf1fa-92d6-464d-b3ba-2b73eeb2ca05)
 
-## Greek is a hard language
+## Greek is hard
 
-Greek is the opposite of English in many ways.
+Greek is the opposite of English.
 
 For one, the words can appear in any order (and they do). 
 
