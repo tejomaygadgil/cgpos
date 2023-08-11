@@ -21,6 +21,7 @@ Also, word endings are pretty simple:
 ![img/conj.png](img/conj.png)
 
 And lastly, we have *a lot* of it:
+
 ![img.png](img/eng_tokens.png)
 
 ## Greek is hard
