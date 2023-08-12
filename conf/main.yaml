@@ -7,4 +7,5 @@ data:
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.0/Greek/nonArethusaCompliant/
   processed: data/processed/perseus.pkl
+  normalized: data/processed/perseus_normalized.pkl
   
