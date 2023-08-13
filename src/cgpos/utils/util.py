@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 from pathlib import Path
@@ -20,14 +21,18 @@ def get_abs_dir(path):
 
 
 def import_pkl(path):
+    logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
+    logger.info(f"Importing {path}")
     with open(path, "rb") as file:
         data = pickle.load(file)
     return data
 
 
 def export_pkl(data, path):
+    logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
+    logger.info(f"Exporting {path}")
     with open(path, "wb") as file:
         pickle.dump(data, file)
 

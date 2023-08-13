@@ -38,7 +38,6 @@ def get_postag_map(config: DictConfig):
     logger.info(f"Success! Built map with {len(data)} part-of-speech categories.")
 
     # Export as pickle
-    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
@@ -84,7 +83,6 @@ def featurize(config: DictConfig):
     logger.info("Success! Syllablized normalized form and parsed part-of-speech tags.")
 
     # Export
-    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
