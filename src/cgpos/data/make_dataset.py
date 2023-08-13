@@ -29,6 +29,7 @@ def parse(config: DictConfig):
 
     # Get files
     files = os.listdir(import_dir)
+    logger.info(f"Importing {len(files)} files from {import_dir}")
 
     # Collect words from files
     data = []
