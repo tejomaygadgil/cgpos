@@ -10,7 +10,10 @@ from cgpos.utils.util import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def make_postag_map(config: DictConfig):
+def parse_postag(config: DictConfig):
+    """
+    Parse part-of-speech map to extract features from `postag` column.
+    """
     logger = logging.getLogger(__name__)
     logger.info("Making postag map:")
 
@@ -40,7 +43,12 @@ def make_postag_map(config: DictConfig):
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def featurize_perseus(config: DictConfig):
+def featurize(config: DictConfig):
+    """
+    Featurize Perseus data by
+    - Getting syllables from normalized form (via greek_accentuation lib)
+    - Parsing part-of-speech tag data (via map generated from parse_postag)
+    """
     logger = logging.getLogger(__name__)
     logger.info("Building Perseus features:")
 
@@ -73,16 +81,17 @@ def featurize_perseus(config: DictConfig):
                         case _:
                             bad_pos.append(word_dict)
 
-    logging.info("Success! Syllablized normalized form and parsed part-of-speech tags.")
+    logger.info("Success! Syllablized normalized form and parsed part-of-speech tags.")
 
     # Export
-    logging.info(f"Exporting to {export_dir}")
+    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+    logging.info("2. BUILDING FEATURES")
 
-    make_postag_map()
-    featurize_perseus()
+    parse_postag()
+    featurize()
