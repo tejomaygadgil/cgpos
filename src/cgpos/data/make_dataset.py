@@ -32,6 +32,7 @@ def parse(config: DictConfig):
     logger.info(f"Importing {len(files)} files from {import_dir}")
 
     # Collect words from files
+    i = 0  # Create unique ID
     data = []
     for file in files:
         file_dir = os.path.join(import_dir, file)
@@ -49,7 +50,6 @@ def parse(config: DictConfig):
                 work_attrib[field] = element[0].text
 
         # Get POS tags
-        i = 0  # Create unique ID
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
             sentence_attrib["sentence_id"] = sentence_attrib.pop("id")  # Rename
@@ -57,7 +57,7 @@ def parse(config: DictConfig):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
                 word_attrib.update(work_attrib)
-                word_attrib["uid"] = i
+                word_attrib["uid"] = str(i)
                 data.append(word_attrib)
                 i += 1
 
@@ -93,7 +93,10 @@ def normalize(config: DictConfig):
         word = "".join(
             [char for char in word if (is_greek(char) or is_punctuation(char))]
         )
-        word_dict["normalized"] = word
+        # Recompose
+        word = unicodedata.normalize("NFC", word)
+
+        word_dict["norm"] = word
 
     logger.info("Success! Decomposed diacritics and stripped non-Greek characters.")
 
