@@ -10,7 +10,7 @@ from cgpos.utils.util import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def parse_postag(config: DictConfig):
+def get_postag_map(config: DictConfig):
     """
     Parse part-of-speech map to extract features from `postag` column.
     """
@@ -93,5 +93,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
     logging.info("2. BUILDING FEATURES")
 
-    parse_postag()
+    get_postag_map()
     featurize()
