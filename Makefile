@@ -52,18 +52,18 @@ data/raw/zip: | init_data_dir
 	mkdir $@
 
 ## Initialize data directory
-init_data_dir: | data/raw data/processed data/interim data/external
+init_data_dir: | data/raw data/processed data/interim data/external data/results
 
-data/raw data/processed data/interim data/external:
+data/raw data/processed data/interim data/external data/results:
 	mkdir -p $@
 
 ## Remove processed data
 remove_data: init_data_dir
-	rm -rf data/processed/* data/interim/* data/external/*
+	rm -rf data/processed/* data/interim/* data/external/* data/results/*
 
 ## Remove all data
 remove_all_data: init_data_dir
-	rm -rf data/raw/*  data/processed/* data/interim/* data/external/*
+	rm -rf data/raw/*  data/processed/* data/interim/* data/external/* data/results/*
 
 #################################################################################
 # Self Documenting Commands                                                     #

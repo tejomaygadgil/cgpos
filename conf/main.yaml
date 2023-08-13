@@ -3,6 +3,7 @@ data:
   interim: data/interim
   processed: data/processed
   external: data/external
+  results: data/results
 
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
@@ -11,3 +12,7 @@ perseus:
   parsed: data/interim/perseus_parsed.pkl
   normalized: data/interim/perseus_normalized.pkl
   featurized: data/processed/perseus_featurized.pkl
+
+results:
+  bos: data/results/bos.pkl
+
