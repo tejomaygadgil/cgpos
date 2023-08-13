@@ -29,7 +29,6 @@ def parse(config: DictConfig):
 
     # Get files
     files = os.listdir(import_dir)
-    logger.info(f"Importing {len(files)} files from {import_dir}")
 
     # Collect words from files
     data = []
@@ -63,8 +62,7 @@ def parse(config: DictConfig):
 
     logger.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
 
-    # Export as pickle
-    logger.info(f"Exporting to {export_dir}")
+    # Export
     export_pkl(data, export_dir)
 
 
@@ -99,7 +97,6 @@ def normalize(config: DictConfig):
     logger.info("Success! Decomposed diacritics and stripped non-Greek characters.")
 
     # Export
-    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
