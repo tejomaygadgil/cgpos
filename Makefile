@@ -26,15 +26,15 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Build features
-build_features: | data/interim/postag_map.pkl data/processed/perseus_normalized.pkl
+build_features: | data/interim/postag_map.pkl data/processed/perseus_featurized.pkl
 
 data/interim/postag_map.pkl data/processed/perseus_normalized.pkl: | make_dataset
 	python src/cgpos/features/build_features.py
 
 ## Make Perseus dataset
-make_dataset: | data/interim/perseus.pkl data/interim/perseus_normalized.pkl
+make_dataset: | data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl
 
-data/interim/perseus.pkl data/interim/perseus_normalized.pkl: | get_data
+data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl: | get_data
 	python src/cgpos/data/make_dataset.py
 
 ## Get raw data
@@ -57,9 +57,13 @@ init_data_dir: | data/raw data/processed data/interim data/external
 data/raw data/processed data/interim data/external:
 	mkdir -p $@
 
-## Remove data
+## Remove processed data
 remove_data: init_data_dir
-	rm -rf data/raw/* data/processed/* data/interim/* data/external/*
+	rm -rf data/processed/* data/interim/* data/external/*
+
+## Remove all data
+remove_all_data: init_data_dir
+	rm -rf data/raw/*  data/processed/* data/interim/* data/external/*
 
 #################################################################################
 # Self Documenting Commands                                                     #

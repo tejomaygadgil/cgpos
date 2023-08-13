@@ -16,9 +16,9 @@ from cgpos.utils.util import (
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def parse_perseus(config: DictConfig):
+def parse(config: DictConfig):
     """
-    Converts raw Perseus treebank XML data into a tabular format.
+    Parse raw Perseus treebank XML data into a tabular format.
     """
     logger = logging.getLogger(__name__)
     logger.info("Processing Perseus data:")
@@ -61,16 +61,22 @@ def parse_perseus(config: DictConfig):
                 data.append(word_attrib)
                 i += 1
 
-    logging.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
+    logger.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
 
     # Export as pickle
-    logging.info(f"Exporting to {export_dir}")
+    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def normalize_perseus(config: DictConfig):
-    logging.info("Normalizing Perseus data:")
+def normalize(config: DictConfig):
+    """
+    Normalize Perseus data by
+    - Decomposing unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
+    - Stripping non-Greek characters.
+    """
+    logger = logging.getLogger(__name__)
+    logger.info("Normalizing Perseus data:")
 
     # Set import and export directories
     import_dir = config.perseus.parsed
@@ -90,16 +96,17 @@ def normalize_perseus(config: DictConfig):
         )
         word_dict["normalized"] = word
 
-    logging.info("Success! Decomposed diacritics and stripped non-Greek characters.")
+    logger.info("Success! Decomposed diacritics and stripped non-Greek characters.")
 
     # Export
-    logging.info(f"Exporting to {export_dir}")
+    logger.info(f"Exporting to {export_dir}")
     export_pkl(data, export_dir)
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+    logging.info("1. PARSING DATA")
 
-    parse_perseus()
-    normalize_perseus()
+    parse()
+    normalize()
