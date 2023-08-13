@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-import pickle
+import unicodedata
 import xml.etree.ElementTree as ET
 
 import hydra
 from omegaconf import DictConfig
 
-from cgpos.utils.util import get_abs_dir
+from cgpos.utils.util import (
+    export_pkl,
+    get_abs_dir,
+    import_pkl,
+    is_greek,
+    is_punctuation,
+)
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -57,8 +63,36 @@ def read_perseus(config: DictConfig):
 
     # Export as pickle
     logging.info(f"Exporting to {export_dir}")
-    with open(export_dir, "wb") as file:
-        pickle.dump(data, file)
+    export_pkl(data, export_dir)
+
+
+@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+def normalize(config: DictConfig):
+    logging.info("Normalizing Perseus data:")
+
+    # Set import and export directories
+    import_dir = config.perseus.processed
+    export_dir = config.perseus.normalized
+
+    # Import data
+    data = import_pkl(import_dir)
+
+    # Normalize
+    for word_dict in data:
+        word = word_dict["form"]
+        # Split letter from diacritics: ["ί"] becomes ["ι"," ́ "]
+        word = unicodedata.normalize("NFD", word)
+        # Strip non-Greek chars
+        word = "".join(
+            [char for char in word if (is_greek(char) or is_punctuation(char))]
+        )
+        word_dict["normalized"] = word
+
+    logging.info("Success! Decomposed diacritics and stripped non-Greek characters.")
+
+    # Export
+    logging.info(f"Exporting to {export_dir}")
+    export_pkl(data, config.perseus.normalized)
 
 
 if __name__ == "__main__":
@@ -66,3 +100,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
     read_perseus()
+    normalize()

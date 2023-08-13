@@ -69,3 +69,11 @@ def is_greek(char):
     """
 
     return ord(char) in GREEK_MARKS
+
+
+def is_punctuation(char):
+    """
+    Determine if char is Greek punctuation.
+    """
+
+    return ord(char) in GREEK_PUNCTUATION
