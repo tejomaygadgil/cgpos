@@ -47,7 +47,7 @@ def read_perseus(config: DictConfig):
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
             sentence_attrib["sentence_id"] = sentence_attrib.pop("id")  # Rename
-            for word in sentence:
+            for word in sentence.iter("word"):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
                 word_attrib.update(work_attrib)
@@ -59,19 +59,6 @@ def read_perseus(config: DictConfig):
     logging.info(f"Exporting to {export_dir}")
     with open(export_dir, "wb") as file:
         pickle.dump(data, file)
-
-
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def load_perseus(config: DictConfig):
-    """
-    Loads processed perseus.pkl.
-    """
-    perseus_path = get_abs_dir(config.perseus.processed)
-
-    with open(perseus_path, "rb") as file:
-        data = pickle.load(file)
-
-    return data
 
 
 if __name__ == "__main__":
