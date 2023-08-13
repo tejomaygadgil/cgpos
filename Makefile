@@ -25,13 +25,19 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
-## Make Perseus dataset
-make_dataset: | data/processed/perseus.pkl
+## Build features
+build_features: | data/interim/postag_map.pkl data/processed/perseus_normalized.pkl
 
-data/processed/perseus.pkl: | get_data
+data/interim/postag_map.pkl data/processed/perseus_normalized.pkl: | make_dataset
+	python src/cgpos/features/build_features.py
+
+## Make Perseus dataset
+make_dataset: | data/interim/perseus.pkl data/interim/perseus_normalized.pkl
+
+data/interim/perseus.pkl data/interim/perseus_normalized.pkl: | get_data
 	python src/cgpos/data/make_dataset.py
 
-## Get and unzip data
+## Get raw data
 get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
 
 data/raw/treebank_data-master/README.md: | data/raw/zip
