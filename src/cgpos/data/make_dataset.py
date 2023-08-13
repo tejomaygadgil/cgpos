@@ -9,7 +9,6 @@ from omegaconf import DictConfig
 
 from cgpos.utils.util import (
     export_pkl,
-    get_abs_dir,
     import_pkl,
     is_greek,
     is_punctuation,
@@ -17,7 +16,7 @@ from cgpos.utils.util import (
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def read_perseus(config: DictConfig):
+def parse_perseus(config: DictConfig):
     """
     Converts raw Perseus treebank XML data into a tabular format.
     """
@@ -25,8 +24,8 @@ def read_perseus(config: DictConfig):
     logger.info("Processing Perseus data:")
 
     # Set import and export directories
-    import_dir = get_abs_dir(config.perseus.raw_dir)
-    export_dir = get_abs_dir(config.perseus.processed)
+    import_dir = config.perseus.raw_dir
+    export_dir = config.perseus.parsed
 
     # Get files
     files = os.listdir(import_dir)
@@ -50,6 +49,7 @@ def read_perseus(config: DictConfig):
                 work_attrib[field] = element[0].text
 
         # Get POS tags
+        i = 0  # Create unique ID
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
             sentence_attrib["sentence_id"] = sentence_attrib.pop("id")  # Rename
@@ -57,7 +57,9 @@ def read_perseus(config: DictConfig):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
                 word_attrib.update(work_attrib)
+                word_attrib["uid"] = i
                 data.append(word_attrib)
+                i += 1
 
     logging.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
 
@@ -67,11 +69,11 @@ def read_perseus(config: DictConfig):
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def normalize(config: DictConfig):
+def normalize_perseus(config: DictConfig):
     logging.info("Normalizing Perseus data:")
 
     # Set import and export directories
-    import_dir = config.perseus.processed
+    import_dir = config.perseus.parsed
     export_dir = config.perseus.normalized
 
     # Import data
@@ -92,12 +94,12 @@ def normalize(config: DictConfig):
 
     # Export
     logging.info(f"Exporting to {export_dir}")
-    export_pkl(data, config.perseus.normalized)
+    export_pkl(data, export_dir)
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-    read_perseus()
-    normalize()
+    parse_perseus()
+    normalize_perseus()

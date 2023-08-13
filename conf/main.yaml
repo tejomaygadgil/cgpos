@@ -7,6 +7,7 @@ data:
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
   tagset: data/raw/treebank_data-master/v2.1/Greek/TAGSETS.xml
-  processed: data/processed/perseus.pkl
-  normalized: data/processed/perseus_normalized.pkl
-  
+  postag_map: data/interim/postag_map.pkl
+  parsed: data/interim/perseus_parsed.pkl
+  normalized: data/interim/perseus_normalized.pkl
+  featurized: data/processed/perseus_featurized.pkl

@@ -71,6 +71,13 @@ def is_greek(char):
     return ord(char) in GREEK_MARKS
 
 
+def all_greek(word):
+    """
+    Determine if the whole word contains only Greek marks.
+    """
+    return all(is_greek(char) for char in word)
+
+
 def is_punctuation(char):
     """
     Determine if char is Greek punctuation.
