@@ -63,11 +63,9 @@ GREEK_PUNCTUATION = {  # cf. https://www.degruyter.com/document/doi/10.1515/9783
 }
 
 
-def is_greek(string, mark_set=None):
+def is_greek(char):
     """
-    Determine if character is Greek.
+    Determine if char is Greek.
     """
 
-    if mark_set is None:
-        mark_set = GREEK_MARKS
-    return [ord(char) in mark_set for char in string]
+    return ord(char) in GREEK_MARKS
