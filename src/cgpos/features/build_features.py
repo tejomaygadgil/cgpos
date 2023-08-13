@@ -63,7 +63,7 @@ def featurize(config: DictConfig):
     bad_pos = []
     for word_dict in data:
         # Parse syllables
-        word_dict["syllables"] = syllabify(word_dict["normalized"])
+        word_dict["syllables"] = syllabify(word_dict["norm"])
         # Parse part-of-speech
         if "postag" in word_dict:
             for i, tag in enumerate(word_dict["postag"]):
