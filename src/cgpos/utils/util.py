@@ -1,4 +1,5 @@
 import os
+import pickle
 from pathlib import Path
 
 from greek_accentuation.characters import (
@@ -8,6 +9,32 @@ from greek_accentuation.characters import (
     Length,
     Subscript,
 )
+
+
+def get_abs_dir(path):
+    """
+    Helper function to return the absolute path from within a package (data, features, etc.)
+    """
+    abs_path = os.path.join(Path(__file__).resolve().parents[3], path)
+    return abs_path
+
+
+def import_pkl(path):
+    path = get_abs_dir(path)
+    with open(path, "rb") as file:
+        data = pickle.load(file)
+    return data
+
+
+def export_pkl(data, path):
+    path = get_abs_dir(path)
+    with open(path, "wb") as file:
+        pickle.dump(data, file)
+
+
+def flatten(nested_list):
+    return [item for sublist in nested_list for item in sublist]
+
 
 # Some sets of Unicode Greek characters. Useful for normalization
 GREEK_LOWER = set(range(0x03B1, 0x03CA))
@@ -44,11 +71,3 @@ def is_greek(string, mark_set=None):
     if mark_set is None:
         mark_set = GREEK_MARKS
     return [ord(char) in mark_set for char in string]
-
-
-def get_abs_dir(path):
-    """
-    Helper function to return the absolute path from within a package (data, features, etc.)
-    """
-    abs_path = os.path.join(Path(__file__).resolve().parents[3], path)
-    return abs_path
