@@ -8,7 +8,10 @@ data:
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
   tagset: data/raw/treebank_data-master/v2.1/Greek/TAGSETS.xml
-  postag_map: data/interim/postag_map.pkl
+  postag_map: data/reference/postag_map.pkl
+  category_map: data/reference/category_map.pkl
+  cat2int: data/reference/cat2int.pkl
+  int2cat: data/reference/int2cat.pkl
   parsed: data/interim/perseus_parsed.pkl
   normalized: data/interim/perseus_normalized.pkl
   featurized: data/processed/perseus_featurized.pkl
@@ -16,3 +19,5 @@ perseus:
 results:
   bos: data/results/bos.pkl
 
+vars:
+  pred: ["pos", "pers", "num", "tense", "mood", "voice", "gend", "case", "degree"]

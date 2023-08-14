@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 
 import hydra
 from greek_accentuation.syllabify import syllabify
@@ -35,10 +36,49 @@ def get_postag_map(config: DictConfig):
             description = value.find("long").text
             data[(i, postag)] = (category, description)
 
-    logger.info(f"Success! Built map with {len(data)} part-of-speech categories.")
+    # Add irregularities
+    data[(5, "d")] = ("voice", "medio-passive")  # Treat depondent as medio-passive
+    data[(0, "x")] = ("pos", "irregular")  # Accept irregular pos tag
+
+    logger.info("Success! Built map to parse part-of-speech categories.")
 
     # Export as pickle
     export_pkl(data, export_dir)
+
+    logger.info("Mapping part-of-speech categories to values:")
+    # Set export directory
+    export_dir = config.perseus.category_map
+
+    # Create category-value map
+    category_map = defaultdict(list)
+    for category, value in data.values():
+        category_map[category].append(value)
+
+    logger.info(
+        f"Success! Built map with {len(category_map)} part-of-speech categories."
+    )
+
+    # Export as pickle
+    export_pkl(category_map, export_dir)
+
+    logger.info("Mapping cat2int (and vice-versa):")
+    # Set export directory
+    cat2int_export_dir = config.perseus.cat2int
+    int2cat_export_dir = config.perseus.int2cat
+
+    # Create cat2int and int2cat map
+    cat2int = {}
+    int2cat = {}
+    for category, values in category_map.items():
+        for i, value in enumerate(values):
+            cat2int[(category, value)] = i
+            int2cat[(category, i)] = value
+
+    logger.info("Success! Built cat2int and int2cat maps.")
+
+    # Export as pickle
+    export_pkl(cat2int, cat2int_export_dir)
+    export_pkl(int2cat, int2cat_export_dir)
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -72,13 +112,7 @@ def featurize(config: DictConfig):
                     pos_category, pos_value = postag_map[key]
                     word_dict[pos_category] = pos_value
                 except KeyError:
-                    match key:
-                        case (5, "d"):  # Treat depondent verbs as medio-passive
-                            word_dict["voice"] = "medio-passive"
-                        case (0, "x"):  # Accept irregular pos tag
-                            word_dict["pos"] = "irregular"
-                        case _:
-                            bad_pos.append(word_dict)
+                    bad_pos.append(word_dict)
 
     logger.info("Success! Syllablized normalized form and parsed part-of-speech tags.")
 

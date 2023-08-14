@@ -26,9 +26,9 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Build features
-build_features: | data/interim/postag_map.pkl data/processed/perseus_featurized.pkl
+build_features: | data/reference/postag_map.pkl data/reference/category_map.pkl data/reference/cat2int.pkl data/reference/int2cat.pkl data/processed/perseus_featurized.pkl
 
-data/interim/postag_map.pkl data/processed/perseus_normalized.pkl: | make_dataset
+data/reference/postag_map.pkl data/reference/category_map.pkl data/reference/cat2int.pkl data/reference/int2cat.pkl data/processed/perseus_normalized.pkl: | make_dataset
 	python src/cgpos/features/build_features.py
 
 ## Make Perseus dataset
@@ -52,18 +52,18 @@ data/raw/zip: | init_data_dir
 	mkdir $@
 
 ## Initialize data directory
-init_data_dir: | data/raw data/processed data/interim data/external data/results
+init_data_dir: | data/raw data/processed data/interim data/external data/results data/reference
 
-data/raw data/processed data/interim data/external data/results:
+data/raw data/processed data/interim data/external data/results data/reference:
 	mkdir -p $@
 
 ## Remove processed data
 remove_data: init_data_dir
-	rm -rf data/processed/* data/interim/* data/external/* data/results/*
+	rm -rf data/processed/* data/interim/* data/external/* data/results/* data/reference/*
 
 ## Remove all data
 remove_all_data: init_data_dir
-	rm -rf data/raw/*  data/processed/* data/interim/* data/external/* data/results/*
+	rm -rf data/raw/*  data/processed/* data/interim/* data/external/* data/results/* data/reference/*
 
 #################################################################################
 # Self Documenting Commands                                                     #
