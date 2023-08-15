@@ -73,6 +73,7 @@ def normalize(config: DictConfig):
     Normalize Perseus data by
     - Decomposing unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
     - Stripping non-Greek characters.
+    - Recomposing diacritics (for better syllablization)
     """
     logger = logging.getLogger(__name__)
     logger.info("Normalizing Perseus data:")
@@ -87,18 +88,18 @@ def normalize(config: DictConfig):
     # Normalize
     for word_dict in data:
         word = word_dict["form"]
-        # Split letter from diacritics: ["ί"] becomes ["ι"," ́ "]
+        # Split letter from diacritics (["ί"] becomes ["ι"," ́ "])
         word = unicodedata.normalize("NFD", word)
         # Strip non-Greek chars
         word = "".join(
             [char for char in word if (is_greek(char) or is_punctuation(char))]
         )
-        # Recompose
+        # Recompose (["ι"," ́ "] becomes ["ί"])
         word = unicodedata.normalize("NFC", word)
 
         word_dict["norm"] = word
 
-    logger.info("Success! Decomposed diacritics and stripped non-Greek characters.")
+    logger.info("Success! Normalized and stripped non-Greek characters.")
 
     # Export
     export_pkl(data, export_dir)
