@@ -20,7 +20,7 @@ from cgpos.utils.util import (
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
 def parse(config: DictConfig):
     """
-    Parse raw Perseus treebank XML data into a tabular format.
+    Convert raw Perseus treebank XML data into a tabular format.
     """
     logger = logging.getLogger(__name__)
     logger.info("Processing Perseus data:")
@@ -150,7 +150,7 @@ def normalize(config: DictConfig):
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
 def clean(config: DictConfig):
     """
-    Clean Perseus data for training:
+    Clean normalized data for training:
 
     - Drop malformed words
     - Build targets for training.
@@ -177,9 +177,9 @@ def clean(config: DictConfig):
         try:
             assert len(word.get("postag", "")) == 9
             sentence_id = word["sentence_id"]
-            # Build feature
+            # Build features
             norm = word["norm"]
-            syllables = syllabify(norm)
+            feature = syllabify(norm)
             # Build target
             target = []
             postag = word["postag"]
@@ -191,8 +191,8 @@ def clean(config: DictConfig):
                 target.append(value)
             # Append
             cleaned[0].append(sentence_id)
-            cleaned[1].append(syllables)
-            cleaned[2].append(postag)
+            cleaned[1].append(feature)
+            cleaned[2].append(target)
         except (AssertionError, ValueError):
             malform.append(word)
 
