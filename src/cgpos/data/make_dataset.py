@@ -18,7 +18,7 @@ from cgpos.utils.util import (
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def parse(config: DictConfig):
+def get_raw_data(config: DictConfig):
     """
     Convert raw Perseus treebank XML data into a tabular format.
     """
@@ -27,7 +27,7 @@ def parse(config: DictConfig):
 
     # Set import and export directories
     import_dir = get_abs_dir(config.perseus.raw_dir)
-    export_dir = config.perseus.parsed
+    export_dir = config.perseus.raw
 
     # Get files
     files = os.listdir(import_dir)
@@ -55,7 +55,7 @@ def parse(config: DictConfig):
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
             sentence_attrib["sentence_id"] = str(sentence_id)
-            sentence_id += sentence_id
+            sentence_id += 1
             for word in sentence.iter("word"):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
@@ -69,7 +69,7 @@ def parse(config: DictConfig):
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def target_map(config: DictConfig):
+def get_target_map(config: DictConfig):
     """
     Build map to parse target column.
     """
@@ -119,7 +119,7 @@ def normalize(config: DictConfig):
     logger.info("Normalizing Perseus data:")
 
     # Set import and export directories
-    import_dir = config.perseus.parsed
+    import_dir = config.perseus.raw
     export_dir = config.perseus.normalized
 
     # Import data
@@ -155,7 +155,7 @@ def clean(config: DictConfig):
     - Drop malformed words
     - Build targets for training.
 
-    Export: [[uid_1], ...], [[form_1], ...], [[target_1], ...]]
+    Export: [[sentence_id_1], ...], [[form_1], ...], [[target_1], ...]]
     """
     logger = logging.getLogger(__name__)
     logger.info("Cleaning data for training:")
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-    parse()
-    target_map()
+    get_raw_data()
+    get_target_map()
     normalize()
     clean()
