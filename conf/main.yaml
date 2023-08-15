@@ -12,7 +12,7 @@ reference:
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
   tagset: data/raw/treebank_data-master/v2.1/Greek/TAGSETS.xml
-  parsed: data/interim/perseus_parsed.pkl
+  raw: data/interim/perseus_raw.pkl
   normalized: data/interim/perseus_normalized.pkl
 
 ngram_bos_model:
