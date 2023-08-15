@@ -1,10 +1,13 @@
 data:
-  feature_map: data/reference/feature_map.pkl
-  target_map: data/reference/target_map.pkl
+  cleaned: data/processed/cleaned.pkl
   features: data/processed/features.pkl
   targets: data/processed/targets.pkl
   train: &train_path data/processed/train.pkl
   test: &test_path data/processed/test.pkl
+
+reference:
+  feature_map: data/reference/feature_map.pkl
+  target_map: data/reference/target_map.pkl
 
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
