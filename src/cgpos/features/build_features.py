@@ -110,7 +110,7 @@ def tokenize(config: DictConfig):
     ), f"Feature and target lengths ({len(features), len(targets)}) do not match."
 
     logger.info(
-        f"Success! Tokenized {len(feature_map)} features and {len(targets)}  targets."
+        f"Success! Tokenized {len(feature_map)} features and {len(targets)} targets."
     )
 
     # Export
