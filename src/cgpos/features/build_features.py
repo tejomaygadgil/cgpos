@@ -109,7 +109,9 @@ def tokenize(config: DictConfig):
         length_match
     ), f"Feature and target lengths ({len(features), len(targets)}) do not match."
 
-    logger.info("Success! Tokenized features and targets.")
+    logger.info(
+        f"Success! Tokenized {len(feature_map)} features and {len(targets)}  targets."
+    )
 
     # Export
     export_pkl(feature_map, feature_map_dir)
