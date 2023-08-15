@@ -66,8 +66,7 @@ target/
 *.rdb
 
 # Data folder
-data/
-.data/
+/data/
 
 # Pycharm
 .idea
