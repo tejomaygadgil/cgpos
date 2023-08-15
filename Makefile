@@ -26,16 +26,16 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Build features
-build_features: | data/reference/feature_map.pkl data/reference/target_map.pkl data/processed/features.pkl data/processed/targets.pkl
+build_features: | data/reference/feature_map.pkl  data/processed/features.pkl
 
-data/reference/feature_map.pkl data/reference/target_map.pkl data/processed/features.pkl data/processed/targets.pkl: | make_dataset
+data/reference/feature_map.pkl  data/processed/features.pkl: | make_dataset
 	python src/cgpos/features/build_features.py
 
 ## Make Perseus dataset
-make_dataset: | data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl
+make_dataset: | data/interim/perseus_parsed.pkl data/reference/target_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
 
-data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl: | get_data
-	python src/cgpos/data/get_data.py
+data/interim/perseus_parsed.pkl data/reference/target_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl: | get_data
+	python src/cgpos/data/make_dataset.py
 
 ## Get raw data
 get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
