@@ -86,20 +86,22 @@ def normalize(config: DictConfig):
     data = import_pkl(import_dir)
 
     # Normalize
-    for word_dict in data:
-        word = word_dict["form"]
+    for word in data:
+        form = word["form"]
         # Split letter from diacritics (["ί"] becomes ["ι"," ́ "])
-        word = unicodedata.normalize("NFD", word)
+        form = unicodedata.normalize("NFD", form)
         # Strip non-Greek chars
-        word = "".join(
-            [char for char in word if (is_greek(char) or is_punctuation(char))]
+        form = "".join(
+            [char for char in form if (is_greek(char) or is_punctuation(char))]
         )
         # Recompose (["ι"," ́ "] becomes ["ί"])
-        word = unicodedata.normalize("NFC", word)
+        form = unicodedata.normalize("NFC", form)
 
-        word_dict["norm"] = word
+        word["norm"] = form
 
-    logger.info("Success! Normalized and stripped non-Greek characters.")
+    logger.info(
+        "Success! Performed unicode normalization and stripped non-Greek characters."
+    )
 
     # Export
     export_pkl(data, export_dir)
@@ -108,7 +110,6 @@ def normalize(config: DictConfig):
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
-    logging.info("1. PARSING DATA")
 
     parse()
     normalize()
