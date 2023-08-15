@@ -1,20 +1,22 @@
 data:
-  raw: data/raw
-  interim: data/interim
-  processed: data/processed
-  external: data/external
-  results: data/results
+  feature_map: data/reference/feature_map.pkl
+  target_map: data/reference/target_map.pkl
+  features: data/processed/features.pkl
+  targets: data/processed/targets.pkl
+  train: &train_path data/processed/train.pkl
+  test: &test_path data/processed/test.pkl
 
 perseus:
   raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
   tagset: data/raw/treebank_data-master/v2.1/Greek/TAGSETS.xml
-  postag_map: data/reference/postag_map.pkl
-  category_map: data/reference/category_map.pkl
-  cat2int: data/reference/cat2int.pkl
-  int2cat: data/reference/int2cat.pkl
   parsed: data/interim/perseus_parsed.pkl
   normalized: data/interim/perseus_normalized.pkl
-  featurized: data/processed/perseus_featurized.pkl
+
+ngram_bos_model:
+  train: *train_path
+  test: *test_path
+  n: 3
+  backoff: True
 
 results:
   bos: data/results/bos.pkl

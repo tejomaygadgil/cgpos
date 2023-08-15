@@ -26,9 +26,9 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Build features
-build_features: | data/reference/postag_map.pkl data/reference/category_map.pkl data/reference/cat2int.pkl data/reference/int2cat.pkl data/processed/perseus_featurized.pkl
+build_features: | data/reference/feature_map.pkl data/reference/target_map.pkl data/processed/features.pkl data/processed/targets.pkl
 
-data/reference/postag_map.pkl data/reference/category_map.pkl data/reference/cat2int.pkl data/reference/int2cat.pkl data/processed/perseus_normalized.pkl: | make_dataset
+data/reference/feature_map.pkl data/reference/target_map.pkl data/processed/features.pkl data/processed/targets.pkl: | make_dataset
 	python src/cgpos/features/build_features.py
 
 ## Make Perseus dataset

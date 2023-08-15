@@ -20,110 +20,106 @@ def get_postag_map(config: DictConfig):
 
     # Set import and export directories
     file_dir = get_abs_dir(config.perseus.tagset)
-    export_dir = config.perseus.postag_map
+    export_dir = config.data.target_map
 
     # Load XML
     tree = ET.parse(file_dir)
     root = tree.getroot()
 
     # Build map
-    data = {}
-    for i, element in enumerate(next(root.iter("attributes"))):
-        category = element.tag
-        data[(i, "-")] = (category, "N/A")
-        for value in element.find("values"):
-            postag = value.find("postag").text
-            description = value.find("long").text
-            data[(i, postag)] = (category, description)
+    data = defaultdict(list)
+    for element in next(root.iter("attributes")):
+        pos_class = element.tag
+        data[pos_class].append(("-", "N/A"))
+        for _i, value in enumerate(element.find("values"), start=1):
+            short = value.find("postag").text
+            long = value.find("long").text
+            data[pos_class].append((short, long))
 
-    # Add irregularities
-    data[(5, "d")] = ("voice", "medio-passive")  # Treat depondent as medio-passive
-    data[(0, "x")] = ("pos", "irregular")  # Accept irregular pos tag
+    # Accept irregular pos tag
+    data["pos"].append(("x", "irregular"))
 
     logger.info("Success! Built map to parse part-of-speech categories.")
 
     # Export as pickle
     export_pkl(data, export_dir)
 
-    logger.info("Mapping part-of-speech categories to values:")
-    # Set export directory
-    export_dir = config.perseus.category_map
-
-    # Create category-value map
-    category_map = defaultdict(list)
-    for category, value in data.values():
-        category_map[category].append(value)
-
-    logger.info(
-        f"Success! Built map with {len(category_map)} part-of-speech categories."
-    )
-
-    # Export as pickle
-    export_pkl(category_map, export_dir)
-
-    logger.info("Mapping cat2int (and vice-versa):")
-    # Set export directory
-    cat2int_export_dir = config.perseus.cat2int
-    int2cat_export_dir = config.perseus.int2cat
-
-    # Create cat2int and int2cat map
-    cat2int = {}
-    int2cat = {}
-    for category, values in category_map.items():
-        for i, value in enumerate(values):
-            cat2int[(category, value)] = i
-            int2cat[(category, i)] = value
-
-    logger.info("Success! Built cat2int and int2cat maps.")
-
-    # Export as pickle
-    export_pkl(cat2int, cat2int_export_dir)
-    export_pkl(int2cat, int2cat_export_dir)
-
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def featurize(config: DictConfig):
+def tokenize(config: DictConfig):
     """
-    Featurize Perseus data by
-    - Getting syllables from normalized form (via greek_accentuation lib)
-    - Parsing part-of-speech tag data (via map generated from parse_postag)
+    Tokenize features and target.
     """
     logger = logging.getLogger(__name__)
-    logger.info("Building Perseus features:")
+    logger.info("Tokenizing Perseus features and targets:")
 
-    # Set import and export directories
+    # Import directories
     import_dir = config.perseus.normalized
-    postag_dir = config.perseus.postag_map
-    export_dir = config.perseus.featurized
+    target_map_dir = config.data.target_map
+    # Export directories
+    feature_map_dir = config.data.feature_map
+    features_dir = config.data.features
+    targets_dir = config.data.targets
 
     # Import data
     data = import_pkl(import_dir)
-    postag_map = import_pkl(postag_dir)
+    target_map = import_pkl(target_map_dir)
 
-    bad_pos = []
-    for word_dict in data:
-        # Parse syllables
-        word_dict["syllables"] = syllabify(word_dict["norm"])
-        # Parse part-of-speech
-        if "postag" in word_dict:
-            for i, tag in enumerate(word_dict["postag"]):
-                key = (i, tag)
-                try:
-                    pos_category, pos_value = postag_map[key]
-                    word_dict[pos_category] = pos_value
-                except KeyError:
-                    bad_pos.append(word_dict)
+    # Build dict to tokenize target
+    target_short_map = defaultdict(dict)
+    for i, (_key, values) in enumerate(target_map.items()):
+        for j, (short, _) in enumerate(values):
+            target_short_map[i][short] = j
 
-    logger.info("Success! Syllablized normalized form and parsed part-of-speech tags.")
+    bad_words = []
+    feature_map = {}
+    features = []
+    targets = []
+    feature_i = 0
+    for word in data:
+        try:
+            assert len(word.get("postag", "")) == 9
+            # Build features
+            feature = []
+            norm = word["norm"]
+            syllables = syllabify(norm)
+            for syllable in syllables:
+                if syllable not in feature_map:
+                    feature_map[syllable] = feature_i
+                    feature_i += 1
+                token = feature_map[syllable]
+                feature.append(token)
+            # Build targets
+            target = []
+            postag = word["postag"]
+            for i, tag in enumerate(postag):
+                match (i, tag):
+                    case ("5", "d"):  # Treat depondent verbs as medio-passive
+                        i, tag = ("5", "e")
+                token = target_short_map[i][tag]
+                target.append(token)
+            # Append to data
+            features.append(feature)
+            targets.append(target)
+        except (AssertionError, KeyError):
+            bad_words.append(word)
+
+    length_match = len(features) == len(targets)
+    assert (
+        length_match
+    ), f"Feature and target lengths ({len(features), len(targets)}) do not match."
+
+    logger.info("Success! Tokenized features and targets.")
 
     # Export
-    export_pkl(data, export_dir)
+    export_pkl(feature_map, feature_map_dir)
+    export_pkl(features, features_dir)
+    export_pkl(targets, targets_dir)
 
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
-    logging.info("2. BUILDING FEATURES")
 
     get_postag_map()
-    featurize()
+    tokenize()
