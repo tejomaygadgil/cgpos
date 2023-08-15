@@ -66,10 +66,10 @@ def tokenize(config: DictConfig):
     target_map = import_pkl(target_map_dir)
 
     # Build dict to tokenize target
-    target_short_map = defaultdict(dict)
-    for i, (_key, values) in enumerate(target_map.items()):
+    target_token_map = defaultdict(dict)
+    for i, (_, values) in enumerate(target_map.items()):
         for j, (short, _) in enumerate(values):
-            target_short_map[i][short] = j
+            target_token_map[i][short] = j
 
     bad_words = []
     feature_map = {}
@@ -96,7 +96,7 @@ def tokenize(config: DictConfig):
                 match (i, tag):
                     case ("5", "d"):  # Treat depondent verbs as medio-passive
                         i, tag = ("5", "e")
-                token = target_short_map[i][tag]
+                token = target_token_map[i][tag]
                 target.append(token)
             # Append to data
             features.append(feature)
