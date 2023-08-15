@@ -35,7 +35,7 @@ data/reference/postag_map.pkl data/reference/category_map.pkl data/reference/cat
 make_dataset: | data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl
 
 data/interim/perseus_parsed.pkl data/interim/perseus_normalized.pkl: | get_data
-	python src/cgpos/data/make_dataset.py
+	python src/cgpos/data/get_data.py
 
 ## Get raw data
 get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
