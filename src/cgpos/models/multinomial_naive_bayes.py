@@ -2,32 +2,36 @@
 import logging
 import math
 from collections import Counter, defaultdict
-from typing import Collection
+from typing import Collection, Union
 
 from cgpos.utils.util import flatten
 
 
-def ngrams(sequence: Collection, ngram_range: (int, int)) -> list:
+def ngrams(sequence: Collection, n: Union[tuple, int]) -> Collection:
     """
     Return (1, n) n-grams for input sequence.
 
     Arguments
     - sequence: Sequence of tokens.
-    - n: Depth of n-grams to generate.
+    - n: n-gram range, or depth of n-grams to generate.
     """
-    start, end = ngram_range
-    grams = []
-    len_sequence = len(sequence)
-    for i in range(start, end + 1):
-        n_passes = len_sequence - i + 1
-        if n_passes >= 1:
-            for j in range(n_passes):
-                gram = tuple(sequence[j : (i + j)])
-                grams.append(gram)
-        else:
-            break
+    match n:
+        case tuple():
+            start, end = n
+            grams = []
+            len_sequence = len(sequence)
+            for i in range(start, end + 1):
+                n_passes = len_sequence - i + 1
+                if n_passes >= 1:
+                    for j in range(n_passes):
+                        gram = tuple(sequence[j : (i + j)])
+                        grams.append(gram)
+            return grams
 
-    return grams
+        case int():
+            len_sequence = len(sequence)
+            n_passes = max(1, len_sequence - n + 1)
+            return [tuple(sequence[i : (i + n)]) for i in range(n_passes)]
 
 
 def count_vectors(sequence: Collection, ngram_range: (int, int)) -> Counter:
@@ -51,25 +55,30 @@ class MultinomialNaiveBayes:
     """
 
     def __init__(self, alpha=1.0, ngram_range=(1, 1)):
+        assert 0 <= alpha <= 1, "0.0 <= alpha <= 1.0."
+        assert (type(ngram_range) == tuple) and [
+            i > 0 for i in ngram_range
+        ], "ngram_range should be non-negative tuple."
         self.alpha = alpha
         self.ngram_range = ngram_range
-        self.log_likelihoods = None
-        self.log_priors = None
-        self.feature_counts = None
-        self.class_counts = None
-        self.classes = None
         self.V = None
+        self.classes = None
+        self.class_counts = None
+        self.feature_counts = None
+        self.log_priors = None
+        self.log_likelihoods = None
+        self.gram_set = None
 
     def fit(self, X: Collection, y: Collection):
-        X_grams = [count_vectors(word, self.ngram_range) for word in X]
+        X_cv = [count_vectors(word, self.ngram_range) for word in X]
         N = len(y)
-        V = len(set(flatten(X_grams)))
+        V = len(set(flatten(X_cv)))
         classes = set(y)
         class_counts = Counter()
         feature_counts = defaultdict(Counter)
         for i in range(N):
             class_i = y[i]
-            features_i = X_grams[i]
+            features_i = X_cv[i]
             class_counts[class_i] += 1
             feature_counts[class_i].update(features_i)
 
@@ -110,6 +119,53 @@ class MultinomialNaiveBayes:
                     max_prob = prob
                     argmax = class_i
             preds.append(argmax)
+        return preds
+
+
+class StupidBayes:
+    """
+    Implement Stupid Bayes that just adds things up.
+    """
+
+    def __init__(self, n=1):
+        assert (type(n) == int) and (n >= 0), "n should be int >= 0."
+        self.n = n
+        self.gram_counts = None
+
+    def fit(self, X: list, y: list):
+        X_ngrams = [ngrams(x, (1, self.n)) for x in X]
+        gram_counts = defaultdict(Counter)
+        for i, x_ngrams in enumerate(X_ngrams):
+            y_i = y[i]
+            for ngram in x_ngrams:
+                gram_counts[ngram][y_i] += 1
+        self.gram_counts = gram_counts
+
+    def predict(self, X: Collection) -> list:
+        def _ngram_lookup(sequence, gram_dict, n):
+            """
+            Recursively looks up ngrams to find count distributions for a word.
+            """
+            if n == 0:
+                return Counter()
+
+            y_dist = Counter()
+            for gram in ngrams(sequence, n):
+                if gram in gram_dict:
+                    y_dist.update(gram_dict[gram])
+                else:
+                    sub_y_dist = _ngram_lookup(gram, gram_dict, n - 1)
+                    y_dist.update(sub_y_dist)
+
+            return y_dist
+
+        preds = []
+        for x in X:
+            y_dist = _ngram_lookup(x, self.gram_counts, self.n)
+            pred = None
+            if y_dist:
+                pred = max(y_dist, key=y_dist.get)
+            preds.append(pred)
 
         return preds
 
