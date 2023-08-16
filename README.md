@@ -19,7 +19,7 @@ $$\begin{align*}
 \text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + P(\text{class}_c)
 \end{align*} $$
 
-`StupidBayes`
+`StupidBayes`[^3]
 
 ## Results
 
@@ -30,7 +30,9 @@ $$\begin{align*}
 
 [^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
 
-[^3]:Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
+[^3]: `from cgpos.models.multinomial_naive_bayes import StupidBayes`
+
+[^4]:Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
 
 
 # Running the code
