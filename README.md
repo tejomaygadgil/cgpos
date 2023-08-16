@@ -13,9 +13,9 @@ This purely morphological approach overcomes the main difficulty of using [class
 [^2]: Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
 
 
-# Run the code
-Instructions to run this repository:
-## Set environment
+# Running the code
+## Instructions
+### 1. Set environment
 Get project requirements by setting up a `poetry` environment:
 1. Install [poetry](https://python-poetry.org/docs/#installation)
 2. In the terminal, run:
@@ -32,7 +32,7 @@ Installing the current project: cgpos (0.1.0)
 ...
 ```
 
-## Get data
+### 2. Get data
 Grab project data:
 ```
 $ cd /dir/to/repository
@@ -43,7 +43,7 @@ Grabbing Perseus data
 ...
 ```
 
-## Run model
+### 3. Run model
 Train the part-of-speech tagger using: 
 ```
 $ cd /dir/to/repository
