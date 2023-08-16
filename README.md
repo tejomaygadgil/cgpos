@@ -3,6 +3,11 @@ Part-of-Speech Tagging for Classical Greek 🏺
 This project builds a fine-trained [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) for Ancient Classical Greek, a [morphologically rich](https://arxiv.org/pdf/2005.01330.pdf) and [low-resource](https://arxiv.org/pdf/2006.07264.pdf) language, using texts from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/) and ideas inspired by [*Speech and Language Processing*](https://web.stanford.edu/~jurafsky/slp3/).
 
 # Model
+Ancient Greek uses [word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables)[^1] to indicate part-of-speech. Therefore words contain more information than simply their part-of-speech: a verb, for instance any category contains far more information such as person, number, mood, aspect, voice.
+
+This means we cannot necessarily rely on [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) that use word sequence to make predictions.
+
+[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
 
 # Run the code
 Instructions to run this repository:
@@ -34,21 +39,14 @@ Grabbing Perseus data
 ...
 ```
 
-## Running the model
-Build project features using this command:
-```
-$ cd /dir/to/repository
-$ make build_features
-Initializing data directory
-Building features
-python src/cgpos/features/build_features.py
-...
-```
-
-Run the model using: 
+## Run model
+Train the part-of-speech tagger using: 
 ```
 $ cd /dir/to/repository
 $ make run_model # TODO
+Building features
+python src/cgpos/features/build_features.py
+...
 ```
 
 ## Help
@@ -70,7 +68,7 @@ tests               Run tests
 ```
 
 ## Tools
-This repository is managed using these tools:
+This repository uses the following tools:
 * [`make`](https://www.gnu.org/software/make/) for running code
 * [`poetry`](https://python-poetry.org) for package management 
 * [`hydra`](https://hydra.cc/) for code reproducibility
