@@ -19,7 +19,7 @@ $ cd cgpos/
 $ make activate_poetry
 ```
 
-You can get a convenient helpfile of all available `make` options by running:
+You can get a helpfile of all available `make` options by running:
 ```
 $ make
 Available rules:
