@@ -19,6 +19,7 @@ $$\begin{align*}
 \text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + P(\text{class}_c)
 \end{align*} $$
 
+`StupidBayes`
 
 ## Results
 
