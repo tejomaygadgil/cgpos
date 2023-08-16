@@ -34,13 +34,6 @@ Grabbing Perseus data
 ...
 ```
 
-Data will automatically be downloaded to `cgpos/data/` and cleaned.
-
-All data can be removed at any time using this command: 
-```
-$ make remove_all_data 
-```
-
 ## Running the model
 Build project features using this command:
 ```
