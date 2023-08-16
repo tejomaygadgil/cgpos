@@ -6,8 +6,8 @@ This project builds a fine-trained [part-of-speech tagger](https://en.wikipedia.
 
 # Run the code
 Instructions to run this repository:
-## Get environment
-Packages are managed by setting up a `poetry` environment:
+## Set environment
+Get project requirements by setting up a `poetry` environment:
 1. Install [poetry](https://python-poetry.org/docs/#installation)
 2. In the terminal, run:
 ```
