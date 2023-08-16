@@ -19,11 +19,7 @@ $ cd cgpos/
 $ make activate_poetry
 ```
 
-This command will create and activate a `poetry` instance with the correct packages to run the contents of this repository.  
-
-From then on you can build various parts of the project using `make`.
-
-You can get a convenient helpfile of all available options by running:
+You can get a convenient helpfile of all available `make` options by running:
 ```
 $ make
 Available rules:
