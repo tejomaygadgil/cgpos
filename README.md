@@ -8,6 +8,7 @@ A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_c
 This purely morphological approach overcomes the main difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: the use of a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech[^1]. 
 
 
+
 [^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
 
 [^2]: Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
@@ -54,7 +55,7 @@ python src/cgpos/features/build_features.py
 ```
 
 
-# Etc
+# References
 ## Help
 You can get a helpfile of all available `make` options by running:
 ```
