@@ -4,10 +4,7 @@ This project builds a fine-trained [part-of-speech tagger](https://en.wikipedia.
 
 # Model
 
-# Results
-
-
-# Code
+# Run the code
 Instructions to run this repository:
 ## Get environment
 Packages are managed by setting up a `poetry` environment:
@@ -17,8 +14,51 @@ Packages are managed by setting up a `poetry` environment:
 $ git clone https://github.com/tejomaygadgil/cgpos.git
 $ cd cgpos/
 $ make activate_poetry
+poetry install
+Installing dependencies from lock file
+
+No dependencies to install or update
+
+Installing the current project: cgpos (0.1.0)
+...
 ```
 
+## Get data
+Grab project data:
+```
+$ cd /dir/to/repository
+$ make make_dataset
+Initializing data directory
+mkdir data/raw/zip
+Grabbing Perseus data
+...
+```
+
+Data will automatically be downloaded to `cgpos/data/` and cleaned.
+
+All data can be removed at any time using this command: 
+```
+$ make remove_all_data 
+```
+
+## Running the model
+Build project features using this command:
+```
+$ cd /dir/to/repository
+$ make build_features
+Initializing data directory
+Building features
+python src/cgpos/features/build_features.py
+...
+```
+
+Run the model using: 
+```
+$ cd /dir/to/repository
+$ make run_model # TODO
+```
+
+## Help
 You can get a helpfile of all available `make` options by running:
 ```
 $ make
@@ -34,34 +74,6 @@ remove_all_data     Remove all data
 remove_data         Remove processed data 
 tests               Run tests 
 
-```
-
-## Get data
-Grab project data:
-```
-$ cd /dir/to/repository
-$ make make_dataset
-```
-
-Data will automatically be downloaded to `cgpos/data/`.
-
-It can be removed at any time using these commands: 
-```
-$ make remove_data  # Excludes raw data
-$ make remove_all_data 
-```
-
-## Running the model
-Build project features using this command:
-```
-$ cd /dir/to/repository
-$ make build_features
-```
-
-Run the model using: 
-```
-$ cd /dir/to/repository
-$ make run_model # TODO
 ```
 
 ## Tools
