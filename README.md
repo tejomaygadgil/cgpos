@@ -23,8 +23,9 @@ This command will create and activate a `poetry` instance with the correct packa
 
 From then on you can build various parts of the project using `make`.
 
-Generate a convenient helpfile of all available options by running:
+You can get a convenient helpfile of all available options by running:
 ```
+$ cd /dir/to/repository
 $ make
 Available rules:
 
