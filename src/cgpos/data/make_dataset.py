@@ -85,24 +85,26 @@ def get_target_map(config: DictConfig):
     root = tree.getroot()
 
     # Build map
-    data = ([], [])
+    data = ([], [], [])
     for element in next(root.iter("attributes")):
         pos_class = element.tag
         data[0].append(pos_class)
-        data[1].append([[], []])
-        data[1][-1][0].append("-")
-        data[1][-1][1].append("N/A")
+        data[1].append([])
+        data[2].append([])
+        data[1][-1].append("-")
+        data[2][-1].append("N/A")
         for _i, value in enumerate(element.find("values"), start=1):
             short = value.find("postag").text
             long = value.find("long").text
-            data[1][-1][0].append(short)
-            data[1][-1][1].append(long)
+            data[1][-1].append(short)
+            data[2][-1].append(long)
 
     # Accept irregular pos tag
+    data[1][0].append("x")
+    data[2][0].append("irregular")
 
     # Export
     export_pkl(data, export_dir)
-    data[1][0].append(("x", "irregular"))
 
     logger.info(f"Success! Built target map for {len(data[0])} targets: {data[0]}")
 
@@ -168,7 +170,7 @@ def clean(config: DictConfig):
 
     # Import data
     data = import_pkl(import_dir)
-    _, target_values = import_pkl(target_map_dir)
+    _, target_short, _ = import_pkl(target_map_dir)
 
     # Normalize
     cleaned = [[], [], []]
@@ -187,7 +189,7 @@ def clean(config: DictConfig):
                 match (i, short):
                     case ("5", "d"):  # Treat depondent verbs as medio-passive
                         i, short = "5", "e"
-                value = target_values[i][0].index(short)
+                value = target_short[i].index(short)
                 target.append(value)
             # Append
             cleaned[0].append(sentence_id)
