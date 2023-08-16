@@ -142,26 +142,27 @@ class StupidBayes:
         self.gram_counts = gram_counts
 
     def predict(self, X: Collection) -> list:
-        def _ngram_lookup(sequence, gram_dict, n):
+        def _ngram_backoff(sequence, gram_dict, n):
             """
-            Recursively looks up ngrams to find count distributions for a word.
+            Recursively looks up n-grams in gram_dict.
             """
             if n == 0:
                 return Counter()
 
             y_dist = Counter()
-            for gram in ngrams(sequence, n):
+            sequence_ngrams = ngrams(sequence, n)
+            for gram in sequence_ngrams:
                 if gram in gram_dict:
                     y_dist.update(gram_dict[gram])
                 else:
-                    sub_y_dist = _ngram_lookup(gram, gram_dict, n - 1)
+                    sub_y_dist = _ngram_backoff(gram, gram_dict, n - 1)
                     y_dist.update(sub_y_dist)
 
             return y_dist
 
         preds = []
         for x in X:
-            y_dist = _ngram_lookup(x, self.gram_counts, self.n)
+            y_dist = _ngram_backoff(x, self.gram_counts, self.n)
             pred = None
             if y_dist:
                 pred = max(y_dist, key=y_dist.get)
