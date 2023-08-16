@@ -5,7 +5,7 @@ This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/
 # Model
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech by estimating likelihoods and priors from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
-This morphological approach overcomes the main difficulty of using classical methods based on [word order](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: its use of [word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables)[^1] to indicate part-of-speech.
+This purely morphological approach overcomes the main difficulty of using classical, [word order](https://en.wikipedia.org/wiki/Hidden_Markov_model) methods to parse Ancient Greek: its use of a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables)[^1] to indicate part-of-speech.
 
 
 
