@@ -5,13 +5,29 @@ This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/
 # Model
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech using likelihood and prior estimates from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
-This purely morphological approach overcomes the main difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: the use of a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech[^1]. 
+This purely morphological approach overcomes the main difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech[^1]. 
+
+## Implementation
+
+`MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables. The Naive Bayes is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). 
+
+The first training pass counts the occurence of syllables per category (likelihoods), as well as class occurences (priors).[Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model. 
+
+The second pass normalizes the raw counts into probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) numerical stability). [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development split (see below).
+
+At test time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) with a [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference) assumption to calculate $P(class|syllables)$
+
+
+## Results
+
 
 
 
 [^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
 
-[^2]: Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
+[^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
+
+[^3]:Therefore, while most of English follows only [eight inflections](https://en.wikipedia.org/wiki/Inflection#Examples_in_English), a single Greek verb can have [hundreds of word endings](https://en.wiktionary.org/wiki/%CE%BB%CF%8D%CF%89#Inflection) to express every combination of person, number, mood, aspect, voice.
 
 
 # Running the code
