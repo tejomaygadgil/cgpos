@@ -9,7 +9,7 @@ This purely morphological approach overcomes the main difficulty of using [class
 
 ## Implementation
 
-`MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurence of syllables per category (likelihoods), as well as class occurences (priors).[Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model. 
+`MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurence of syllables per category (likelihoods), as well as class occurences (priors). [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model. 
 
 The second pass normalizes the raw counts into probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) numerical stability). [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development split (see below).
 
