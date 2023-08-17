@@ -2,13 +2,12 @@ Part-of-Speech Tagging for Classical Greek 🏺
 ==============================
 This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/Part-of-speech_tagging) for Ancient Classical Greek, a [morphologically rich](https://arxiv.org/pdf/2005.01330.pdf) and [low-resource](https://arxiv.org/pdf/2006.07264.pdf) language, using texts from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/) and ideas inspired by [*Speech and Language Processing*](https://web.stanford.edu/~jurafsky/slp3/).
 
-# Model
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech using likelihood and prior estimates from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
 This morphological approach overcomes the major difficulties of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: free word order[^1] and many words [only occurring once](https://en.wikipedia.org/wiki/Hapax_legomenon) due to a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech. 
 
-## Implementation
-### Multinomial Naive Bayes
+# Implementation
+## Multinomial Naive Bayes
 `MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model. 
 
 The second pass normalizes the raw counts into probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below).
@@ -21,7 +20,7 @@ $$\begin{align*}
 
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `MultinomialNaiiveBayes` per target.
 
-### Stupid Bayes
+## Stupid Bayes
 `StupidBayes`[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
 Predictions are generated during test time by simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
@@ -32,16 +31,10 @@ $$\begin{align*}
 
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target.
 
-## Results
+# Results
 
 
 
-
-[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
-
-[^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
-
-[^3]: `from cgpos.models.multinomial_naive_bayes import StupidBayes`
 
 # Running the code
 ## Instructions
@@ -108,6 +101,10 @@ This repository uses the following tools:
 * [`make`](https://www.gnu.org/software/make/) for running code
 * [`poetry`](https://python-poetry.org) for package management 
 * [`hydra`](https://hydra.cc/) for code reproducibility
-* [`black`](https://github.com/psf/black) and [`ruff`](https://github.com/charliermarsh/ruff-pre-commit) for code review
+* [`black`](https://github.com/psf/black) and [`ruff`](https://github.com/charliermarsh/ruff-pre-commit) for code review 
 
+[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
 
+[^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
+
+[^3]: `from cgpos.models.multinomial_naive_bayes import StupidBayes`
