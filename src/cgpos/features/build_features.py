@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+"""
+Includes classes and functions to build model features from cleaned data.
+"""
+
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
 import logging
 
 import hydra
@@ -10,10 +15,10 @@ from cgpos.utils.util import export_pkl, import_pkl
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
 def tokenize(config: DictConfig):
     """
-    Tokenize features and build target.
+    Tokenize features.
     """
     logger = logging.getLogger(__name__)
-    logger.info("Tokenizing Perseus features and targets:")
+    logger.info("Tokenizing Perseus features:")
 
     # Import directories
     import_dir = config.data.cleaned

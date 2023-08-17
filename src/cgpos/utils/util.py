@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+"""
+Contains utility functions to read data and clean Greek text.
+"""
+
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
 import logging
 import os
 import pickle

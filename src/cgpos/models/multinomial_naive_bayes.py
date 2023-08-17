@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+"""
+Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
+"""
+
+# Author: tejomaygadgil@gmail.com
+
 import logging
 import math
 from collections import Counter, defaultdict
