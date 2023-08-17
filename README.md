@@ -4,7 +4,7 @@ This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/
 
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech using likelihood and prior estimates from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
-This morphological approach addresses the major difficulty of parsing Ancient Greek: namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) used to indicate part-of-speech[^1] that ends up producing sentences with free word order[^2] and many [singularly occurring](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples) words.
+This morphological approach addresses the major difficulty of parsing Ancient Greek: namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables)[^1] used to indicate part-of-speech that results in free word order[^2] and [singularly occurring](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples) words.
 
 # Implementation
 ## Multinomial Naive Bayes
@@ -103,7 +103,7 @@ This repository uses the following tools:
 * [`hydra`](https://hydra.cc/) for code reproducibility
 * [`black`](https://github.com/psf/black) and [`ruff`](https://github.com/charliermarsh/ruff-pre-commit) for code review 
 
-[^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
+[^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
 
 [^2]: This feature in particular poses a challenge to [classical methods that heavily rely on word order](https://en.wikipedia.org/wiki/Hidden_Markov_model) to make predictions.
 
