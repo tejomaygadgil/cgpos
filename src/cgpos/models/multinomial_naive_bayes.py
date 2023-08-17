@@ -5,6 +5,7 @@ Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 # Author: tejomaygadgil@gmail.com
 
 import math
+from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from typing import Collection, Union
 
@@ -42,7 +43,7 @@ def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     """
     Return count vectors of n-gram bag-of-syllables.
 
-    Argument
+    Arguments
     - words: Dictionary of word syllables.
     - var: Variable to count.
     - n: Depth of n-grams to generate.
@@ -53,7 +54,48 @@ def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     return counts
 
 
-class MultinomialNaiveBayes:
+class Classifier(ABC):
+    """
+    Abstract base class for classifiers.
+    """
+
+    @abstractmethod
+    def fit(self, X, y):
+        """
+        Trains classifier to predict y using X.
+
+        Arguments
+        - X: features.
+        - y: targets.
+        """
+        pass
+
+    @abstractmethod
+    def predict(self, X):
+        """
+        Generate prediction for y using X.
+
+        Arguments
+        - X: features.
+        """
+        pass
+
+    def score(self, X, y):
+        """
+        Return accuracy of predictions of X as compared to y.
+
+        Arguments
+        X: features.
+        y: targets.
+        """
+        len_y = len(y)
+        y_pred = self.predict(X)
+        num_correct = [y_pred[i] == y[i] for i in range(len_y)]
+        accuracy = sum(num_correct) / len_y
+        return accuracy
+
+
+class MultinomialNaiveBayes(Classifier):
     """
     Implement Multinomial Naive Bayes with Laplace smoothing and N-gram range.
     """
@@ -126,7 +168,7 @@ class MultinomialNaiveBayes:
         return preds
 
 
-class StupidBayes:
+class StupidBayes(Classifier):
     """
     Implement Stupid Bayes that just adds things up.
     """
