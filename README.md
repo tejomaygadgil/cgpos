@@ -13,7 +13,7 @@ This morphological approach overcomes the major difficulties of using [classical
 
 The second pass normalizes the raw counts into probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below).
 
-At prediction time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem), assuming [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference), to estimate the most likely class $\text{argmax}_c P(\text{class}_c|\text{syllables})$ from the following probabilistic relationship:
+At prediction time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) (along with assuming [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference)) to estimate the most likely class $\text{argmax}_c P(\text{class}_c|\text{syllables})$ from the following probabilistic relationship:
 
 $$\begin{align*} 
 \text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + P(\text{class}_c)
