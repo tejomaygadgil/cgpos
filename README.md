@@ -15,7 +15,7 @@ The second pass normalizes the raw counts into probabilities (represented via [l
 At prediction time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) (and an assumption of [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference)) to estimate the most likely class using the following relationship:
 
 $$\begin{align*} 
-\text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + P(\text{class}_c)
+\text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + \log P(\text{class}_c)
 \end{align*} $$
 
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `MultinomialNaiiveBayes` per target.
