@@ -5,75 +5,35 @@ Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import math
-from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 
 from cgpos.models.utils import count_vectors, ngrams
 from cgpos.utils.util import flatten
 
 
-class Classifier(ABC):
-    """
-    Abstract base class for classifiers.
-    """
-
-    @abstractmethod
-    def fit(self, X, y):
-        """
-        Trains classifier to predict y using X.
-
-        Arguments
-        - X: features.
-        - y: targets.
-        """
-        pass
-
-    @abstractmethod
-    def predict(self, X):
-        """
-        Generate prediction for y using X.
-
-        Arguments
-        - X: features.
-        """
-        pass
-
-    def score(self, X, y):
-        """
-        Return accuracy of predictions of X as compared to y.
-
-        Arguments
-        X: features.
-        y: targets.
-        """
-        len_y = len(y)
-        y_pred = self.predict(X)
-        num_correct = [y_pred[i] == y[i] for i in range(len_y)]
-        accuracy = sum(num_correct) / len_y
-        return accuracy
-
-
-class MultinomialNaiveBayes(Classifier):
+class MultinomialNaiveBayes:
     """
     Implement Multinomial Naive Bayes with Laplace smoothing and N-gram range.
+
+    Arguments
+    - alpha: Laplace/Lidstone smoothing parameter.
+    - ngram_range: Range of n-grams to generate.
     """
 
-    def __init__(self, alpha: float, ngram_range: tuple[int, int]):
-        assert 0.0 <= alpha <= 1.0, "alpha should be a float between 0.0 and 1.0."
-        assert (type(ngram_range) == tuple) and [
-            i > 0 for i in ngram_range
-        ], "ngram_range should be a length 2 tuple of non-negative ints."
+    def __init__(self, alpha=1, ngram_range=(1, 1)):
         self.alpha = alpha
         self.ngram_range = ngram_range
-        self.V = None
-        self.classes = None
-        self.class_counts = None
-        self.feature_counts = None
-        self.log_priors = None
-        self.log_likelihoods = None
-        self.gram_set = None
 
     def fit(self, X: list, y: list):
+        # Check parameters
+        assert 0.0 <= self.alpha <= 1.0, "alpha should be a float between 0.0 and 1.0."
+        assert (
+            (type(self.ngram_range) == tuple)
+            and (self.ngram_range[1] >= self.ngram_range[0])
+            and [value > 0 for value in self.ngram_range]
+        ), "Invalid ngram_range."
+
+        # Generate class and feature counts
         X_cv = [count_vectors(word, self.ngram_range) for word in X]
         N = len(y)
         V = len(set(flatten(X_cv)))
@@ -86,11 +46,10 @@ class MultinomialNaiveBayes(Classifier):
             class_counts[class_i] += 1
             feature_counts[class_i].update(features_i)
 
-        def set_default_factory(value):
-            return lambda: value
-
+        # Calculate prior and likelihood
         log_priors = {key: math.log(value / N) for key, value in class_counts.items()}
-        log_likelihoods = defaultdict(defaultdict)
+        log_likelihoods = defaultdict(dict)
+        log_likelihoods_defaults = defaultdict()
         for class_i in classes:
             feature_total = sum(feature_counts[class_i].values())
             denominator = feature_total + self.alpha * V
@@ -98,24 +57,34 @@ class MultinomialNaiveBayes(Classifier):
                 numerator = value + self.alpha
                 log_likelihood = math.log(numerator / denominator)
                 log_likelihoods[class_i][key] = log_likelihood
-            laplace = math.log(self.alpha / denominator)
-            log_likelihoods[class_i].default_factory = set_default_factory(laplace)
+            default_likelihood = self.alpha / denominator
+            default_log_likelihood = math.log(default_likelihood)
+            log_likelihoods_defaults[class_i] = default_log_likelihood
 
-        self.V = V
-        self.classes = classes
-        self.class_counts = class_counts
-        self.feature_counts = feature_counts
-        self.log_priors = log_priors
-        self.log_likelihoods = log_likelihoods
+        # Set attributes
+        self.X_ = X
+        self.y_ = y
+        self.V_ = V
+        self.classes_ = classes
+        self.class_counts_ = class_counts
+        self.feature_counts_ = feature_counts
+        self.log_priors_ = log_priors
+        self.log_likelihoods_ = log_likelihoods
+        self.log_likelihoods_defaults_ = log_likelihoods_defaults
+
+        return self
 
     def predict(self, X: list) -> list:
         X_grams = [ngrams(word, self.ngram_range) for word in X]
         preds = []
         for word in X_grams:
-            probs = self.log_priors.copy()
+            probs = self.log_priors_.copy()
             for gram in word:
-                for class_i in self.classes:
-                    probs[class_i] += self.log_likelihoods[class_i][gram]
+                for class_i in self.classes_:
+                    default_log_likelihood = self.log_likelihoods_defaults_[class_i]
+                    probs[class_i] += self.log_likelihoods_[class_i].get(
+                        gram, default_log_likelihood
+                    )
             max_prob = float("-inf")
             argmax = None
             for class_i, prob in probs.items():
@@ -123,28 +92,40 @@ class MultinomialNaiveBayes(Classifier):
                     max_prob = prob
                     argmax = class_i
             preds.append(argmax)
+
         return preds
 
 
-class StupidBayes(Classifier):
+class StupidBayes:
     """
     Implement Stupid Bayes that just adds things up.
+
+    Arguments
+    - n: Maximum n-gram depth.
     """
 
-    def __init__(self, n: int):
-        assert (type(n) == int) and (n >= 0), "n should be int >= 0."
+    def __init__(self, n=1):
         self.n = n
         self.ngram_range = (1, n)
-        self.gram_counts = None
 
     def fit(self, X: list, y: list):
+        # Check parameters
+        assert (type(self.n) == int) and (self.n >= 0), "n should be int >= 0."
+
+        # Generate n-grams
         X_ngrams = [ngrams(x, self.ngram_range) for x in X]
+
+        # Count
         gram_counts = defaultdict(Counter)
         for i, x_ngrams in enumerate(X_ngrams):
             y_i = y[i]
             for ngram in x_ngrams:
                 gram_counts[ngram][y_i] += 1
-        self.gram_counts = gram_counts
+
+        # Get feature counts
+        self.gram_counts_ = gram_counts
+
+        return self
 
     def predict(self, X: list) -> list:
         def _ngram_backoff(sequence, gram_dict, n):
@@ -165,10 +146,11 @@ class StupidBayes(Classifier):
 
             return dist
 
+        # Get predictions
         preds = []
         for x in X:
-            y_dist = _ngram_backoff(x, self.gram_counts, self.n)
             pred = None
+            y_dist = _ngram_backoff(x, self.gram_counts_, self.n)
             if y_dist:
                 pred = max(y_dist, key=y_dist.get)
             preds.append(pred)
