@@ -14,7 +14,7 @@ def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
 
     Arguments
     - sequence: Sequence of tokens.
-    - n: n-gram range, or depth of n-grams to generate.
+    - n: N-gram range, or depth of n-grams to generate.
     """
     match n:
         case tuple():
