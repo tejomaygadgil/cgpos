@@ -5,55 +5,13 @@ Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import math
-from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 
 from cgpos.models.utils import count_vectors, ngrams
 from cgpos.utils.util import flatten
 
 
-class Classifier(ABC):
-    """
-    Abstract base class for classifiers.
-    """
-
-    @abstractmethod
-    def fit(self, X, y):
-        """
-        Trains classifier to predict y using X.
-        Arguments
-        - X: features.
-        - y: targets.
-        """
-        pass
-
-    @abstractmethod
-    def predict(self, X):
-        """
-        Generate prediction for y using X.
-        Arguments
-        - X: features.
-        """
-        pass
-
-    def score(self, X, y, return_preds=False):
-        """
-        Return accuracy of predictions of X as compared to y.
-        Arguments
-        X: features.
-        y: targets.
-        """
-        len_y = len(y)
-        y_pred = self.predict(X)
-        num_correct = [y_pred[i] == y[i] for i in range(len_y)]
-        accuracy = sum(num_correct) / len_y
-
-        if return_preds:
-            return accuracy, y_pred
-        return accuracy
-
-
-class MultinomialNaiveBayes(Classifier):
+class MultinomialNaiveBayes:
     """
     Implement Multinomial Naive Bayes with Laplace smoothing and N-gram range.
 
@@ -142,7 +100,7 @@ class MultinomialNaiveBayes(Classifier):
         return preds
 
 
-class StupidBayes(Classifier):
+class StupidBayes:
     """
     Implement Stupid Bayes that just adds things up.
 
