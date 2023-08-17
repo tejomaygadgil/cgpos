@@ -103,7 +103,7 @@ This repository uses the following tools:
 * [`hydra`](https://hydra.cc/) for code reproducibility
 * [`black`](https://github.com/psf/black) and [`ruff`](https://github.com/charliermarsh/ruff-pre-commit) for code review 
 
-[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
+[^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
 
 [^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
 
