@@ -2,56 +2,14 @@
 Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 """
 
-# Author: tejomaygadgil@gmail.com
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import math
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
-from typing import Collection, Union
 
+from cgpos.models.utils import count_vectors, ngrams
 from cgpos.utils.util import flatten
-
-
-def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
-    """
-    Return (1, n) n-grams for input sequence.
-
-    Arguments
-    - sequence: Sequence of tokens.
-    - n: n-gram range, or depth of n-grams to generate.
-    """
-    match n:
-        case tuple():
-            start, end = n
-            grams = []
-            len_sequence = len(sequence)
-            for i in range(start, end + 1):
-                n_passes = len_sequence - i + 1
-                if n_passes >= 1:
-                    for j in range(n_passes):
-                        gram = tuple(sequence[j : (i + j)])
-                        grams.append(gram)
-            return grams
-
-        case int():
-            len_sequence = len(sequence)
-            n_passes = max(1, len_sequence - n + 1)
-            return [tuple(sequence[i : (i + n)]) for i in range(n_passes)]
-
-
-def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
-    """
-    Return count vectors of n-gram bag-of-syllables.
-
-    Arguments
-    - words: Dictionary of word syllables.
-    - var: Variable to count.
-    - n: Depth of n-grams to generate.
-    """
-    counts = Counter()
-    for gram in ngrams(sequence, ngram_range):
-        counts[gram] += 1
-    return counts
 
 
 class Classifier(ABC):
