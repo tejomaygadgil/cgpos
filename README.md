@@ -5,7 +5,7 @@ This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/
 # Model
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech using likelihood and prior estimates from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
-This purely morphological approach overcomes the main difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech[^1], resulting in free word order and many [words that only occur once](https://en.wikipedia.org/wiki/Hapax_legomenon). 
+This purely morphological approach overcomes the main difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: a [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to indicate part-of-speech resulting in free word order[^1] and many [words that only occur once](https://en.wikipedia.org/wiki/Hapax_legomenon). 
 
 ## Implementation
 
@@ -27,7 +27,7 @@ Multioutput predictions are achieved by following the [simple strategy](https://
 
 
 
-[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
+[^1]: This is in contrast to [analytics languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
 
 [^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
 
