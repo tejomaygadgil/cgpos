@@ -4,13 +4,13 @@ This project implements a [part-of-speech tagger](https://en.wikipedia.org/wiki/
 
 A Syllable-Based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) with [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented to predict fine-grained part-of-speech using likelihood and prior estimates from the training data. A variant called `StupidBayes` (due to its relation to the [Stupid Backoff](https://aclanthology.org/D07-1090.pdf) smoothing method) is introduced that delivers a 5-10% improvement in accuracy.
 
-This morphological approach overcomes the major difficulty of using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model) to parse Ancient Greek: namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) used to indicate part-of-speech that results in free word order[^1] and many words [only occurring once](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples).
+This morphological approach addresses the major difficulty of parsing Ancient Greek: namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) used to indicate part-of-speech[^1] that ends up producing sentences with free word order[^2] and many [singularly occurring](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples) words.
 
 # Implementation
 ## Multinomial Naive Bayes
-`MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
+`MultinomialNaiveBayes`[^3] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
 
-The second pass normalizes the raw counts to produce probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) for numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below). As most likelihood probability distributions are sparse, dictionaries are used with default values to speed up computation.
+The second pass normalizes the raw counts to produce probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) for numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below). As likelihood probability distributions are sparse, dictionaries and default values are used to speed up computation.
 
 At prediction time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) (and an assumption of [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference)) to estimate the most likely class using the following relationship:
 
@@ -21,7 +21,7 @@ $$\begin{align*}
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `MultinomialNaiveBayes` per target.
 
 ## Stupid Bayes
-`StupidBayes`[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
+`StupidBayes`[^4], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
 Predictions are generated during test time by simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
 
@@ -105,6 +105,8 @@ This repository uses the following tools:
 
 [^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
 
-[^2]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
+[^2]: This feature in particular poses a challenge to [classical methods that heavily rely on word order](https://en.wikipedia.org/wiki/Hidden_Markov_model) to make predictions.
 
-[^3]: `from cgpos.models.multinomial_naive_bayes import StupidBayes`
+[^3]: `from cgpos.models.multinomial_naive_bayes import MultinomialNaiveBayes`
+
+[^4]: `from cgpos.models.multinomial_naive_bayes import StupidBayes`
