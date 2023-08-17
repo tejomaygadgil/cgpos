@@ -36,7 +36,7 @@ class Classifier(ABC):
         """
         pass
 
-    def score(self, X, y):
+    def score(self, X, y, return_preds=False):
         """
         Return accuracy of predictions of X as compared to y.
         Arguments
@@ -47,6 +47,9 @@ class Classifier(ABC):
         y_pred = self.predict(X)
         num_correct = [y_pred[i] == y[i] for i in range(len_y)]
         accuracy = sum(num_correct) / len_y
+
+        if return_preds:
+            return accuracy, y_pred
         return accuracy
 
 
