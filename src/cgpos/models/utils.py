@@ -1,9 +1,9 @@
 """
-This module contains utilities for building part-of-speech models.
+This module contains utilities for building and evaluating part-of-speech models.
 """
+
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
-import logging
 from collections import Counter
 from typing import Collection, Union
 
@@ -52,7 +52,7 @@ def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     return counts
 
 
-def stratified_shuffle(X, y, clf, n_splits, train_size, random_state, **kwargs):
+def stratified_shuffle(X, y, clf, return_preds, sss_args, clf_args):
     """
     Return scores of stratified shuffle CV.
 
@@ -60,35 +60,24 @@ def stratified_shuffle(X, y, clf, n_splits, train_size, random_state, **kwargs):
     - X: Features.
     - y: Target.
     - clf: Classifier.
-    - n_splits: Number of splits.
-    - train_size: Size of training set.
-    - random_state: Random state for CV.
+    - return_preds: Boolean to return predictions.
+    - sss_args: Additional arguments for StratifiedShuffleSplit.
+    - clf_args: Additional arguments for clf.
     """
-    logger = logging.getLogger(__name__)
-    logger.info(f"Stratified shuffle CV for {clf}")
+
+    sss = StratifiedShuffleSplit(**sss_args)
 
     scores = []
     dummy_X = [0] * len(y)
-    # Get stratified split
-    sss = StratifiedShuffleSplit(
-        n_splits=n_splits, train_size=train_size, random_state=random_state
-    )
     splits = sss.split(dummy_X, y)
-    for i, (train_indices, test_indices) in enumerate(splits):
+    for train_indices, test_indices in splits:
         X_train = [X[index] for index in train_indices]
         X_test = [X[index] for index in test_indices]
         y_train = y[train_indices]
         y_test = y[test_indices]
 
-        classifier = clf(**kwargs)
-        score = classifier.fit(X_train, y_train).score(X_test, y_test)
-
-        logger.info(f"Training fold {i} accuracy: {score * 100:.2f}%")
-
+        classifier = clf(**clf_args)
+        score = classifier.fit(X_train, y_train).score(X_test, y_test, return_preds)
         scores.append(score)
-
-    scores_mean = sum(scores) / n_splits
-
-    logger.info(f"Overall CV accuracy: {scores_mean * 100:.2f}%")
 
     return scores
