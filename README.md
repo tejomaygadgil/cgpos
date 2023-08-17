@@ -103,7 +103,7 @@ This repository uses the following tools:
 * [`hydra`](https://hydra.cc/) for code reproducibility
 * [`black`](https://github.com/psf/black) and [`ruff`](https://github.com/charliermarsh/ruff-pre-commit) for code review 
 
-[^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use strict word order and special words like "had" and "will" to express part-of-speech.
+[^1]: This is in contrast to [analytic languages](https://en.wikipedia.org/wiki/Analytic_language) like English that use word order and special words like "had" and "will" to express part-of-speech.
 
 [^2]: This feature in particular poses a challenge to [classical methods that heavily rely on word order](https://en.wikipedia.org/wiki/Hidden_Markov_model) to make predictions.
 
