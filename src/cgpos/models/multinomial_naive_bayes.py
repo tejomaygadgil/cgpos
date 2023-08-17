@@ -5,13 +5,52 @@ Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import math
+from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 
 from cgpos.models.utils import count_vectors, ngrams
 from cgpos.utils.util import flatten
 
 
-class MultinomialNaiveBayes:
+class Classifier(ABC):
+    """
+    Abstract base class for classifiers.
+    """
+
+    @abstractmethod
+    def fit(self, X, y):
+        """
+        Trains classifier to predict y using X.
+        Arguments
+        - X: features.
+        - y: targets.
+        """
+        pass
+
+    @abstractmethod
+    def predict(self, X):
+        """
+        Generate prediction for y using X.
+        Arguments
+        - X: features.
+        """
+        pass
+
+    def score(self, X, y):
+        """
+        Return accuracy of predictions of X as compared to y.
+        Arguments
+        X: features.
+        y: targets.
+        """
+        len_y = len(y)
+        y_pred = self.predict(X)
+        num_correct = [y_pred[i] == y[i] for i in range(len_y)]
+        accuracy = sum(num_correct) / len_y
+        return accuracy
+
+
+class MultinomialNaiveBayes(Classifier):
     """
     Implement Multinomial Naive Bayes with Laplace smoothing and N-gram range.
 
@@ -23,6 +62,10 @@ class MultinomialNaiveBayes:
     def __init__(self, alpha=1, ngram_range=(1, 1)):
         self.alpha = alpha
         self.ngram_range = ngram_range
+
+    def __str__(self):
+        name = "Multinomial Naive Bayes"
+        return f"{name} with alpha={self.alpha} and ngram_range={self.ngram_range}"
 
     def fit(self, X: list, y: list):
         # Check parameters
@@ -96,7 +139,7 @@ class MultinomialNaiveBayes:
         return preds
 
 
-class StupidBayes:
+class StupidBayes(Classifier):
     """
     Implement Stupid Bayes that just adds things up.
 
@@ -104,16 +147,22 @@ class StupidBayes:
     - n: Maximum n-gram depth.
     """
 
-    def __init__(self, n=1):
-        self.n = n
-        self.ngram_range = (1, n)
+    def __init__(self, ngram_depth=1):
+        self.ngram_depth = ngram_depth
+
+    def __str__(self):
+        name = "Stupid Bayes"
+        return f"{name} with ngram_depth={self.ngram_depth}"
 
     def fit(self, X: list, y: list):
         # Check parameters
-        assert (type(self.n) == int) and (self.n >= 0), "n should be int >= 0."
+        assert (type(self.ngram_depth) == int) and (
+            self.ngram_depth >= 0
+        ), "n should be int >= 0."
 
         # Generate n-grams
-        X_ngrams = [ngrams(x, self.ngram_range) for x in X]
+        ngram_range = (1, self.ngram_depth)
+        X_ngrams = [ngrams(x, ngram_range) for x in X]
 
         # Count
         gram_counts = defaultdict(Counter)
@@ -130,7 +179,7 @@ class StupidBayes:
     def predict(self, X: list) -> list:
         def _ngram_backoff(sequence, gram_dict, n):
             """
-            Recursively looks up n-grams in gram_dict.
+            Recursively look up n-grams in gram_dict.
             """
             if n == 0:
                 return Counter()
