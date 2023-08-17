@@ -1,4 +1,9 @@
-# -*- coding: utf-8 -*-
+"""
+Performs data processing and data cleaning.
+"""
+
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
 import logging
 import os
 import unicodedata
@@ -18,7 +23,7 @@ from cgpos.utils.util import (
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def get_raw_data(config: DictConfig):
+def process_raw_data(config: DictConfig):
     """
     Convert raw Perseus treebank XML data into a tabular format.
     """
@@ -216,7 +221,7 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-    get_raw_data()
+    process_raw_data()
     get_target_map()
     normalize()
     clean()
