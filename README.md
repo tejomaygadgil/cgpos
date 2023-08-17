@@ -24,7 +24,7 @@ Multioutput predictions are achieved by following the [simple strategy](https://
 `StupidBayes`[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether and simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
 
 $$\begin{align*} 
-\text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \sum_i  C(\text{class}_c|\text{syllable}_i)
+\text{argmax}_c (\text{class}_c|\text{syllables}) &= \sum_i  C(\text{class}_c|\text{syllable}_i)
 \end{align*} $$
 
 This has the effect of 
