@@ -65,7 +65,7 @@ data/raw data/processed data/interim data/external data/results data/reference:
 ## Remove processed data
 remove_data: init_data_dir
 	$(info Removing project data (excluding data/raw))
-	rm -rf data/processed/* data/interim/* data/external/* data/results/* data/reference/*
+	rm -rf data/processed/* data/interim/* data/reference/*
 
 ## Remove all data
 remove_all_data: init_data_dir
