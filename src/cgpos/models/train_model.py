@@ -126,7 +126,7 @@ def train_model(config: DictConfig):
                     # Loop through parameter grid
                     for i, clf_arg in enumerate(param_grid):
                         future = executor.submit(run_clf, i, clf_arg, run_clf_arg)
-                        future.append(future)
+                        futures.append(future)
 
                     for future in tqdm(futures, total=len(param_grid)):
                         future.result()

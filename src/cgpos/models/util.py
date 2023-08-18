@@ -116,7 +116,7 @@ def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     score = f1_score(y_pred, y_dev, average=f1_average)
     # Export
     score_dir = os.path.join(score_dir_stem, f"{i}.pkl")
-    pred_dir = os.path.join(pred_dir_stem, f"{i}.pkl")
+    export_pkl(score, score_dir, verbose=False)
     if export_pred:
-        export_pkl(score, score_dir, verbose=False)
+        pred_dir = os.path.join(pred_dir_stem, f"{i}.pkl")
         export_pkl(y_pred, pred_dir, verbose=False)
