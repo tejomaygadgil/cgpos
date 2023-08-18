@@ -54,6 +54,10 @@ def train_model(config: DictConfig):
     clf = getattr(clf_module, clf_name)
     logger.info(f"Training {clf_name}:")
 
+    # Export clf name
+    clf_name_dir = os.path.join(run_dir, "clf_name.pkl")
+    export_pkl(clf_name, clf_name_dir)
+
     # Get CV args
     test_split_args = config.train.test_split
     tune_split_args = config.train.tune_split
