@@ -1,9 +1,9 @@
 """
 This module contains utilities for building and evaluating part-of-speech models.
 """
-import os
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
 from collections import Counter
 from itertools import product
 from typing import Collection, Union
@@ -115,8 +115,8 @@ def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     y_pred = clf_i.fit(X_train, y_train).predict(X_dev)
     score = f1_score(y_pred, y_dev, average=f1_average)
     # Export
-    score_dir = os.path.join(score_dir_stem, f"{i}.pkl")
+    score_dir = score_dir_stem + f"{i}.pkl"
     export_pkl(score, score_dir, verbose=False)
     if export_pred:
-        pred_dir = os.path.join(pred_dir_stem, f"{i}.pkl")
+        pred_dir = pred_dir_stem + f"{i}.pkl"
         export_pkl(y_pred, pred_dir, verbose=False)
