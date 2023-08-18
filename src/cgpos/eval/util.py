@@ -59,7 +59,7 @@ def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     Utility to run model in parallel.
     """
     # Unpack args
-    clf = run_clf_arg["clf"]
+    clf_method = run_clf_arg["clf_method"]
     f1_score = run_clf_arg["f1_score"]
     f1_average = run_clf_arg["f1_average"]
     X_train = run_clf_arg["X_i_train"]
@@ -70,8 +70,8 @@ def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     pred_dir_stem = run_clf_arg["score_dir_stem"]
     export_pred = run_clf_arg["export_pred"]
     # Get score
-    clf_i = clf(**clf_arg)
-    y_pred = clf_i.fit(X_train, y_train).predict(X_dev)
+    clf = clf_method(**clf_arg)
+    y_pred = clf.fit(X_train, y_train).predict(X_dev)
     score = f1_score(y_pred, y_dev, average=f1_average)
     # Export
     score_dir = score_dir_stem + f"{i}.pkl"
