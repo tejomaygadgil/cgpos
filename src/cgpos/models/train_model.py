@@ -56,10 +56,10 @@ def train_model(config: DictConfig):
     ss = ShuffleSplit(**eval_split_args)
     dummy_X = [0] * len(y)
     test_splits = ss.split(dummy_X, y)
-    for test_i, (_temp_indices, test_indices) in enumerate(test_splits):
+    for test_i, (_temp_indices, _test_indices) in enumerate(test_splits):
         logger.info(f"Test split {test_i + 1} of {eval_split_args['n_splits']}:")
-        [X[index] for index in test_indices]
-        y[test_indices]
+        # X_test = [X[index] for index in test_indices]
+        # y_test = y[test_indices]
 
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
