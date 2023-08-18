@@ -9,6 +9,7 @@ from itertools import product
 from typing import Collection, Union
 
 import numpy as np
+from omegaconf import DictConfig
 
 from cgpos.utils.util import export_pkl
 
@@ -70,22 +71,22 @@ def ngram_range_grid(ngram_depth):
     return ngram_range
 
 
-def get_clf_args(clf_config) -> list:
+def get_clf_args(clf_param: DictConfig) -> list:
     """
     Generate Cartesian product of classifier parameters for tuning.
     """
     param_grid = {}
-    if "alpha" in clf_config:
-        start = clf_config.alpha.start
-        stop = clf_config.alpha.stop
-        step = clf_config.alpha.step
+    if "alpha" in clf_param:
+        start = clf_param.alpha.start
+        stop = clf_param.alpha.stop
+        step = clf_param.alpha.step
         param_grid["alpha"] = np.arange(start=start, stop=stop, step=step)
-    if "ngram_range" in clf_config:
-        depth = clf_config.ngram_range.depth
+    if "ngram_range" in clf_param:
+        depth = clf_param.ngram_range.depth
         param_grid["ngram_range"] = ngram_range_grid(depth)
-    if "ngram_depth" in clf_config:
-        start = clf_config.ngram_depth.start
-        stop = clf_config.ngram_depth.stop
+    if "ngram_depth" in clf_param:
+        start = clf_param.ngram_depth.start
+        stop = clf_param.ngram_depth.stop
         param_grid["ngram_depth"] = list(range(start, stop + 1))
 
     clf_args = []
