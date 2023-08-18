@@ -88,7 +88,7 @@ def get_clf_args(clf_param: DictConfig) -> list:
         start = clf_param.ngram_depth.start
         stop = clf_param.ngram_depth.stop
         param_grid["ngram_depth"] = list(range(start, stop + 1))
-
+    # Generate grid
     clf_args = []
     params = list(param_grid.keys())
     param_product = product(*[param_grid[key] for key in params])
@@ -116,7 +116,6 @@ def run_clf(clfarg_i, clf_arg, run_clf_arg):
     target_i = run_clf_arg["target_i"]
     eval_i = run_clf_arg["eval_i"]
     tune_i = run_clf_arg["tune_i"]
-
     # Get score
     clf_i = clf(**clf_arg)
     y_i_pred = clf_i.fit(X_i_train, y_i_train).predict(X_i_dev)
