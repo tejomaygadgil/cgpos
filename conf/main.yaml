@@ -32,7 +32,7 @@ train:
   export_pred: False
 
 eval:
-  run: None
+  run:
 
 param_grid:
   MultinomialNaiveBayes:
