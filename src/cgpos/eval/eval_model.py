@@ -1,5 +1,5 @@
 """
-Trains part-of-speech tagger on data features.
+This module selects the best model and evaluates it on the test set.
 """
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
@@ -21,7 +21,7 @@ from sklearn.model_selection import (
 )
 from tqdm import tqdm
 
-from cgpos.models.util import get_clf_args, run_clf
+from cgpos.eval.util import get_clf_args, run_clf
 from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
 
 
