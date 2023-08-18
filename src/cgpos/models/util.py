@@ -7,6 +7,8 @@ This module contains utilities for building and evaluating part-of-speech models
 from collections import Counter
 from typing import Collection, Union
 
+from cgpos.utils.util import export_pkl
+
 
 def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
     """
@@ -63,3 +65,28 @@ def ngram_range_grid(ngram_depth):
             ngram_range.append((i, j))
 
     return ngram_range
+
+
+def run_clf(clfarg_i, clf_arg, run_clf_arg):
+    """
+    Utility to run model in parallel.
+    """
+    # Unpack args
+    clf = run_clf_arg["clf"]
+    f1_score = run_clf_arg["f1_score"]
+    X_i_train = run_clf_arg["X_i_train"]
+    y_i_train = run_clf_arg["y_i_train"]
+    X_i_dev = run_clf_arg["X_i_dev"]
+    y_i_dev = run_clf_arg["y_i_dev"]
+    f1_average = run_clf_arg["f1_average"]
+    target_i = run_clf_arg["target_i"]
+    test_i = run_clf_arg["test_i"]
+    tune_i = run_clf_arg["tune_i"]
+
+    # Get score
+    clf_i = clf(**clf_arg)
+    y_i_pred = clf_i.fit(X_i_train, y_i_train).predict(X_i_dev)
+    score = f1_score(y_i_pred, y_i_dev, average=f1_average)
+    # Export
+    export_path = f"data/results/test_{test_i}_target_{target_i}_tune_{tune_i}_clfarg_{clfarg_i}_score.pkl"
+    export_pkl(score, export_path, verbose=False)

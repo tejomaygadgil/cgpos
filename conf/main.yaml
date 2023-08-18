@@ -29,9 +29,13 @@ train:
 
 param_grid:
   MultinomialNaiveBayes:
-    alpha_min: 0.1
-    alpha_max: 1
+    alpha_start: 0.1
+    alpha_stop: 1
     alpha_step: 0.1
     ngram_depth: 6
+  StupidBayes:
+    ngram_depth_start: 1
+    ngram_depth_stop: 6
+
 
 

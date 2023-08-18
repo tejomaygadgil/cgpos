@@ -18,8 +18,8 @@ from sklearn.model_selection import (
 )
 from tqdm import tqdm
 
-from cgpos.models.util import ngram_range_grid
-from cgpos.utils.util import export_pkl, import_pkl
+from cgpos.models.util import ngram_range_grid, run_clf
+from cgpos.utils.util import import_pkl
 
 if __name__ == "__main__":
     # Load hydra params
@@ -46,13 +46,13 @@ if __name__ == "__main__":
     f1_average = config.train.f1_average
 
     # Set up parameter grid
-    alpha_min = config.MultinomialNaiveBayes.alpha_min
-    alpha_max = config.MultinomialNaiveBayes.max
+    alpha_start = config.MultinomialNaiveBayes.alpha_start
+    alpha_stop = config.MultinomialNaiveBayes.alpha_stop
     alpha_step = config.MultinomialNaiveBayes.alpha_step
     ngram_depth = config.MultinomialNaiveBayes.ngram_depth
 
     param_grid = {
-        "alpha": np.arange(alpha_min, alpha_max, alpha_step),
+        "alpha": np.arange(start=alpha_start, stop=alpha_stop, step=alpha_step),
         "ngram_range": ngram_range_grid(ngram_depth),
     }
 
@@ -97,6 +97,8 @@ if __name__ == "__main__":
                 y_i_dev = _y_i_temp[dev_indices]
 
                 run_clf_arg = {
+                    "clf": clf,
+                    "f1_score": f1_score,
                     "X_i_train": X_i_train,
                     "y_i_train": y_i_train,
                     "X_i_dev": X_i_dev,
@@ -106,28 +108,6 @@ if __name__ == "__main__":
                     "test_i": test_i,
                     "tune_i": tune_i,
                 }
-
-                def run_clf(clfarg_i, clf_arg, run_clf_arg):
-                    """
-                    Run classifier with args.
-                    """
-                    # Unpack args
-                    X_i_train = run_clf_arg["X_i_train"]
-                    y_i_train = run_clf_arg["y_i_train"]
-                    X_i_dev = run_clf_arg["X_i_dev"]
-                    y_i_dev = run_clf_arg["y_i_dev"]
-                    f1_average = run_clf_arg["f1_average"]
-                    target_i = run_clf_arg["target_i"]
-                    test_i = run_clf_arg["test_i"]
-                    tune_i = run_clf_arg["tune_i"]
-
-                    # Get score
-                    clf_i = clf(**clf_arg)
-                    y_i_pred = clf_i.fit(X_i_train, y_i_train).predict(X_i_dev)
-                    score = f1_score(y_i_pred, y_i_dev, average=f1_average)
-                    # Export
-                    export_path = f"data/results/test_{test_i}_target_{target_i}_tune_{tune_i}_clfarg_{clfarg_i}_score.pkl"
-                    export_pkl(score, export_path, verbose=False)
 
                 # Parallelize model runs
                 with ProcessPoolExecutor() as executor:
