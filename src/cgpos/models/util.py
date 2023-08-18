@@ -5,7 +5,10 @@ This module contains utilities for building and evaluating part-of-speech models
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 from collections import Counter
+from itertools import product
 from typing import Collection, Union
+
+import numpy as np
 
 from cgpos.utils.util import export_pkl
 
@@ -65,6 +68,36 @@ def ngram_range_grid(ngram_depth):
             ngram_range.append((i, j))
 
     return ngram_range
+
+
+def get_clf_args(clf_config) -> list:
+    """
+    Generate Cartesian product of classifier parameters for tuning.
+    """
+    param_grid = {}
+    if "alpha" in clf_config:
+        start = clf_config.alpha.start
+        stop = clf_config.alpha.stop
+        step = clf_config.alpha.step
+        param_grid["alpha"] = np.arange(start=start, stop=stop, step=step)
+    if "ngram_range" in clf_config:
+        depth = clf_config.ngram_range.depth
+        param_grid["ngram_range"] = ngram_range_grid(depth)
+    if "ngram_depth" in clf_config:
+        start = clf_config.ngram_depth.start
+        stop = clf_config.ngram_depth.stop
+        param_grid["ngram_depth"] = list(range(start, stop + 1))
+
+    clf_args = []
+    params = list(param_grid.keys())
+    param_product = product(*[param_grid[key] for key in params])
+    for output in param_product:
+        clf_arg = {}
+        for i, param in enumerate(params):
+            clf_arg[param] = output[i]
+        clf_args.append(clf_arg)
+
+    return clf_args
 
 
 def run_clf(clfarg_i, clf_arg, run_clf_arg):
