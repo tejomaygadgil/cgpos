@@ -7,10 +7,11 @@ Trains part-of-speech tagger on data features.
 import logging
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
-from itertools import product
+from importlib import import_module
 
+import hydra
 import numpy as np
-from hydra import compose, initialize
+from omegaconf import DictConfig
 from sklearn.metrics import f1_score
 from sklearn.model_selection import (
     ShuffleSplit,
@@ -18,17 +19,17 @@ from sklearn.model_selection import (
 )
 from tqdm import tqdm
 
-from cgpos.models.util import ngram_range_grid, run_clf
+from cgpos.models.util import get_clf_args, run_clf
 from cgpos.utils.util import import_pkl
 
-if __name__ == "__main__":
-    # Load hydra params
-    initialize("../../../conf", version_base=None)
-    config = compose(config_name="main")
 
-    # Log
-    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+def train_model(config: DictConfig):
+    """
+    Train model with shuffled CV and stratified shuffled CV for hyperparmeter tuning.
+    """
+    logger = logging.getLogger(__name__)
+    logger.info("Tokenizing Perseus features:")
 
     # Import data
     uid, text, targets = import_pkl(config.data.cleaned)
@@ -40,35 +41,25 @@ if __name__ == "__main__":
     y = np.array(targets)
 
     # Get args
-    clf = config.train.clf
+    clf_module = import_module(config.train.clf_module)
+    clf_name = config.train.clf
+    clf = getattr(clf_module, clf_name)
     eval_split_args = config.train.eval_split
     tune_split_args = config.train.tune_split
     f1_average = config.train.f1_average
 
     # Set up parameter grid
-    alpha_start = config.MultinomialNaiveBayes.alpha_start
-    alpha_stop = config.MultinomialNaiveBayes.alpha_stop
-    alpha_step = config.MultinomialNaiveBayes.alpha_step
-    ngram_depth = config.MultinomialNaiveBayes.ngram_depth
-
-    param_grid = {
-        "alpha": np.arange(start=alpha_start, stop=alpha_stop, step=alpha_step),
-        "ngram_range": ngram_range_grid(ngram_depth),
-    }
-
-    clf_args = []
-    param_product = product(param_grid["alpha"], param_grid["ngram_range"])
-    for alpha, ngram_range in param_product:
-        clf_args.append({"alpha": alpha, "ngram_range": ngram_range})
+    clf_config = config.param_grid[clf_name]
+    clf_args = get_clf_args(clf_config)
 
     # Test CV loop
     ss = ShuffleSplit(**eval_split_args)
     dummy_X = [0] * len(y)
     test_splits = ss.split(dummy_X, y)
     for test_i, (_temp_indices, test_indices) in enumerate(test_splits):
-        logging.info(f"Test split {test_i + 1} of {eval_split_args['n_splits']}:")
-        X_test = [X[index] for index in test_indices]
-        y_test = y[test_indices]
+        logger.info(f"Test split {test_i + 1} of {eval_split_args['n_splits']}:")
+        [X[index] for index in test_indices]
+        y[test_indices]
 
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
@@ -76,18 +67,18 @@ if __name__ == "__main__":
         # Target loop
         targets_len = len(target_names)
         for target_i in range(targets_len):  # Per target
-            logging.info(
+            logger.info(
                 f"Target {target_i + 1} of {targets_len} ({target_names[target_i]}):"
             )
             _y_i_temp = _y_temp[:, target_i]
 
             # Hyperparameter tuning loop
             sss = StratifiedShuffleSplit(**tune_split_args)
-            tune_scores = defaultdict(lambda: defaultdict(list))
+            defaultdict(lambda: defaultdict(list))
             dummy_X = [0] * len(_y_i_temp)
             tune_splits = sss.split(dummy_X, _y_i_temp)
             for tune_i, (train_indices, dev_indices) in enumerate(tune_splits):
-                logging.info(
+                logger.info(
                     f"Tune split {tune_i + 1} of {tune_split_args['n_splits']}:"
                 )
                 X_i_train = [_X_temp[index] for index in train_indices]
@@ -118,3 +109,11 @@ if __name__ == "__main__":
 
                     for future in tqdm(futures, total=len(clf_args)):
                         future.result()
+
+
+if __name__ == "__main__":
+    # Log
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+
+    train_model()

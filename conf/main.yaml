@@ -16,6 +16,7 @@ perseus:
   normalized: data/interim/perseus_normalized.pkl
 
 train:
+  clf_module: cgpos.models.multinomial_naive_bayes
   clf: MultinomialNaiveBayes
   eval_split:
     n_splits: 1
@@ -23,19 +24,22 @@ train:
     random_state: 20
   tune_split:
     n_splits: 5
-    train_size: 0.8 / 0.9
+    train_size: 0.8888
     random_state: 20
   f1_average: "macro"
 
 param_grid:
   MultinomialNaiveBayes:
-    alpha_start: 0.1
-    alpha_stop: 1
-    alpha_step: 0.1
-    ngram_depth: 6
+    alpha:
+      start: 0.1
+      stop: 1
+      step: 0.1
+    ngram_range:
+      depth: 6
   StupidBayes:
-    ngram_depth_start: 1
-    ngram_depth_stop: 6
+    ngram_depth:
+      start: 1
+      stop: 6
 
 
 
