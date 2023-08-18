@@ -95,6 +95,12 @@ def train_model(config: DictConfig):
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
 
+        # Export as train (for eval_model)
+        X_train_export_dir = os.path.join(test_dir, "X_train.pkl")
+        y_train_export_dir = os.path.join(test_dir, "y_train_.pkl")
+        export_pkl(X_test, X_train_export_dir, verbose=False)
+        export_pkl(y_test, y_train_export_dir, verbose=False)
+
         # Loop through targets
         targets_len = len(targets_name)
         for target in range(targets_len):
