@@ -15,14 +15,23 @@ perseus:
   raw: data/interim/perseus_raw.pkl
   normalized: data/interim/perseus_normalized.pkl
 
-ngram_bos_model:
-  train: *train_path
-  test: *test_path
-  n: 3
-  backoff: True
+train:
+  clf: MultinomialNaiveBayes
+  eval_split:
+    n_splits: 1
+    train_size: 0.9
+    random_state: 20
+  tune_split:
+    n_splits: 5
+    train_size: 0.8 / 0.9
+    random_state: 20
+  f1_average: "macro"
 
-results:
-  bos: data/results/bos.pkl
+param_grid:
+  MultinomialNaiveBayes:
+    alpha_min: 0.1
+    alpha_max: 1
+    alpha_step: 0.1
+    ngram_depth: 6
 
-vars:
-  pred: ["pos", "pers", "num", "tense", "mood", "voice", "gend", "case", "degree"]
+

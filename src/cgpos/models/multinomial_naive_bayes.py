@@ -7,7 +7,7 @@ Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
 import math
 from collections import Counter, defaultdict
 
-from cgpos.models.utils import count_vectors, ngrams
+from cgpos.models.util import count_vectors, ngrams
 from cgpos.utils.util import flatten
 
 

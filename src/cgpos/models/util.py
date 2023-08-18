@@ -7,8 +7,6 @@ This module contains utilities for building and evaluating part-of-speech models
 from collections import Counter
 from typing import Collection, Union
 
-from sklearn.model_selection import StratifiedShuffleSplit
-
 
 def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
     """
@@ -52,32 +50,16 @@ def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     return counts
 
 
-def stratified_shuffle(X, y, clf, return_preds, sss_args, clf_args):
+def ngram_range_grid(ngram_depth):
     """
-    Return scores of stratified shuffle CV.
+    Generate a parameter grid of all combinations from (1, 1) to (ngram_depth, ngram_depth).
 
-    Arguments:
-    - X: Features.
-    - y: Target.
-    - clf: Classifier.
-    - return_preds: Boolean to return predictions.
-    - sss_args: Additional arguments for StratifiedShuffleSplit.
-    - clf_args: Additional arguments for clf.
+    Arguments
+    - ngram_depth: Maximum depth of ngram range grid.
     """
+    ngram_range = []
+    for i in range(1, ngram_depth):
+        for j in range(i, ngram_depth):
+            ngram_range.append((i, j))
 
-    sss = StratifiedShuffleSplit(**sss_args)
-
-    scores = []
-    dummy_X = [0] * len(y)
-    splits = sss.split(dummy_X, y)
-    for train_indices, test_indices in splits:
-        X_train = [X[index] for index in train_indices]
-        X_test = [X[index] for index in test_indices]
-        y_train = y[train_indices]
-        y_test = y[test_indices]
-
-        classifier = clf(**clf_args)
-        score = classifier.fit(X_train, y_train).score(X_test, y_test, return_preds)
-        scores.append(score)
-
-    return scores
+    return ngram_range
