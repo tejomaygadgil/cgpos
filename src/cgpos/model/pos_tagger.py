@@ -1,5 +1,5 @@
 """
-Ths module implements Multinomial Naive Bayes for part-of-speech tagging.
+This module provides a multiouput part-of-speech tagger to use on prediction data.
 """
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
