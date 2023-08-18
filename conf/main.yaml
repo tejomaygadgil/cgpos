@@ -14,7 +14,7 @@ perseus:
   raw: data/interim/perseus_raw.pkl
   normalized: data/interim/perseus_normalized.pkl
 
-# Training config
+# Training configs
 train:
   clf_module: cgpos.models.multinomial_naive_bayes
   clf: StupidBayes
@@ -28,6 +28,9 @@ train:
     random_state: 20
   f1_average: "macro"
   export_pred: False
+
+eval:
+  run: None
 
 param_grid:
   MultinomialNaiveBayes:
