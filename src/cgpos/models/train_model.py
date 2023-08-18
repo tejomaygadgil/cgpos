@@ -41,8 +41,8 @@ def train_model(config: DictConfig):
     # Set export dir
     current_datetime = datetime.now()
     timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
-    results_dir = get_abs_dir(f"data/results/{timestamp}")
-    os.makedirs(results_dir)
+    runs_dir = get_abs_dir(f"data/runs/{timestamp}")
+    os.makedirs(runs_dir)
 
     # Set data
     X = features
@@ -65,7 +65,7 @@ def train_model(config: DictConfig):
     param_grid = get_clf_args(clf_param)
 
     # Export parameter grid
-    param_grid_dir = os.path.join(results_dir, "param_grid.pkl")
+    param_grid_dir = os.path.join(runs_dir, "param_grid.pkl")
     export_pkl(param_grid, param_grid_dir)
 
     # test CV loop
@@ -75,7 +75,7 @@ def train_model(config: DictConfig):
     for test, (_temp_indices, test_indices) in enumerate(test_splits):
         logger.info(f"Test split {test + 1} of {test_split_args['n_splits']}:")
         # Make test dir
-        test_dir = os.path.join(results_dir, f"test_{test}")
+        test_dir = os.path.join(runs_dir, f"test_{test}")
         scores_dir = os.path.join(test_dir, "scores")
         preds_dir = os.path.join(test_dir, "preds")
         os.makedirs(scores_dir)
