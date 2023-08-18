@@ -5,8 +5,10 @@ Trains part-of-speech tagger on data features.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import logging
+import os
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime
 from importlib import import_module
 
 import hydra
@@ -20,7 +22,7 @@ from sklearn.model_selection import (
 from tqdm import tqdm
 
 from cgpos.models.util import get_clf_args, run_clf
-from cgpos.utils.util import import_pkl
+from cgpos.utils.util import get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -37,7 +39,12 @@ def train_model(config: DictConfig):
     target_names, target_short, target_long = import_pkl(config.reference.target_map)
 
     # Set export dir
-    export_dir = "data/results"
+    current_datetime = datetime.now()
+    timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+    results_dir = get_abs_dir(f"data/results/{timestamp}")
+    # Create the directory if it doesn't exist
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
 
     # Set data
     X = features
@@ -93,11 +100,8 @@ def train_model(config: DictConfig):
                 X_i_dev = [_X_temp[index] for index in dev_indices]
                 y_i_dev = _y_i_temp[dev_indices]
 
-                export_dir_stem = (
-                    export_dir
-                    + f"/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
-                )
-
+                file_stem = f"/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
+                export_dir_stem = os.path.join(results_dir, file_stem)
                 run_clf_arg = {
                     "clf": clf,
                     "f1_score": f1_score,
