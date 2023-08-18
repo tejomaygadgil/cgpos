@@ -53,9 +53,9 @@ def train_model(config: DictConfig):
     X = features
     y = np.array(targets)
 
-    # Get clf
-    clf_module = import_module(config.train.clf_module)
+    # Import clf
     clf_name = config.train.clf
+    clf_module = import_module(config.train.clf_module)
     clf = getattr(clf_module, clf_name)
     logger.info(f"Training {clf_name}:")
 
@@ -63,6 +63,7 @@ def train_model(config: DictConfig):
     eval_split_args = config.train.eval_split
     tune_split_args = config.train.tune_split
     f1_average = config.train.f1_average
+    export_pred = config.train.export_pred
 
     # Set up parameter grid
     clf_param = config.param_grid[clf_name]
@@ -73,9 +74,9 @@ def train_model(config: DictConfig):
     export_pkl(param_grid, param_grid_dir)
 
     # Eval CV loop
-    ss = ShuffleSplit(**eval_split_args)
+    eval_splitter = ShuffleSplit(**eval_split_args)
     dummy_X = [0] * len(y)
-    eval_splits = ss.split(dummy_X, y)
+    eval_splits = eval_splitter.split(dummy_X, y)
     for eval_i, (_temp_indices, _test_indices) in enumerate(eval_splits):
         logger.info(f"Test split {eval_i + 1} of {eval_split_args['n_splits']}:")
         # X_test = [X[index] for index in test_indices]
@@ -93,10 +94,10 @@ def train_model(config: DictConfig):
             _y_i_temp = _y_temp[:, target_i]
 
             # Hyperparameter tuning loop
-            sss = StratifiedShuffleSplit(**tune_split_args)
+            tune_splitter = StratifiedShuffleSplit(**tune_split_args)
             defaultdict(lambda: defaultdict(list))
             dummy_X = [0] * len(_y_i_temp)
-            tune_splits = sss.split(dummy_X, _y_i_temp)
+            tune_splits = tune_splitter.split(dummy_X, _y_i_temp)
             for tune_i, (train_indices, dev_indices) in enumerate(tune_splits):
                 logger.info(
                     f"Tune split {tune_i + 1} of {tune_split_args['n_splits']}:"
@@ -107,8 +108,9 @@ def train_model(config: DictConfig):
                 X_i_dev = [_X_temp[index] for index in dev_indices]
                 y_i_dev = _y_i_temp[dev_indices]
 
-                file_stem = f"/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
-                export_dir_stem = os.path.join(scores_dir, file_stem)
+                file_stem = f"eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
+                score_dir_stem = os.path.join(scores_dir, file_stem)
+                pred_dir_stem = os.path.join(preds_dir, file_stem)
                 run_clf_arg = {
                     "clf": clf,
                     "f1_score": f1_score,
@@ -117,7 +119,9 @@ def train_model(config: DictConfig):
                     "X_i_dev": X_i_dev,
                     "y_i_dev": y_i_dev,
                     "f1_average": f1_average,
-                    "export_dir_stem": export_dir_stem,
+                    "score_dir_stem": score_dir_stem,
+                    "pred_dir_stem": pred_dir_stem,
+                    "export_pred": export_pred,
                 }
 
                 # Parallelize model runs
