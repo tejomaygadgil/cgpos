@@ -39,9 +39,9 @@ def train_model(config: DictConfig):
     targets_name, _, _ = import_pkl(config.reference.targets_map)
 
     # Set export dir
-    runs_dir = config.runs_dir
+    runs_dir = get_abs_dir(config.runs_dir)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    run_dir = get_abs_dir(os.path.join(runs_dir, timestamp))
+    run_dir = os.path.join(runs_dir, timestamp)
     os.makedirs(run_dir)
 
     # Set data
