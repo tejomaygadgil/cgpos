@@ -60,7 +60,7 @@ def train_model(config: DictConfig):
     logger.info(f"Training {clf_name}:")
 
     # Get CV args
-    eval_split_args = config.train.eval_split
+    test_split_args = config.train.test_split
     tune_split_args = config.train.tune_split
     f1_average = config.train.f1_average
     export_pred = config.train.export_pred
@@ -73,12 +73,12 @@ def train_model(config: DictConfig):
     param_grid_dir = os.path.join(results_dir, "param_grid.pkl")
     export_pkl(param_grid, param_grid_dir)
 
-    # Eval CV loop
-    eval_splitter = ShuffleSplit(**eval_split_args)
+    # test CV loop
+    test_splitter = ShuffleSplit(**test_split_args)
     dummy_X = [0] * len(y)
-    eval_splits = eval_splitter.split(dummy_X, y)
-    for eval_i, (_temp_indices, _test_indices) in enumerate(eval_splits):
-        logger.info(f"Test split {eval_i + 1} of {eval_split_args['n_splits']}:")
+    test_splits = test_splitter.split(dummy_X, y)
+    for test, (_temp_indices, _test_indices) in enumerate(test_splits):
+        logger.info(f"Test split {test + 1} of {test_split_args['n_splits']}:")
         # X_test = [X[index] for index in test_indices]
         # y_test = y[test_indices]
 
@@ -87,21 +87,18 @@ def train_model(config: DictConfig):
 
         # Loop through targets
         targets_len = len(target_names)
-        for target_i in range(targets_len):
-            logger.info(
-                f"Target {target_i + 1} of {targets_len} ({target_names[target_i]}):"
-            )
-            _y_i_temp = _y_temp[:, target_i]
+        for target in range(targets_len):
+            target_name = target_names[target]
+            logger.info(f"Target {target + 1} of {targets_len} ({target_name}):")
+            _y_i_temp = _y_temp[:, target]
 
             # Hyperparameter tuning loop
             tune_splitter = StratifiedShuffleSplit(**tune_split_args)
             defaultdict(lambda: defaultdict(list))
             dummy_X = [0] * len(_y_i_temp)
             tune_splits = tune_splitter.split(dummy_X, _y_i_temp)
-            for tune_i, (train_indices, dev_indices) in enumerate(tune_splits):
-                logger.info(
-                    f"Tune split {tune_i + 1} of {tune_split_args['n_splits']}:"
-                )
+            for tune, (train_indices, dev_indices) in enumerate(tune_splits):
+                logger.info(f"Tune split {tune + 1} of {tune_split_args['n_splits']}:")
                 X_i_train = [_X_temp[index] for index in train_indices]
                 y_i_train = _y_i_temp[train_indices]
 
@@ -109,7 +106,7 @@ def train_model(config: DictConfig):
                 y_i_dev = _y_i_temp[dev_indices]
 
                 # Set run parameters
-                file_stem = f"eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
+                file_stem = f"test_{test}_target_{target}_tune_{tune}_clfarg_"
                 score_dir_stem = os.path.join(scores_dir, file_stem)
                 pred_dir_stem = os.path.join(preds_dir, file_stem)
                 run_clf_arg = {
