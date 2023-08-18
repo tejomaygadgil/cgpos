@@ -20,7 +20,9 @@ def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
 
     Arguments
     - sequence: Sequence of tokens.
-    - n: N-gram range, or depth of n-grams to generate.
+    - n:
+        - tuple: N-gram range.
+        - int: Depth of n-grams to generate.
     """
     match n:
         case tuple():
@@ -44,11 +46,6 @@ def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:
 def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     """
     Return count vectors of n-gram bag-of-syllables.
-
-    Arguments
-    - words: Dictionary of word syllables.
-    - var: Variable to count.
-    - n: Depth of n-grams to generate.
     """
     counts = Counter()
     for gram in ngrams(sequence, ngram_range):
@@ -56,12 +53,9 @@ def count_vectors(sequence: list, ngram_range: (int, int)) -> Counter:
     return counts
 
 
-def ngram_range_grid(ngram_depth):
+def ngram_range_grid(ngram_depth: int) -> list:
     """
     Generate a parameter grid of all combinations from (1, 1) to (ngram_depth, ngram_depth).
-
-    Arguments
-    - ngram_depth: Maximum depth of ngram range grid.
     """
     ngram_range = []
     for i in range(1, ngram_depth):
@@ -101,25 +95,23 @@ def get_clf_args(clf_param: DictConfig) -> list:
     return clf_args
 
 
-def run_clf(clfarg_i, clf_arg, run_clf_arg):
+def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     """
     Utility to run model in parallel.
     """
     # Unpack args
     clf = run_clf_arg["clf"]
     f1_score = run_clf_arg["f1_score"]
-    X_i_train = run_clf_arg["X_i_train"]
-    y_i_train = run_clf_arg["y_i_train"]
-    X_i_dev = run_clf_arg["X_i_dev"]
-    y_i_dev = run_clf_arg["y_i_dev"]
     f1_average = run_clf_arg["f1_average"]
-    target_i = run_clf_arg["target_i"]
-    eval_i = run_clf_arg["eval_i"]
-    tune_i = run_clf_arg["tune_i"]
+    X_train = run_clf_arg["X_i_train"]
+    y_train = run_clf_arg["y_i_train"]
+    X_dev = run_clf_arg["X_i_dev"]
+    y_dev = run_clf_arg["y_i_dev"]
+    export_dir_stem = run_clf_arg["export_dir_stem"]
     # Get score
     clf_i = clf(**clf_arg)
-    y_i_pred = clf_i.fit(X_i_train, y_i_train).predict(X_i_dev)
-    score = f1_score(y_i_pred, y_i_dev, average=f1_average)
+    y_pred = clf_i.fit(X_train, y_train).predict(X_dev)
+    score = f1_score(y_pred, y_dev, average=f1_average)
     # Export
-    export_path = f"data/results/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_{clfarg_i}_score.pkl"
-    export_pkl(score, export_path, verbose=False)
+    export_dir = export_dir_stem + f"{i}_score.pkl"
+    export_pkl(score, export_dir, verbose=False)

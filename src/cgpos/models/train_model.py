@@ -36,6 +36,9 @@ def train_model(config: DictConfig):
     features = import_pkl(config.data.features)
     target_names, target_short, target_long = import_pkl(config.reference.target_map)
 
+    # Set export dir
+    export_dir = "data/results"
+
     # Set data
     X = features
     y = np.array(targets)
@@ -69,7 +72,7 @@ def train_model(config: DictConfig):
 
         # Target loop
         targets_len = len(target_names)
-        for target_i in range(targets_len):  # Per target
+        for target_i in range(targets_len):
             logger.info(
                 f"Target {target_i + 1} of {targets_len} ({target_names[target_i]}):"
             )
@@ -90,6 +93,11 @@ def train_model(config: DictConfig):
                 X_i_dev = [_X_temp[index] for index in dev_indices]
                 y_i_dev = _y_i_temp[dev_indices]
 
+                export_dir_stem = (
+                    export_dir
+                    + f"/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
+                )
+
                 run_clf_arg = {
                     "clf": clf,
                     "f1_score": f1_score,
@@ -98,17 +106,15 @@ def train_model(config: DictConfig):
                     "X_i_dev": X_i_dev,
                     "y_i_dev": y_i_dev,
                     "f1_average": f1_average,
-                    "target_i": target_i,
-                    "eval_i": eval_i,
-                    "tune_i": tune_i,
+                    "export_dir_stem": export_dir_stem,
                 }
 
                 # Parallelize model runs
                 with ProcessPoolExecutor() as executor:
-                    futures = [
-                        executor.submit(run_clf, clfarg_i, clf_arg, run_clf_arg)
-                        for clfarg_i, clf_arg in enumerate(clf_args)
-                    ]
+                    futures = []
+                    for i, clf_arg in enumerate(clf_args):
+                        future = executor.submit(run_clf, i, clf_arg, run_clf_arg)
+                        future.append(future)
 
                     for future in tqdm(futures, total=len(clf_args)):
                         future.result()
