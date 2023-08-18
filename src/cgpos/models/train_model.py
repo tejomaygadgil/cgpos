@@ -26,7 +26,7 @@ from cgpos.utils.util import import_pkl
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
 def train_model(config: DictConfig):
     """
-    Train model with shuffled CV and stratified shuffled CV for hyperparmeter tuning.
+    Train model with shuffled CV and stratified shuffled CV for hyperparameter tuning.
     """
     logger = logging.getLogger(__name__)
     logger.info("Tokenizing Perseus features:")
