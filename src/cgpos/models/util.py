@@ -114,7 +114,7 @@ def run_clf(clfarg_i, clf_arg, run_clf_arg):
     y_i_dev = run_clf_arg["y_i_dev"]
     f1_average = run_clf_arg["f1_average"]
     target_i = run_clf_arg["target_i"]
-    test_i = run_clf_arg["test_i"]
+    eval_i = run_clf_arg["eval_i"]
     tune_i = run_clf_arg["tune_i"]
 
     # Get score
@@ -122,5 +122,5 @@ def run_clf(clfarg_i, clf_arg, run_clf_arg):
     y_i_pred = clf_i.fit(X_i_train, y_i_train).predict(X_i_dev)
     score = f1_score(y_i_pred, y_i_dev, average=f1_average)
     # Export
-    export_path = f"data/results/test_{test_i}_target_{target_i}_tune_{tune_i}_clfarg_{clfarg_i}_score.pkl"
+    export_path = f"data/results/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_{clfarg_i}_score.pkl"
     export_pkl(score, export_path, verbose=False)
