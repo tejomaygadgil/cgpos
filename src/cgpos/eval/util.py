@@ -1,5 +1,5 @@
 """
-This module contains utilities for building and evaluating part-of-speech models.
+This module contains utilities for building and evaluating part-of-speech model.
 """
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
@@ -56,7 +56,7 @@ def get_clf_args(clf_param: DictConfig) -> list:
 
 def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     """
-    Utility to run models in parallel.
+    Utility to run model in parallel.
     """
     # Unpack args
     clf = run_clf_arg["clf"]
