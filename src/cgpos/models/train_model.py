@@ -40,10 +40,13 @@ def train_model(config: DictConfig):
     X = features
     y = np.array(targets)
 
-    # Get args
+    # Get clf
     clf_module = import_module(config.train.clf_module)
     clf_name = config.train.clf
     clf = getattr(clf_module, clf_name)
+    logger.info(f"Training {clf_name}:")
+
+    # Get CV args
     eval_split_args = config.train.eval_split
     tune_split_args = config.train.tune_split
     f1_average = config.train.f1_average
@@ -52,12 +55,12 @@ def train_model(config: DictConfig):
     clf_param = config.param_grid[clf_name]
     clf_args = get_clf_args(clf_param)
 
-    # Test CV loop
+    # Eval CV loop
     ss = ShuffleSplit(**eval_split_args)
     dummy_X = [0] * len(y)
-    test_splits = ss.split(dummy_X, y)
-    for test_i, (_temp_indices, _test_indices) in enumerate(test_splits):
-        logger.info(f"Test split {test_i + 1} of {eval_split_args['n_splits']}:")
+    eval_splits = ss.split(dummy_X, y)
+    for eval_i, (_temp_indices, _test_indices) in enumerate(eval_splits):
+        logger.info(f"Test split {eval_i + 1} of {eval_split_args['n_splits']}:")
         # X_test = [X[index] for index in test_indices]
         # y_test = y[test_indices]
 
@@ -96,7 +99,7 @@ def train_model(config: DictConfig):
                     "y_i_dev": y_i_dev,
                     "f1_average": f1_average,
                     "target_i": target_i,
-                    "test_i": test_i,
+                    "eval_i": eval_i,
                     "tune_i": tune_i,
                 }
 
