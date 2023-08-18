@@ -17,7 +17,7 @@ perseus:
 # Training config
 train:
   clf_module: cgpos.models.multinomial_naive_bayes
-  clf: MultinomialNaiveBayes
+  clf: StupidBayes
   test_split:
     n_splits: 1
     train_size: 0.9

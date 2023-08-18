@@ -31,7 +31,7 @@ def train_model(config: DictConfig):
     Train model with shuffled CV and stratified shuffled CV for hyperparameter tuning.
     """
     logger = logging.getLogger(__name__)
-    logger.info("Tokenizing Perseus features:")
+    logger.info("Training model:")
 
     # Import data
     _, _, targets = import_pkl(config.data.cleaned)
