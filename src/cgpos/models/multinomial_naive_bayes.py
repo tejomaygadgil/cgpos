@@ -160,7 +160,7 @@ class StupidBayes:
         preds = []
         for x in X:
             pred = None
-            y_dist = _ngram_backoff(x, self.gram_counts_, self.n)
+            y_dist = _ngram_backoff(x, self.gram_counts_, self.ngram_depth)
             if y_dist:
                 pred = max(y_dist, key=y_dist.get)
             preds.append(pred)
