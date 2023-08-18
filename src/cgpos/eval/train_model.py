@@ -124,7 +124,7 @@ def train_model(config: DictConfig):
                 y_i_dev = _y_i_temp[dev_indices]
 
                 # Set run parameters
-                file_stem = f"test_{test}_target_{target}_tune_{tune}_clfarg_"
+                file_stem = f"target{target}_tune{tune}_clfarg"
                 score_dir_stem = os.path.join(scores_dir, file_stem)
                 pred_dir_stem = os.path.join(preds_dir, file_stem)
                 run_clf_arg = {
