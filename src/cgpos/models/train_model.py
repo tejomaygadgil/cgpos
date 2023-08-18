@@ -44,10 +44,8 @@ def train_model(config: DictConfig):
     results_dir = get_abs_dir(f"data/results/{timestamp}")
     scores_dir = os.path.join(results_dir, "scores")
     preds_dir = os.path.join(results_dir, "preds")
-    # Create the directory if it doesn't exist
-    if not os.path.exists(results_dir):
-        os.makedirs(scores_dir)
-        os.makedirs(preds_dir)
+    os.makedirs(scores_dir)
+    os.makedirs(preds_dir)
 
     # Set data
     X = features
