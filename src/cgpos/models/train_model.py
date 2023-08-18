@@ -42,10 +42,7 @@ def train_model(config: DictConfig):
     current_datetime = datetime.now()
     timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     results_dir = get_abs_dir(f"data/results/{timestamp}")
-    scores_dir = os.path.join(results_dir, "scores")
-    preds_dir = os.path.join(results_dir, "preds")
-    os.makedirs(scores_dir)
-    os.makedirs(preds_dir)
+    os.makedirs(results_dir)
 
     # Set data
     X = features
@@ -75,11 +72,26 @@ def train_model(config: DictConfig):
     test_splitter = ShuffleSplit(**test_split_args)
     dummy_X = [0] * len(y)
     test_splits = test_splitter.split(dummy_X, y)
-    for test, (_temp_indices, _test_indices) in enumerate(test_splits):
+    for test, (_temp_indices, test_indices) in enumerate(test_splits):
         logger.info(f"Test split {test + 1} of {test_split_args['n_splits']}:")
-        # X_test = [X[index] for index in test_indices]
-        # y_test = y[test_indices]
+        # Make test dir
+        test_dir = os.path.join(results_dir, f"test_{test}")
+        scores_dir = os.path.join(test_dir, "scores")
+        preds_dir = os.path.join(test_dir, "preds")
+        os.makedirs(scores_dir)
+        os.makedirs(preds_dir)
 
+        # Make test data
+        X_test = [X[index] for index in test_indices]
+        y_test = y[test_indices]
+
+        # Export test data
+        X_test_export_dir = os.path.join(test_dir, "X_test.pkl")
+        y_test_export_dir = os.path.join(test_dir, "y_test.pkl")
+        export_pkl(X_test, X_test_export_dir, verbose=False)
+        export_pkl(y_test, y_test_export_dir, verbose=False)
+
+        # Make _temp data (to be split into train and dev)
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
 
@@ -88,17 +100,19 @@ def train_model(config: DictConfig):
         for target in range(targets_len):
             target_name = targets_name[target]
             logger.info(f"Target {target + 1} of {targets_len} ({target_name}):")
-            _y_i_temp = _y_temp[:, target]
 
             # Hyperparameter tuning loop
+            _y_i_temp = _y_temp[:, target]
             tune_splitter = StratifiedShuffleSplit(**tune_split_args)
             defaultdict(lambda: defaultdict(list))
             dummy_X = [0] * len(_y_i_temp)
             tune_splits = tune_splitter.split(dummy_X, _y_i_temp)
             for tune, (train_indices, dev_indices) in enumerate(tune_splits):
                 logger.info(f"Tune split {tune + 1} of {tune_split_args['n_splits']}:")
+
+                # Make train and dev sets
                 X_i_train = [_X_temp[index] for index in train_indices]
-                y_i_train = _y_i_temp[train_indices]
+                y_i_train = _y_temp[:, target][train_indices]
 
                 X_i_dev = [_X_temp[index] for index in dev_indices]
                 y_i_dev = _y_i_temp[dev_indices]
