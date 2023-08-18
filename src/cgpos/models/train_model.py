@@ -34,9 +34,9 @@ def train_model(config: DictConfig):
     logger.info("Tokenizing Perseus features:")
 
     # Import data
-    uid, text, targets = import_pkl(config.data.cleaned)
+    _, _, targets = import_pkl(config.data.cleaned)
     features = import_pkl(config.data.features)
-    target_names, target_short, target_long = import_pkl(config.reference.target_map)
+    targets_name, _, _ = import_pkl(config.reference.targets_map)
 
     # Set export dir
     current_datetime = datetime.now()
@@ -86,9 +86,9 @@ def train_model(config: DictConfig):
         _y_temp = y[_temp_indices]
 
         # Loop through targets
-        targets_len = len(target_names)
+        targets_len = len(targets_name)
         for target in range(targets_len):
-            target_name = target_names[target]
+            target_name = targets_name[target]
             logger.info(f"Target {target + 1} of {targets_len} ({target_name}):")
             _y_i_temp = _y_temp[:, target]
 

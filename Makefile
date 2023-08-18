@@ -26,16 +26,16 @@ tests:
 # PROJECT RULES                                                                 #
 #################################################################################
 ## Build features
-build_features: | data/reference/feature_map.pkl  data/processed/features.pkl
+build_features: | data/reference/features_map.pkl  data/processed/features.pkl
 
-data/reference/feature_map.pkl  data/processed/features.pkl: | make_dataset
+data/reference/features_map.pkl  data/processed/features.pkl: | make_dataset
 	$(info Building features)
 	python src/cgpos/features/build_features.py
 
 ## Make Perseus dataset
-make_dataset: | data/interim/perseus_raw.pkl data/reference/target_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
+make_dataset: | data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
 
-data/interim/perseus_raw.pkl data/reference/target_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl: | get_data
+data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl: | get_data
 	$(info Making dataset)
 	python src/cgpos/data/make_dataset.py
 

@@ -74,16 +74,16 @@ def process_raw_data(config: DictConfig):
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
-def get_target_map(config: DictConfig):
+def get_targets_map(config: DictConfig):
     """
-    Build map to parse target column.
+    Build map to parse targets.
     """
     logger = logging.getLogger(__name__)
-    logger.info("Building target map:")
+    logger.info("Building targets map:")
 
     # Set import and export directories
     file_dir = get_abs_dir(config.perseus.tagset)
-    export_dir = config.reference.target_map
+    export_dir = config.reference.targets_map
 
     # Load XML
     tree = ET.parse(file_dir)
@@ -111,7 +111,7 @@ def get_target_map(config: DictConfig):
     # Export
     export_pkl(data, export_dir)
 
-    logger.info(f"Success! Built target map for {len(data[0])} targets: {data[0]}")
+    logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -169,13 +169,13 @@ def clean(config: DictConfig):
 
     # Set import directories
     import_dir = config.perseus.normalized
-    target_map_dir = config.reference.target_map
+    targets_map_dir = config.reference.targets_map
     # Set export directories
     export_dir = config.data.cleaned
 
     # Import data
     data = import_pkl(import_dir)
-    _, target_short, _ = import_pkl(target_map_dir)
+    _, targets_short, _ = import_pkl(targets_map_dir)
 
     # Normalize
     cleaned = [[], [], []]
@@ -194,7 +194,7 @@ def clean(config: DictConfig):
                 match (i, short):
                     case ("5", "d"):  # Treat depondent verbs as medio-passive
                         i, short = "5", "e"
-                value = target_short[i].index(short)
+                value = targets_short[i].index(short)
                 target.append(value)
             # Append
             cleaned[0].append(sentence_id)
@@ -222,6 +222,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
     process_raw_data()
-    get_target_map()
+    get_targets_map()
     normalize()
     clean()
