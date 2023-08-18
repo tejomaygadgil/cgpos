@@ -30,7 +30,7 @@ build_features: | data/reference/features_map.pkl  data/processed/features.pkl
 
 data/reference/features_map.pkl  data/processed/features.pkl: | make_dataset
 	$(info Building features)
-	python src/cgpos/features/build_features.py
+	python src/cgpos/data/build_features.py
 
 ## Make Perseus dataset
 make_dataset: | data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
@@ -56,10 +56,10 @@ data/raw/zip: | init_data_dir
 	mkdir $@
 
 ## Initialize data directory
-init_data_dir: | data/raw data/processed data/interim data/external data/results data/reference
+init_data_dir: | data/raw data/processed data/interim data/runs data/reference
 	$(info Initializing data directory)
 
-data/raw data/processed data/interim data/external data/results data/reference:
+data/raw data/processed data/interim data/runs data/reference:
 	mkdir -p $@
 
 ## Remove processed data
@@ -70,7 +70,7 @@ remove_data: init_data_dir
 ## Remove all data
 remove_all_data: init_data_dir
 	$(info Removing all data)
-	rm -rf data/raw/*  data/processed/* data/interim/* data/external/* data/results/* data/reference/*
+	rm -rf data/raw/*  data/processed/* data/interim/* data/runs/* data/reference/*
 
 #################################################################################
 # Self Documenting Commands                                                     #

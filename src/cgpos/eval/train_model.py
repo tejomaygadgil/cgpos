@@ -1,5 +1,5 @@
 """
-Trains part-of-speech tagger on data features.
+This module trains a model and performs hyperparameter tuning.
 """
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
@@ -21,7 +21,7 @@ from sklearn.model_selection import (
 )
 from tqdm import tqdm
 
-from cgpos.models.util import get_clf_args, run_clf
+from cgpos.eval.util import get_clf_args, run_clf
 from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
 
 
@@ -39,10 +39,10 @@ def train_model(config: DictConfig):
     targets_name, _, _ = import_pkl(config.reference.targets_map)
 
     # Set export dir
-    current_datetime = datetime.now()
-    timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
-    results_dir = get_abs_dir(f"data/results/{timestamp}")
-    os.makedirs(results_dir)
+    runs_dir = get_abs_dir(config.runs_dir)
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_dir = os.path.join(runs_dir, timestamp)
+    os.makedirs(run_dir)
 
     # Set data
     X = features
@@ -53,6 +53,10 @@ def train_model(config: DictConfig):
     clf_module = import_module(config.train.clf_module)
     clf = getattr(clf_module, clf_name)
     logger.info(f"Training {clf_name}:")
+
+    # Export clf name
+    clf_name_dir = os.path.join(run_dir, "clf_name.pkl")
+    export_pkl(clf_name, clf_name_dir)
 
     # Get CV args
     test_split_args = config.train.test_split
@@ -65,7 +69,7 @@ def train_model(config: DictConfig):
     param_grid = get_clf_args(clf_param)
 
     # Export parameter grid
-    param_grid_dir = os.path.join(results_dir, "param_grid.pkl")
+    param_grid_dir = os.path.join(run_dir, "param_grid.pkl")
     export_pkl(param_grid, param_grid_dir)
 
     # test CV loop
@@ -75,7 +79,7 @@ def train_model(config: DictConfig):
     for test, (_temp_indices, test_indices) in enumerate(test_splits):
         logger.info(f"Test split {test + 1} of {test_split_args['n_splits']}:")
         # Make test dir
-        test_dir = os.path.join(results_dir, f"test_{test}")
+        test_dir = os.path.join(run_dir, f"test_{test}")
         scores_dir = os.path.join(test_dir, "scores")
         preds_dir = os.path.join(test_dir, "preds")
         os.makedirs(scores_dir)
@@ -94,6 +98,12 @@ def train_model(config: DictConfig):
         # Make _temp data (to be split into train and dev)
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
+
+        # Export as train (for eval_model)
+        X_train_export_dir = os.path.join(test_dir, "X_train.pkl")
+        y_train_export_dir = os.path.join(test_dir, "y_train_.pkl")
+        export_pkl(X_test, X_train_export_dir, verbose=False)
+        export_pkl(y_test, y_train_export_dir, verbose=False)
 
         # Loop through targets
         targets_len = len(targets_name)
@@ -118,7 +128,7 @@ def train_model(config: DictConfig):
                 y_i_dev = _y_i_temp[dev_indices]
 
                 # Set run parameters
-                file_stem = f"test_{test}_target_{target}_tune_{tune}_clfarg_"
+                file_stem = f"target{target}_tune{tune}_clfarg"
                 score_dir_stem = os.path.join(scores_dir, file_stem)
                 pred_dir_stem = os.path.join(preds_dir, file_stem)
                 run_clf_arg = {
@@ -147,7 +157,6 @@ def train_model(config: DictConfig):
 
 
 if __name__ == "__main__":
-    # Log
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
