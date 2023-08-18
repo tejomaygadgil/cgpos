@@ -85,7 +85,7 @@ def train_model(config: DictConfig):
         _X_temp = [X[index] for index in _temp_indices]
         _y_temp = y[_temp_indices]
 
-        # Target loop
+        # Loop through targets
         targets_len = len(target_names)
         for target_i in range(targets_len):
             logger.info(
@@ -108,6 +108,7 @@ def train_model(config: DictConfig):
                 X_i_dev = [_X_temp[index] for index in dev_indices]
                 y_i_dev = _y_i_temp[dev_indices]
 
+                # Set run parameters
                 file_stem = f"eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
                 score_dir_stem = os.path.join(scores_dir, file_stem)
                 pred_dir_stem = os.path.join(preds_dir, file_stem)
@@ -127,6 +128,7 @@ def train_model(config: DictConfig):
                 # Parallelize model runs
                 with ProcessPoolExecutor() as executor:
                     futures = []
+                    # Loop through parameter grid
                     for i, clf_arg in enumerate(param_grid):
                         future = executor.submit(run_clf, i, clf_arg, run_clf_arg)
                         future.append(future)
