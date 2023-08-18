@@ -11,7 +11,7 @@ from typing import Collection, Union
 import numpy as np
 from omegaconf import DictConfig
 
-from cgpos.utils.util import export_pkl
+from cgpos.utils.path import export_pkl
 
 
 def ngrams(sequence: list, n: Union[tuple, int]) -> Collection:

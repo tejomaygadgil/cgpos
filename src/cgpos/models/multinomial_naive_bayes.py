@@ -8,7 +8,7 @@ import math
 from collections import Counter, defaultdict
 
 from cgpos.models.util import count_vectors, ngrams
-from cgpos.utils.util import flatten
+from cgpos.utils.path import flatten
 
 
 class MultinomialNaiveBayes:
