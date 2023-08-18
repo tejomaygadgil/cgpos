@@ -1,9 +1,8 @@
+# File paths
 data:
   cleaned: data/processed/cleaned.pkl
   features: data/processed/features.pkl
   targets: data/processed/targets.pkl
-  train: &train_path data/processed/train.pkl
-  test: &test_path data/processed/test.pkl
 
 reference:
   feature_map: data/reference/feature_map.pkl
@@ -15,6 +14,7 @@ perseus:
   raw: data/interim/perseus_raw.pkl
   normalized: data/interim/perseus_normalized.pkl
 
+# Training config
 train:
   clf_module: cgpos.models.multinomial_naive_bayes
   clf: MultinomialNaiveBayes
@@ -27,6 +27,7 @@ train:
     train_size: 0.8888
     random_state: 20
   f1_average: "macro"
+  export_pred: False
 
 param_grid:
   MultinomialNaiveBayes:
