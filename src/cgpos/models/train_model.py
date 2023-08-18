@@ -49,8 +49,8 @@ def train_model(config: DictConfig):
     f1_average = config.train.f1_average
 
     # Set up parameter grid
-    clf_config = config.param_grid[clf_name]
-    clf_args = get_clf_args(clf_config)
+    clf_param = config.param_grid[clf_name]
+    clf_args = get_clf_args(clf_param)
 
     # Test CV loop
     ss = ShuffleSplit(**eval_split_args)
