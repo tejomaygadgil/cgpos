@@ -22,7 +22,7 @@ from sklearn.model_selection import (
 from tqdm import tqdm
 
 from cgpos.models.util import get_clf_args, run_clf
-from cgpos.utils.util import get_abs_dir, import_pkl
+from cgpos.utils.util import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -42,9 +42,12 @@ def train_model(config: DictConfig):
     current_datetime = datetime.now()
     timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     results_dir = get_abs_dir(f"data/results/{timestamp}")
+    scores_dir = os.path.join(results_dir, "scores")
+    preds_dir = os.path.join(results_dir, "preds")
     # Create the directory if it doesn't exist
     if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+        os.makedirs(scores_dir)
+        os.makedirs(preds_dir)
 
     # Set data
     X = features
@@ -63,7 +66,11 @@ def train_model(config: DictConfig):
 
     # Set up parameter grid
     clf_param = config.param_grid[clf_name]
-    clf_args = get_clf_args(clf_param)
+    param_grid = get_clf_args(clf_param)
+
+    # Export parameter grid
+    param_grid_dir = os.path.join(results_dir, "param_grid.pkl")
+    export_pkl(param_grid, param_grid_dir)
 
     # Eval CV loop
     ss = ShuffleSplit(**eval_split_args)
@@ -101,7 +108,7 @@ def train_model(config: DictConfig):
                 y_i_dev = _y_i_temp[dev_indices]
 
                 file_stem = f"/eval_{eval_i}_target_{target_i}_tune_{tune_i}_clfarg_"
-                export_dir_stem = os.path.join(results_dir, file_stem)
+                export_dir_stem = os.path.join(scores_dir, file_stem)
                 run_clf_arg = {
                     "clf": clf,
                     "f1_score": f1_score,
@@ -116,11 +123,11 @@ def train_model(config: DictConfig):
                 # Parallelize model runs
                 with ProcessPoolExecutor() as executor:
                     futures = []
-                    for i, clf_arg in enumerate(clf_args):
+                    for i, clf_arg in enumerate(param_grid):
                         future = executor.submit(run_clf, i, clf_arg, run_clf_arg)
                         future.append(future)
 
-                    for future in tqdm(futures, total=len(clf_args)):
+                    for future in tqdm(futures, total=len(param_grid)):
                         future.result()
 
 
