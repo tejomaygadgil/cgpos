@@ -134,6 +134,8 @@ class StupidBayes:
 
         # Set attributes
         classes = set(y)
+        self.X_ = X
+        self.y_ = y
         self.classes_ = classes
         self.gram_counts_ = gram_counts
 
