@@ -97,7 +97,7 @@ def get_clf_args(clf_param: DictConfig) -> list:
 
 def run_clf(i: int, clf_arg: dict, run_clf_arg: dict):
     """
-    Utility to run model in parallel.
+    Utility to run models in parallel.
     """
     # Unpack args
     clf = run_clf_arg["clf"]
