@@ -26,19 +26,21 @@ def get_abs_dir(path):
     return abs_path
 
 
-def import_pkl(path):
+def import_pkl(path, verbose=True):
     logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
-    logger.info(f"Importing {path}")
+    if verbose:
+        logger.info(f"Importing {path}")
     with open(path, "rb") as file:
         data = pickle.load(file)
     return data
 
 
-def export_pkl(data, path):
+def export_pkl(data, path, verbose=True):
     logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
-    logger.info(f"Exporting {path}")
+    if verbose:
+        logger.info(f"Exporting {path}")
     with open(path, "wb") as file:
         pickle.dump(data, file)
 
