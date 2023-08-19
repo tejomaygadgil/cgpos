@@ -26,7 +26,7 @@ class PartOfSpeechTagger:
     def fit(self, X: list, y: np.array):
         len_targets = len(self.targets_name)
         assert len_targets == y.shape[1], "y is wrong shape."
-        assert len(X) == y.shape[0], "X and y should have same rows."
+        assert len(X) == y.shape[0], "X and y should have same the number of rows."
         logger = logging.getLogger(__name__)
         logger.info("Fitting Part of Speech tagger:")
 
