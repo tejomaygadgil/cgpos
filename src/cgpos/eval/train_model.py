@@ -82,14 +82,14 @@ def train_model(config: DictConfig):
         export_pkl(y_test, y_test_export_dir, verbose=False)
 
         # Make _temp data (to split into train and dev)
-        _X_temp = [X[index] for index in _temp_indices]
-        _y_temp = y[_temp_indices]
+        X_temp = [X[index] for index in _temp_indices]
+        y_temp = y[_temp_indices]
 
         # Export as train (to evaluate best model)
         X_train_export_dir = os.path.join(test_dir, "X_train.pkl")
         y_train_export_dir = os.path.join(test_dir, "y_train.pkl")
-        export_pkl(X_test, X_train_export_dir, verbose=False)
-        export_pkl(y_test, y_train_export_dir, verbose=False)
+        export_pkl(X_temp, X_train_export_dir, verbose=False)
+        export_pkl(y_temp, y_train_export_dir, verbose=False)
 
         # Loop through models
         for clf in range(clfs_len):
@@ -113,7 +113,7 @@ def train_model(config: DictConfig):
                 logger.info(f"Target {target + 1} of {targets_len} ({target_name}):")
 
                 # Hyperparameter tuning loop
-                _y_i_temp = _y_temp[:, target]
+                _y_i_temp = y_temp[:, target]
                 tune_splitter = StratifiedShuffleSplit(**tune_split_args)
                 defaultdict(lambda: defaultdict(list))
                 dummy_X = [0] * len(_y_i_temp)
@@ -124,10 +124,10 @@ def train_model(config: DictConfig):
                     )
 
                     # Make train and dev sets
-                    X_i_train = [_X_temp[index] for index in train_indices]
-                    y_i_train = _y_temp[:, target][train_indices]
+                    X_i_train = [X_temp[index] for index in train_indices]
+                    y_i_train = y_temp[:, target][train_indices]
 
-                    X_i_dev = [_X_temp[index] for index in dev_indices]
+                    X_i_dev = [X_temp[index] for index in dev_indices]
                     y_i_dev = _y_i_temp[dev_indices]
 
                     # Set run parameters
