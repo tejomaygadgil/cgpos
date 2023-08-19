@@ -9,10 +9,13 @@ import os
 import pprint
 import re
 from collections import defaultdict
+from importlib import import_module
 
 import hydra
+import numpy as np
 from omegaconf import DictConfig
 
+from cgpos.model.pos_tagger import PartOfSpeechTagger
 from cgpos.utils.path import get_abs_dir, import_pkl
 
 
@@ -35,6 +38,7 @@ def eval_model(config: DictConfig):
 
     # Import data
     targets_name, _, _ = import_pkl(config.reference.targets_map)
+    clf_module = import_module(config.train.clf_module)
     clfs_name = config.train.clfs
 
     # Import param grids
@@ -50,6 +54,16 @@ def eval_model(config: DictConfig):
     for test in tests:
         test_dir = os.path.join(run_dir, test)
         scores_dir = os.path.join(test_dir, "scores")
+
+        # Import data
+        X_train_dir = os.path.join(test_dir, "X_train.pkl")
+        X_train = import_pkl(X_train_dir)
+        X_test_dir = os.path.join(test_dir, "X_test.pkl")
+        X_test = import_pkl(X_test_dir)
+        y_train_dir = os.path.join(test_dir, "y_train.pkl")
+        y_train = import_pkl(y_train_dir)
+        y_test_dir = os.path.join(test_dir, "y_test.pkl")
+        y_test = import_pkl(y_test_dir)
 
         # Import scores
         scores = defaultdict(lambda: defaultdict(dict))
@@ -85,18 +99,30 @@ def eval_model(config: DictConfig):
                 target_eval[target][clf_key] = result
 
         # Find best model
-        best_models = {}
+        tagger_args = {}
         for target, clfargs in target_eval.items():
             best_clfkey = max(clfargs, key=clfargs.get)
             best_clf, best_clfarg = best_clfkey
             best_clf_name = clfs_name[best_clf]
             best_param = param_grids[best_clf][best_clfarg]
-            best_models[targets_name[target]] = (
+            tagger_args[targets_name[target]] = (
                 best_clf_name,
                 best_param,
             )
 
-        logger.info(f"Best model parameters: \n{pprint.pformat(best_models)}")
+        logger.info(f"Best model parameters: \n{pprint.pformat(tagger_args)}")
+
+        clfs = {}
+        for target_name, (_, _clf_arg) in tagger_args.items():
+            clf_method = clf_module.StupidBayes
+            clf = clf_method(**{"ngram_depth": 5})
+            clfs[target_name] = clf
+
+        tagger = PartOfSpeechTagger(targets_name, clfs)
+        y_preds = tagger.fit(X_train, y_train).predict(X_test)
+
+        accuracy = np.mean((y_preds == y_test).all(axis=1))
+        print(f"Best model accuracy: {accuracy* 100:.2f}%")
 
 
 if __name__ == "__main__":
