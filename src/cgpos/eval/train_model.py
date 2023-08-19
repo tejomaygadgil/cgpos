@@ -87,7 +87,7 @@ def train_model(config: DictConfig):
 
         # Export as train (to evaluate best model)
         X_train_export_dir = os.path.join(test_dir, "X_train.pkl")
-        y_train_export_dir = os.path.join(test_dir, "y_train_.pkl")
+        y_train_export_dir = os.path.join(test_dir, "y_train.pkl")
         export_pkl(X_test, X_train_export_dir, verbose=False)
         export_pkl(y_test, y_train_export_dir, verbose=False)
 
