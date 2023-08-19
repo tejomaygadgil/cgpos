@@ -9,10 +9,13 @@ import os
 import pprint
 import re
 from collections import defaultdict
+from importlib import import_module
 
 import hydra
+import numpy as np
 from omegaconf import DictConfig
 
+from cgpos.model.pos_tagger import PartOfSpeechTagger
 from cgpos.utils.path import get_abs_dir, import_pkl
 
 
@@ -35,16 +38,32 @@ def eval_model(config: DictConfig):
 
     # Import data
     targets_name, _, _ = import_pkl(config.reference.targets_map)
-    param_grid_dir = os.path.join(run_dir, "param_grid.pkl")
-    param_grid = import_pkl(param_grid_dir)
-    clf_name_dir = os.path.join(run_dir, "clf_name.pkl")
-    clf_name = import_pkl(clf_name_dir)
+    clf_module = import_module(config.train.clf_module)
+    clfs_name = config.train.clfs
+
+    # Import param grids
+    param_grids = []
+    param_grid_dir = os.path.join(run_dir, "param_grid")
+    for clf_name in clfs_name:
+        clf_param_grid_dir = os.path.join(param_grid_dir, f"{clf_name}.pkl")
+        param_grid = import_pkl(clf_param_grid_dir)
+        param_grids.append(param_grid)
 
     # Iterate over tests
     tests = [name for name in os.listdir(run_dir) if "test_" in name]
     for test in tests:
         test_dir = os.path.join(run_dir, test)
         scores_dir = os.path.join(test_dir, "scores")
+
+        # Import data
+        X_train_dir = os.path.join(test_dir, "X_train.pkl")
+        X_train = import_pkl(X_train_dir)
+        X_test_dir = os.path.join(test_dir, "X_test.pkl")
+        X_test = import_pkl(X_test_dir)
+        y_train_dir = os.path.join(test_dir, "y_train.pkl")
+        y_train = import_pkl(y_train_dir)
+        y_test_dir = os.path.join(test_dir, "y_test.pkl")
+        y_test = import_pkl(y_test_dir)
 
         # Import scores
         scores = defaultdict(lambda: defaultdict(dict))
@@ -60,30 +79,50 @@ def eval_model(config: DictConfig):
                 key, value = re.match(pattern=r"([a-zA-Z]+)(\d+)", string=arg).groups()
                 value = int(value)
                 args_dict[key] = value
+            clf = args_dict["clf"]
             target = args_dict["target"]
             tune = args_dict["tune"]
             clfarg = args_dict["clfarg"]
 
             # Store score
-            scores[target][clfarg][tune] = score
+            clf_key = (clf, clfarg)
+            scores[target][clf_key][tune] = score
 
         # Evaluate scores
         target_eval = defaultdict(defaultdict)
-        for target, clfargs in scores.items():
-            for clfarg, tunes in clfargs.items():
+        for target, clf_keys in scores.items():
+            for clf_key, tunes in clf_keys.items():
                 values = list(tunes.values())
                 result = sum(values) / len(values)
 
                 # Store result
-                target_eval[target][clfarg] = result
+                target_eval[target][clf_key] = result
 
         # Find best model
-        best_models = {}
+        tagger_args = {}
         for target, clfargs in target_eval.items():
-            best_clfarg = max(clfargs, key=clfargs.get)
-            best_models[targets_name[target]] = param_grid[best_clfarg]
+            best_clfkey = max(clfargs, key=clfargs.get)
+            best_clf, best_clfarg = best_clfkey
+            best_clf_name = clfs_name[best_clf]
+            best_param = param_grids[best_clf][best_clfarg]
+            tagger_args[targets_name[target]] = (
+                best_clf_name,
+                best_param,
+            )
 
-        logger.info(f"Best parameters for {clf_name}: \n{pprint.pformat(best_models)}")
+        logger.info(f"Best model parameters: \n{pprint.pformat(tagger_args)}")
+
+        clfs = {}
+        for target_name, (clf_name, clf_arg) in tagger_args.items():
+            clf_method = getattr(clf_module, clf_name)
+            clf = clf_method(**clf_arg)
+            clfs[target_name] = clf
+
+        tagger = PartOfSpeechTagger(targets_name, clfs)
+        y_preds = tagger.fit(X_train, y_train).predict(X_test)
+
+        accuracy = np.mean((y_preds == y_test).all(axis=1))
+        print(f"Best model accuracy: {accuracy* 100:.2f}%")
 
 
 if __name__ == "__main__":
