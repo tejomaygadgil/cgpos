@@ -33,6 +33,7 @@ train:
 
 eval:
   run:
+  models_dir: models
 
 param_grid:
   MultinomialNaiveBayes:

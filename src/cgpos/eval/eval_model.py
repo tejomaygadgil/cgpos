@@ -16,7 +16,7 @@ import numpy as np
 from omegaconf import DictConfig
 
 from cgpos.model.pos_tagger import PartOfSpeechTagger
-from cgpos.utils.path import get_abs_dir, import_pkl
+from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
@@ -112,6 +112,7 @@ def eval_model(config: DictConfig):
 
         logger.info(f"Best model parameters: \n{pprint.pformat(tagger_args)}")
 
+        # Build best model
         clfs = {}
         for target_name, (clf_name, clf_arg) in tagger_args.items():
             clf_method = getattr(clf_module, clf_name)
@@ -121,8 +122,13 @@ def eval_model(config: DictConfig):
         tagger = PartOfSpeechTagger(targets_name, clfs)
         y_preds = tagger.fit(X_train, y_train).predict(X_test)
 
+        # Calculate accuracy
         accuracy = np.mean((y_preds == y_test).all(axis=1))
         print(f"Best model accuracy: {accuracy* 100:.2f}%")
+
+        # Export model
+        tagger_dir = os.path.join(config.eval.models_dir, "tagger_cv.pkl")
+        export_pkl(tagger, tagger_dir)
 
 
 if __name__ == "__main__":
