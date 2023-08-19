@@ -70,12 +70,7 @@ class MultinomialNaiveBayes:
             log_likelihoods_defaults[class_i] = default_log_likelihood
 
         # Set attributes
-        self.X_ = X
-        self.y_ = y
-        self.V_ = V
         self.classes_ = classes
-        self.class_counts_ = class_counts
-        self.feature_counts_ = feature_counts
         self.log_priors_ = log_priors
         self.log_likelihoods_ = log_likelihoods
         self.log_likelihoods_defaults_ = log_likelihoods_defaults
@@ -140,8 +135,6 @@ class StupidBayes:
 
         # Set attributes
         classes = set(y)
-        self.X_ = X
-        self.y_ = y
         self.classes_ = classes
         self.gram_counts_ = gram_counts
 
