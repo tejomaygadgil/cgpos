@@ -14,12 +14,11 @@ from cgpos.utils.path import export_pkl
 
 def ngram_range_grid(ngram_depth: int) -> list:
     """
-    Generate a parameter grid of all combinations from (1, 1) to (ngram_depth, ngram_depth).
+    Generate a parameter grid from (1, 1) to (1, ngram_depth).
     """
     ngram_range = []
     for i in range(1, ngram_depth):
-        for j in range(i, ngram_depth):
-            ngram_range.append((i, j))
+        ngram_range.append((1, i))
 
     return ngram_range
 
