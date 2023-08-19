@@ -25,8 +25,12 @@ class MultinomialNaiveBayes:
         self.ngram_range = ngram_range
 
     def __str__(self):
-        name = "Multinomial Naive Bayes"
-        return f"{name} with alpha={self.alpha} and ngram_range={self.ngram_range}"
+        return f"Multinomial Naive Bayes with alpha={self.alpha} and ngram_range={self.ngram_range}"
+
+    def __repr__(self):
+        return (
+            f"MultinomialNaiveBayes(alpha={self.alpha}, ngram_range={self.ngram_range})"
+        )
 
     def fit(self, X: list, y: list):
         # Check parameters
@@ -112,8 +116,10 @@ class StupidBayes:
         self.ngram_depth = ngram_depth
 
     def __str__(self):
-        name = "Stupid Bayes"
-        return f"{name} with ngram_depth={self.ngram_depth}"
+        return f"Stupid Bayes with ngram_depth={self.ngram_depth}"
+
+    def __repr__(self):
+        return f"StupidBayes(ngram_depth={self.ngram_depth})"
 
     def fit(self, X: list, y: list):
         # Check parameters
