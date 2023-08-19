@@ -113,9 +113,9 @@ def eval_model(config: DictConfig):
         logger.info(f"Best model parameters: \n{pprint.pformat(tagger_args)}")
 
         clfs = {}
-        for target_name, (_, _clf_arg) in tagger_args.items():
-            clf_method = clf_module.StupidBayes
-            clf = clf_method(**{"ngram_depth": 5})
+        for target_name, (clf_name, clf_arg) in tagger_args.items():
+            clf_method = getattr(clf_module, clf_name)
+            clf = clf_method(**clf_arg)
             clfs[target_name] = clf
 
         tagger = PartOfSpeechTagger(targets_name, clfs)
