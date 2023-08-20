@@ -25,7 +25,7 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
-## Train model
+## Train model and evaluate performance
 train_model: | build_features
 	$(info Training model)
 	python src/cgpos/eval/train_model.py
