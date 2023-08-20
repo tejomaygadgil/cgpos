@@ -96,8 +96,9 @@ def get_targets_map(config: DictConfig):
         for _i, value in enumerate(element.find("values"), start=1):
             short = value.find("postag").text
             long = value.find("long").text
-            data[1][-1].append(short)
-            data[2][-1].append(long)
+            if long not in ["none of the above", "I do not know"]:
+                data[1][-1].append(short)
+                data[2][-1].append(long)
 
     # Export
     export_pkl(data, export_dir)
