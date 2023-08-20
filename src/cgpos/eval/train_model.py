@@ -35,7 +35,7 @@ def train_model(config: DictConfig):
 
     # Import data
     clfs_name = config.train.clfs
-    _, _, targets = import_pkl(config.data.cleaned)
+    _, targets = import_pkl(config.data.cleaned)
     features = import_pkl(config.data.features)
     targets_name, _, _ = import_pkl(config.reference.targets_map)
 

@@ -168,19 +168,21 @@ def clean(config: DictConfig):
     _, targets_short, _ = import_pkl(targets_map_dir)
 
     # Normalize
-    cleaned = [[], [], []]
+    cleaned = [[], []]
     malform = []
     for word in data:
         try:
-            assert len(word.get("postag", "")) == 9
-            sentence_id = word["sentence_id"]
+            # Check form
+            assert "postag" in word and "norm" in word
+            assert len(word["postag"]) == 9
+            assert word["postag"] != "undefined"
+            assert word["norm"]
             # Build features
             norm = word["norm"]
-            feature = syllabify(norm)
+            syllables = syllabify(norm)
             # Build target
             target = []
             postag = word["postag"]
-            assert postag != "undefined"
             for i, short in enumerate(postag):
                 match (i, short):
                     case ("5", "d"):  # Treat depondent verbs as medio-passive
@@ -188,17 +190,13 @@ def clean(config: DictConfig):
                 value = targets_short[i].index(short)
                 target.append(value)
             # Append
-            cleaned[0].append(sentence_id)
-            cleaned[1].append(feature)
-            cleaned[2].append(target)
+            cleaned[0].append(syllables)
+            cleaned[1].append(target)
         except (AssertionError, ValueError):
             malform.append(word)
 
-    n = len(cleaned[0])
-    length_match = [len(collection) == n for collection in cleaned]
-    assert (
-        length_match
-    ), f"Cleaned lengths ({len(cleaned[0])}, {len(cleaned[1])}, {len(cleaned[2])}) do not match."
+    length_match = len(cleaned[0]) == len(cleaned[1])
+    assert length_match, "Syllables and target lengths do not match."
 
     # Export
     export_pkl(cleaned, export_dir)

@@ -27,7 +27,7 @@ def tokenize(config: DictConfig):
     features_dir = config.data.features
 
     # Import data
-    _, data, _ = import_pkl(import_dir)
+    data, _ = import_pkl(import_dir)
 
     # Build features
     features_map = {}
