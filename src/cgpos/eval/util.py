@@ -192,14 +192,18 @@ def get_report_contents(
             target_names=target_long,
         )
         confusion_matrix_i = pd.DataFrame(
-            confusion_matrix(y_pred_i, y_test_i),
+            confusion_matrix(
+                y_pred_i,
+                y_test_i,
+                zero_division=0.0,
+            ),
             index=target_long,
             columns=target_long,
         ).to_markdown()
         classification_reports.append(classification_report_i)
         confusion_matrices.append(confusion_matrix_i)
 
-    report_content = "\n".join(
+    report_content = "\n\n".join(
         [
             pp_tagger_args,
             "\n".join(classification_reports),
