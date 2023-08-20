@@ -22,7 +22,7 @@ from sklearn.model_selection import (
 from tqdm import tqdm
 
 from cgpos.eval.util import get_clf_args, run_clf
-from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
+from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)

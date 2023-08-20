@@ -16,7 +16,7 @@ import numpy as np
 from omegaconf import DictConfig
 
 from cgpos.model.pos_tagger import PartOfSpeechTagger
-from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
+from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)

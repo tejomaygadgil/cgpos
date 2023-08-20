@@ -9,7 +9,7 @@ from itertools import product
 import numpy as np
 from omegaconf import DictConfig
 
-from cgpos.utils.path import export_pkl
+from cgpos.util.path import export_pkl
 
 
 def ngram_range_grid(ngram_depth: int) -> list:

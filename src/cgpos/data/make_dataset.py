@@ -13,8 +13,8 @@ import hydra
 from greek_accentuation.syllabify import syllabify
 from omegaconf import DictConfig
 
-from cgpos.utils.greek import is_greek, is_punctuation
-from cgpos.utils.path import export_pkl, get_abs_dir, import_pkl
+from cgpos.util.greek import is_greek, is_punctuation
+from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
 @hydra.main(config_path="../../../conf", config_name="main", version_base=None)
