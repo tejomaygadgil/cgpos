@@ -21,20 +21,20 @@ def get_abs_dir(path):
 def import_pkl(path, verbose=True):
     logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
-    if verbose:
-        logger.info(f"Importing {path}")
     with open(path, "rb") as file:
         data = pickle.load(file)
+    if verbose:
+        logger.info(f"Imported {path}")
     return data
 
 
 def export_pkl(data, path, verbose=True):
     logger = logging.getLogger(__name__)
     path = get_abs_dir(path)
-    if verbose:
-        logger.info(f"Exporting {path}")
     with open(path, "wb") as file:
         pickle.dump(data, file)
+    if verbose:
+        logger.info(f"Exported {path}")
 
 
 def flatten(nested_list):
