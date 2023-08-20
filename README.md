@@ -86,7 +86,7 @@ python src/cgpos/model/train_model.py
 ...
 ```
 
-Adjust hyperparameters and model selection via [the config file](https://github.com/tejomaygadgil/cgpos/blob/main/conf/main.yaml).
+Hyperparameter grid and model selection is adjustable via [config file](https://github.com/tejomaygadgil/cgpos/blob/main/conf/main.yaml).
 
 # References
 ## Help
