@@ -25,6 +25,13 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
+## Train model
+train_model: | build_features
+	$(info Training model)
+	python src/cgpos/eval/train_model.py
+	$(info Evaluating model)
+	python src/cgpos/eval/eval_model.py
+
 ## Build features
 build_features: | data/reference/features_map.pkl  data/processed/features.pkl
 
