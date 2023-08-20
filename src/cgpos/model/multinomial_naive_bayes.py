@@ -141,7 +141,7 @@ class StupidBayes:
         return self
 
     def predict(self, X: list) -> list:
-        def _ngram_backoff(sequence, gram_dict, n):
+        def ngram_backoff(sequence, gram_dict, n):
             """
             Recursively look up n-grams in gram_dict.
             """
@@ -154,7 +154,7 @@ class StupidBayes:
                 if gram in gram_dict:
                     dist.update(gram_dict[gram])
                 else:
-                    sub_dist = _ngram_backoff(gram, gram_dict, n - 1)
+                    sub_dist = ngram_backoff(gram, gram_dict, n - 1)
                     dist.update(sub_dist)
 
             return dist
@@ -163,7 +163,7 @@ class StupidBayes:
         preds = []
         for x in X:
             pred = sorted(self.classes_)[int(len(self.classes_) / 2)]
-            y_dist = _ngram_backoff(x, self.gram_counts_, self.ngram_depth)
+            y_dist = ngram_backoff(x, self.gram_counts_, self.ngram_depth)
             if y_dist:
                 pred = max(y_dist, key=y_dist.get)
             preds.append(pred)
