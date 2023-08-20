@@ -1,12 +1,13 @@
 """
 This module contains utilities for building and evaluating part-of-speech model.
 """
-import os
-from collections import defaultdict
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
+import os
+import re
+from collections import defaultdict
 from itertools import product
-from typing import re
 
 import numpy as np
 import pandas as pd
