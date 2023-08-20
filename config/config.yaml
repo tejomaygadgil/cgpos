@@ -9,8 +9,8 @@ reference:
   targets_map: data/reference/targets_map.pkl
 
 perseus:
-  raw_dir: data/raw/treebank_data-master/v2.1/Greek/texts
-  tagset: data/raw/treebank_data-master/v2.1/Greek/TAGSETS.xml
+  raw_dir: data/raw/treebank_data-master/v1.6/greek/data
+  tagset: data/raw/treebank_data-master/v2.0/Greek/TAGSETS.xml
   raw: data/interim/perseus_raw.pkl
   normalized: data/interim/perseus_normalized.pkl
 
@@ -25,7 +25,7 @@ train:
   test_split:
     n_splits: 1
     train_size: 0.9
-    random_state: 25
+    random_state: 30
   tune_split:
     n_splits: 5
     train_size: 0.8888
