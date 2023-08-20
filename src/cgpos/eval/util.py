@@ -126,7 +126,7 @@ def get_scores(scores_dir: str) -> defaultdict:
         clf_key = (clf, clfarg)
         scores[target][clf_key][tune] = score
 
-        return scores
+    return scores
 
 
 def eval_scores(scores: defaultdict) -> defaultdict:
@@ -161,6 +161,8 @@ def find_best_model(
             best_clf_name,
             best_param,
         )
+
+    return tagger_args
 
 
 def get_report_contents(
