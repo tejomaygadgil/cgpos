@@ -133,10 +133,16 @@ class StupidBayes:
             for ngram in x_ngrams:
                 gram_counts[ngram][y_i] += 1
 
-        # Set attributes
         classes = set(y)
+        sorted_classes = sorted(classes)
+        n_classes = len(classes)
+        middle_n = int(n_classes / 2)
+        default_pred = sorted_classes[middle_n]
+
+        # Set attributes
         self.classes_ = classes
         self.gram_counts_ = gram_counts
+        self.default_pred_ = default_pred
 
         return self
 
@@ -162,10 +168,11 @@ class StupidBayes:
         # Get predictions
         preds = []
         for x in X:
-            pred = sorted(self.classes_)[int(len(self.classes_) / 2)]
             y_dist = ngram_backoff(x, self.gram_counts_, self.ngram_depth)
             if y_dist:
                 pred = max(y_dist, key=y_dist.get)
+            else:
+                pred = self.default_pred_
             preds.append(pred)
 
         return preds
