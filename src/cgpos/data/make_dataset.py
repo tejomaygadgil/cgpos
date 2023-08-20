@@ -34,7 +34,6 @@ def process_raw_data(config: DictConfig):
     logger.info(f"Importing {len(files)} files from {import_dir}")
 
     # Collect words from files
-    sentence_id = 0  # Create sentence-level ID
     data = []
     for file in files:
         file_dir = os.path.join(import_dir, file)
@@ -54,8 +53,7 @@ def process_raw_data(config: DictConfig):
         # Get POS tags
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
-            sentence_attrib["sentence_id"] = str(sentence_id)
-            sentence_id += 1
+            sentence_attrib["sentence_id"] = sentence_attrib.pop("id")
             for word in sentence.iter("word"):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
@@ -93,7 +91,7 @@ def get_targets_map(config: DictConfig):
         data[2].append([])
         data[1][-1].append("-")
         data[2][-1].append("N/A")
-        for _i, value in enumerate(element.find("values"), start=1):
+        for value in element.find("values"):
             short = value.find("postag").text
             long = value.find("long").text
             if long not in ["none of the above", "I do not know"]:
@@ -182,6 +180,7 @@ def clean(config: DictConfig):
             # Build target
             target = []
             postag = word["postag"]
+            assert postag != "undefined"
             for i, short in enumerate(postag):
                 match (i, short):
                     case ("5", "d"):  # Treat depondent verbs as medio-passive
