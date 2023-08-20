@@ -29,7 +29,7 @@ def eval_model(config: DictConfig):
 
     # Load run (latest if not specified)
     runs_dir = get_abs_dir(config.runs_dir)
-    run = config.eval.run
+    run = config.runs.run
     if not run:
         runs = next(os.walk(runs_dir))[1]
         latest_run = sorted(runs)[-1]

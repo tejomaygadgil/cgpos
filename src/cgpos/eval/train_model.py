@@ -40,7 +40,7 @@ def train_model(config: DictConfig):
     targets_name, _, _ = import_pkl(config.reference.targets_map)
 
     # Set export dir
-    runs_dir = get_abs_dir(config.runs_dir)
+    runs_dir = get_abs_dir(config.runs.runs_dir)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     run_dir = os.path.join(runs_dir, timestamp)
     param_grid_dir = os.path.join(run_dir, "param_grid")

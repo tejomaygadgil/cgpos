@@ -15,15 +15,17 @@ perseus:
   normalized: data/interim/perseus_normalized.pkl
 
 # Training configs
-runs_dir: data/runs
+runs:
+  runs_dir: data/runs
+  run:
 
 train:
   clf_module: cgpos.model.multinomial_naive_bayes
-  clfs: [StupidBayes, MultinomialNaiveBayes]
+  clfs: [StupidBayes]
   test_split:
     n_splits: 1
     train_size: 0.9
-    random_state: 20
+    random_state: 25
   tune_split:
     n_splits: 5
     train_size: 0.8888
@@ -32,7 +34,6 @@ train:
   export_pred: False
 
 eval:
-  run:
   models_dir: models
 
 param_grid:
@@ -45,5 +46,5 @@ param_grid:
       depth: 6
   StupidBayes:
     ngram_depth:
-      start: 1
-      stop: 6
+      start: 4
+      stop: 9
