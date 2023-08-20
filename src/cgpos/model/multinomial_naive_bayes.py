@@ -154,8 +154,8 @@ class StupidBayes:
                 if gram in gram_dict:
                     dist.update(gram_dict[gram])
                 else:
-                    sub_y_dist = _ngram_backoff(gram, gram_dict, n - 1)
-                    dist.update(sub_y_dist)
+                    sub_dist = _ngram_backoff(gram, gram_dict, n - 1)
+                    dist.update(sub_dist)
 
             return dist
 
