@@ -28,7 +28,7 @@ def eval_model(config: DictConfig):
     logger.info("Evaluating model:")
 
     # Load run (latest if not specified)
-    runs_dir = get_abs_dir(config.runs_dir)
+    runs_dir = get_abs_dir(config.runs.runs_dir)
     run = config.runs.run
     if not run:
         runs = next(os.walk(runs_dir))[1]
@@ -119,12 +119,13 @@ def eval_model(config: DictConfig):
             clf = clf_method(**clf_arg)
             clfs[target_name] = clf
 
+        # Get predictions
         tagger = PartOfSpeechTagger(targets_name, clfs)
         y_preds = tagger.fit(X_train, y_train).predict(X_test)
 
         # Calculate accuracy
         accuracy = np.mean((y_preds == y_test).all(axis=1))
-        print(f"Best model accuracy: {accuracy* 100:.2f}%")
+        print(f"Best model accuracy: {(accuracy * 100):.2f}%")
 
         # Export model
         tagger_dir = os.path.join(config.eval.models_dir, "tagger_cv.pkl")

@@ -21,7 +21,7 @@ runs:
 
 train:
   clf_module: cgpos.model.multinomial_naive_bayes
-  clfs: [StupidBayes]
+  clfs: [MultinomialNaiveBayes]
   test_split:
     n_splits: 1
     train_size: 0.9
