@@ -99,10 +99,6 @@ def get_targets_map(config: DictConfig):
             data[1][-1].append(short)
             data[2][-1].append(long)
 
-    # Accept irregular pos tag
-    data[1][0].append("x")
-    data[2][0].append("irregular")
-
     # Export
     export_pkl(data, export_dir)
 
