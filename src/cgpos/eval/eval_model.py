@@ -7,14 +7,19 @@ This module selects the best model and evaluates it on the test set.
 import logging
 import os
 import pprint
-import re
-from collections import defaultdict
 from importlib import import_module
 
 import hydra
 import numpy as np
 from omegaconf import DictConfig
 
+from cgpos.eval.util import (
+    eval_scores,
+    find_best_model,
+    get_report_contents,
+    get_run_data,
+    get_scores,
+)
 from cgpos.model.pos_tagger import PartOfSpeechTagger
 from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
@@ -37,7 +42,7 @@ def eval_model(config: DictConfig):
     run_dir = os.path.join(runs_dir, run)
 
     # Import data
-    targets_name, _, _ = import_pkl(config.reference.targets_map)
+    targets_name, _, targets_long = import_pkl(config.reference.targets_map)
     clf_module = import_module(config.train.clf_module)
     clfs_name = config.train.clfs
 
@@ -56,80 +61,43 @@ def eval_model(config: DictConfig):
         scores_dir = os.path.join(test_dir, "scores")
 
         # Import data
-        X_train_dir = os.path.join(test_dir, "X_train.pkl")
-        X_train = import_pkl(X_train_dir)
-        X_test_dir = os.path.join(test_dir, "X_test.pkl")
-        X_test = import_pkl(X_test_dir)
-        y_train_dir = os.path.join(test_dir, "y_train.pkl")
-        y_train = import_pkl(y_train_dir)
-        y_test_dir = os.path.join(test_dir, "y_test.pkl")
-        y_test = import_pkl(y_test_dir)
+        X_train, X_test, y_train, y_test = get_run_data(test_dir)
 
         # Import scores
-        scores = defaultdict(lambda: defaultdict(dict))
-        scores_name = os.listdir(scores_dir)
-        for score_name in scores_name:
-            score_dir = os.path.join(scores_dir, score_name)
-            score = import_pkl(score_dir, verbose=False)
-
-            # Parse file name
-            args_dict = {}
-            args = os.path.splitext(score_name)[0].split("_")
-            for arg in args:
-                key, value = re.match(pattern=r"([a-zA-Z]+)(\d+)", string=arg).groups()
-                value = int(value)
-                args_dict[key] = value
-            clf = args_dict["clf"]
-            target = args_dict["target"]
-            tune = args_dict["tune"]
-            clfarg = args_dict["clfarg"]
-
-            # Store score
-            clf_key = (clf, clfarg)
-            scores[target][clf_key][tune] = score
+        scores = get_scores(scores_dir)
 
         # Evaluate scores
-        target_eval = defaultdict(defaultdict)
-        for target, clf_keys in scores.items():
-            for clf_key, tunes in clf_keys.items():
-                values = list(tunes.values())
-                result = sum(values) / len(values)
-
-                # Store result
-                target_eval[target][clf_key] = result
+        target_eval = eval_scores(scores)
 
         # Find best model
-        tagger_args = {}
-        for target, clfargs in target_eval.items():
-            best_clfkey = max(clfargs, key=clfargs.get)
-            best_clf, best_clfarg = best_clfkey
-            best_clf_name = clfs_name[best_clf]
-            best_param = param_grids[best_clf][best_clfarg]
-            tagger_args[targets_name[target]] = (
-                best_clf_name,
-                best_param,
-            )
-
-        logger.info(f"Best model parameters: \n{pprint.pformat(tagger_args)}")
+        tagger_args = find_best_model(target_eval, param_grids, clfs_name, targets_name)
+        pp_tagger_args = pprint.pformat(tagger_args)
+        logger.info(f"Best model parameters: \n{pp_tagger_args}")
 
         # Build best model
-        clfs = {}
+        tagger_clfs = {}
         for target_name, (clf_name, clf_arg) in tagger_args.items():
             clf_method = getattr(clf_module, clf_name)
-            clf = clf_method(**clf_arg)
-            clfs[target_name] = clf
-
-        # Get predictions
-        tagger = PartOfSpeechTagger(targets_name, clfs)
-        y_preds = tagger.fit(X_train, y_train).predict(X_test)
+            tagger_clf = clf_method(**clf_arg)
+            tagger_clfs[target_name] = tagger_clf
+        tagger = PartOfSpeechTagger(targets_name, tagger_clfs)
 
         # Calculate accuracy
-        accuracy = np.mean((y_preds == y_test).all(axis=1))
+        y_pred = tagger.fit(X_train, y_train).predict(X_test)
+        accuracy = np.mean((y_pred == y_test).all(axis=1))
         print(f"Best model accuracy: {(accuracy * 100):.2f}%")
 
         # Export model
         tagger_dir = os.path.join(config.eval.models_dir, "tagger_cv.pkl")
         export_pkl(tagger, tagger_dir)
+
+        # Generate report
+        report_content = get_report_contents(
+            y_pred, y_test, pp_tagger_args, targets_name, targets_long
+        )
+        file_path = get_abs_dir("reports/report.txt")
+        with open(file_path, "w") as file:
+            file.write(report_content)
 
 
 if __name__ == "__main__":
