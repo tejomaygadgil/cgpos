@@ -66,13 +66,23 @@ Grabbing Perseus data
 ...
 ```
 
-### 3. Run model
-Train the part-of-speech tagger using: 
+### 3. Build features
+Ready data for training by tokenizing word syllables: 
 ```
 $ cd /dir/to/repository
-$ make run_model # TODO
+$ make build_features
 Building features
-python src/cgpos/features/build_features.py
+python src/cgpos/data/build_features.py
+...
+```
+
+### 4. Train model
+Train the part-of-speech tagger and evaluate performance using: 
+```
+$ cd /dir/to/repository
+$ make train_model
+Training model
+python src/cgpos/model/train_model.py
 ...
 ```
 
@@ -92,7 +102,8 @@ install_poetry      Install poetry environment
 make_dataset        Make Perseus dataset 
 remove_all_data     Remove all data 
 remove_data         Remove processed data 
-tests               Run tests 
+tests               Run tests
+train_model         Train model and evaluate performance
 
 ```
 
