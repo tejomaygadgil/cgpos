@@ -41,7 +41,8 @@ def tokenize(config: DictConfig):
                 feature_token += 1
             token = features_map[syllable]
             feature.append(token)
-        features.append(feature)
+        feature_tuple = tuple(feature)
+        features.append(feature_tuple)
 
     assert len(features) == len(data), "Input and output lengths do not match."
 
