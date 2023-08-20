@@ -17,7 +17,7 @@ from cgpos.util.greek import is_greek, is_punctuation
 from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
 def process_raw_data(config: DictConfig):
     """
     Convert raw Perseus treebank XML data into a tabular format.
@@ -68,7 +68,7 @@ def process_raw_data(config: DictConfig):
     logger.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
 
 
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
 def get_targets_map(config: DictConfig):
     """
     Build map to parse targets.
@@ -109,7 +109,7 @@ def get_targets_map(config: DictConfig):
     logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
 
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
 def normalize(config: DictConfig):
     """
     Normalize Perseus data by
@@ -149,7 +149,7 @@ def normalize(config: DictConfig):
     )
 
 
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
 def clean(config: DictConfig):
     """
     Clean normalized data for training:

@@ -12,7 +12,7 @@ from omegaconf import DictConfig
 from cgpos.util.path import export_pkl, import_pkl
 
 
-@hydra.main(config_path="../../../conf", config_name="main", version_base=None)
+@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
 def tokenize(config: DictConfig):
     """
     Tokenize features.
