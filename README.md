@@ -29,12 +29,190 @@ $$\begin{align*}
 
 # Results
 ## Training
-Module training is carried out by [`cgpos.eval.train`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/train.py). Training and test sets are produced using a [shuffled split](https://scikit-learn.org/stable/modules/cross_validation.html#shufflesplit) strategy. Training is parallelized via [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html#module-concurrent.futures) to speed up training time. Results are stored in `runs/YYYY-mm-dd_HH-MM-SS`.
+Module training is carried out by [`cgpos.eval.train`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/train.py). Training and test sets are produced using a [shuffled split](https://scikit-learn.org/stable/modules/cross_validation.html#shufflesplit) strategy. Training is parallelized via [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html#module-concurrent.futures) to speed up training time. Results are stored in [`runs`]() with the format `YYYY-mm-dd_HH-MM-SS`.
 
-[`cgpos.eval.eval`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/eval.py) carries out hyperparameter tuning and model selection according to [`config.yaml`](https://github.com/tejomaygadgil/cgpos/blob/f78e7ce3f9674ed7c9c44d666ac7cbef61a2f4fc/config/config.yaml#L22). [Stratified k-fold shuffle](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html) strategy (`k=5`) and [F1 score evaluation metric](https://en.wikipedia.org/wiki/F-score) are employed to handle class imbalance issues.  Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target.
+[`cgpos.eval.eval`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/eval.py) carries out hyperparameter tuning and model selection according to [`config.yaml`](https://github.com/tejomaygadgil/cgpos/blob/f78e7ce3f9674ed7c9c44d666ac7cbef61a2f4fc/config/config.yaml#L22). [Stratified k-fold shuffle](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html) strategy (`k=5`) and [F1 score evaluation metric](https://en.wikipedia.org/wiki/F-score) are employed to handle class imbalance issues.  Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target, and a [`PartOfSpeechTagger`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/model/pos_tagger.py) is created based on the best model configuration.
 
-## Results on the test set
-Module evalution script  `cgpos.eval.eval`. It prints a text report showing the main classification metrics, as well as the overall accuracy classification score. It also writes a confusion matrix to reports/report.txt.
+The best model is stored in [`models/pos_tagger.pkl`](https://github.com/tejomaygadgil/cgpos/blob/main/models/pos_tagger.pkl) and a text report showing the best model configuration, classification reports and confusion matrices is saved to [`reports/report.txt`](https://github.com/tejomaygadgil/cgpos/blob/main/reports/report.txt).
+
+## Performance
+### Best model
+```
+     pos: ('StupidBayes', {'ngram_depth': 9}),
+  person: ('MultinomialNaiveBayes', {'alpha': 0.5, 'ngram_range': (1, 2)}),
+  number: ('StupidBayes', {'ngram_depth': 6}),
+  gender: ('MultinomialNaiveBayes', {'alpha': 0.1, 'ngram_range': (1, 3)}),
+    case: ('StupidBayes', {'ngram_depth': 7}),
+   tense: ('StupidBayes', {'ngram_depth': 7}),
+    mood: ('MultinomialNaiveBayes', {'alpha': 0.3, 'ngram_range': (1, 2)}),
+   voice: ('MultinomialNaiveBayes', {'alpha': 0.8, 'ngram_range': (1, 5)})}
+  degree: ('StupidBayes', {'ngram_depth': 9}),
+```
+
+**Overall, the fine-grained test accuracy for the best model selected after hyperparameter tuning is 80.19%.**
+
+### Classification reports
+#### Part of speech
+```
+              precision    recall  f1-score   support
+
+         N/A       0.01      0.33      0.02         3
+     article       0.89      0.86      0.87      2983
+        noun       0.94      0.89      0.91     11732
+   adjective       0.81      0.90      0.85      5316
+     pronoun       0.72      0.84      0.78      2921
+        verb       0.94      0.89      0.91     10179
+      adverb       0.57      0.89      0.70      3089
+  adposition       0.96      0.91      0.93      2885
+ conjunction       0.81      0.72      0.76      3133
+     numeral       0.83      0.63      0.72        71
+interjection       1.00      1.00      1.00        19
+    particle       0.89      0.72      0.80      4810
+ punctuation       1.00      0.99      1.00      5574
+    accuracy                           0.87     52715
+   macro avg       0.80      0.81      0.79     52715
+weighted avg       0.89      0.87      0.87     52715
+```
+
+#### Person
+```
+               precision    recall  f1-score   support
+
+          N/A       0.99      0.99      0.99     46656
+ first person       0.76      0.77      0.77       839
+second person       0.65      0.64      0.64       732
+ third person       0.93      0.87      0.90      4488
+
+     accuracy                           0.97     52715
+    macro avg       0.83      0.82      0.83     52715
+ weighted avg       0.97      0.97      0.97     52715
+```
+
+#### Number
+```
+              precision    recall  f1-score   support
+
+         N/A       0.96      0.98      0.97     20844
+    singular       0.96      0.92      0.94     22222
+      plural       0.87      0.92      0.90      9516
+        dual       0.64      0.92      0.76       133
+    
+    accuracy                           0.94     52715
+   macro avg       0.86      0.94      0.89     52715
+weighted avg       0.94      0.94      0.94     52715
+```
+
+#### Gender
+```
+              precision    recall  f1-score   support
+
+         N/A       0.98      0.97      0.97     27309
+   masculine       0.90      0.91      0.90     13571
+    feminine       0.88      0.90      0.89      6704
+      neuter       0.79      0.79      0.79      5131
+
+    accuracy                           0.93     52715
+   macro avg       0.89      0.89      0.89     52715
+weighted avg       0.93      0.93      0.93     52715
+```
+
+#### Case
+```
+              precision    recall  f1-score   support
+
+         N/A       0.98      0.95      0.96     27589
+  nominative       0.80      0.87      0.83      7039
+    genitive       0.92      0.92      0.92      4870
+      dative       0.88      0.93      0.91      3628
+  accusative       0.88      0.85      0.86      9309
+    vocative       0.55      0.87      0.68       280
+
+    accuracy                           0.92     52715
+   macro avg       0.83      0.90      0.86     52715
+weighted avg       0.92      0.92      0.92     52715
+```
+
+#### Tense-aspect
+```
+                 precision    recall  f1-score   support
+
+            N/A       0.99      0.97      0.98     44010
+        present       0.84      0.93      0.88      3471
+      imperfect       0.78      0.92      0.84      1083
+        perfect       0.81      0.90      0.85       509
+plusquamperfect       0.67      0.59      0.63       105
+ future perfect       0.00      0.00      0.00         1
+         future       0.62      0.84      0.71       299
+         aorist       0.85      0.91      0.88      3237
+
+       accuracy                           0.96     52715
+      macro avg       0.70      0.76      0.72     52715
+   weighted avg       0.97      0.96      0.96     52715
+```
+
+#### Mood
+```
+              precision    recall  f1-score   support
+
+         N/A       0.98      0.99      0.99     42640
+  indicative       0.92      0.92      0.92      4707
+ subjunctive       0.78      0.66      0.71       479
+  infinitive       0.99      0.87      0.92      1372
+  imperative       0.54      0.61      0.57       276
+  participle       0.95      0.89      0.92      2922
+    optative       0.89      0.72      0.80       319
+
+    accuracy                           0.97     52715
+   macro avg       0.87      0.81      0.83     52715
+weighted avg       0.97      0.97      0.97     52715
+```
+
+#### Voice
+```
+               precision    recall  f1-score   support
+
+          N/A       0.99      0.99      0.99     42987
+       active       0.94      0.94      0.94      6765
+      passive       0.77      0.91      0.84       261
+       middle       0.84      0.81      0.83       902
+medio-passive       0.93      0.84      0.89      1800
+
+     accuracy                           0.98     52715
+    macro avg       0.89      0.90      0.90     52715
+ weighted avg       0.98      0.98      0.98     52715
+```
+
+#### Degree
+```
+              precision    recall  f1-score   support
+
+         N/A       1.00      1.00      1.00     52532
+    positive       0.00      0.00      0.00         1
+ comparative       0.76      0.64      0.69       137
+ superlative       0.37      0.67      0.48        45
+
+    accuracy                           1.00     52715
+   macro avg       0.53      0.58      0.54     52715
+weighted avg       1.00      1.00      1.00     52715
+```
+
+### Confusion matrix
+| true / pred  |   article |   noun |   adjective |   pronoun |   verb |   adverb |   adposition |   conjunction |   numeral |   interjection |   particle |   punctuation |
+|:-------------|----------:|-------:|------------:|----------:|-------:|---------:|-------------:|--------------:|----------:|---------------:|-----------:|--------------:|
+| article      |      2559 |      3 |           4 |       405 |      5 |        7 |            0 |             0 |         0 |              0 |          0 |             0 |
+| noun         |        63 |  10393 |         491 |       179 |    404 |       73 |            9 |            33 |         1 |              0 |         63 |             0 |
+| adjective    |         4 |    253 |        4763 |       160 |     74 |       21 |            9 |            15 |         7 |              0 |          2 |             0 |
+| pronoun      |        69 |     20 |         302 |      2456 |     15 |       23 |            0 |             1 |         0 |              0 |         34 |             0 |
+| verb         |         1 |    326 |         242 |       100 |   9031 |       64 |           39 |           151 |         1 |              0 |        211 |             0 |
+| adverb       |         4 |     38 |          36 |        24 |     45 |     2744 |           54 |            65 |         0 |              0 |         74 |             0 |
+| adposition   |       160 |      3 |           5 |        17 |     12 |       50 |         2635 |             2 |         0 |              0 |          0 |             0 |
+| conjunction  |         4 |      2 |           4 |        57 |      3 |      763 |            5 |          2252 |         0 |              0 |         42 |             0 |
+| numeral      |         0 |      1 |          25 |         0 |      0 |        0 |            0 |             0 |        45 |              0 |          0 |             0 |
+| interjection |         0 |      0 |           0 |         0 |      0 |        0 |            0 |             0 |         0 |             19 |          0 |             0 |
+| particle     |         7 |      7 |          11 |         4 |     24 |     1033 |            6 |           252 |         0 |              0 |       3464 |             0 |
+| punctuation  |         0 |      0 |           0 |         0 |      0 |        0 |            0 |             0 |         0 |              0 |          0 |          5545 |
+
+As expected, the part-of-speech tagger does well on classifying highly morphologically-driven elements such as nouns and verbs, but struggles to addressing positionally-driven elements such as conjugations or particles. Some kind of positional augmentation (provided via models such as [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field)) would be necessary to address this.  
 
 # Build instructions
 ## 1. Set environment
