@@ -72,7 +72,7 @@ Ready data for training by tokenizing word syllables:
 $ cd /dir/to/repository
 $ make build_features
 Building features
-python src/cgpos/data/build_features.py
+python src/cgpos/data/features.py
 ...
 ```
 
@@ -82,7 +82,7 @@ Train the part-of-speech tagger and evaluate performance using:
 $ cd /dir/to/repository
 $ make train_model
 Training model
-python src/cgpos/model/train_model.py
+python src/cgpos/eval/train.py
 ...
 ```
 

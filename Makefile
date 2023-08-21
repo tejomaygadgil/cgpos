@@ -28,28 +28,28 @@ tests:
 ## Evaluate performance for latest model rul
 eval_model: |
 	$(info Evaluating model)
-	python src/cgpos/eval/eval_model.py
+	python src/cgpos/eval/eval.py
 
 ## Train model and evaluate performance
 train_model: | build_features
 	$(info Training model)
-	python src/cgpos/eval/train_model.py
+	python src/cgpos/eval/train.py
 	$(info Evaluating model)
-	python src/cgpos/eval/eval_model.py
+	python src/cgpos/eval/eval.py
 
 ## Build features
 build_features: | data/reference/features_map.pkl  data/processed/features.pkl
 
 data/reference/features_map.pkl  data/processed/features.pkl: | make_dataset
 	$(info Building features)
-	python src/cgpos/data/build_features.py
+	python src/cgpos/data/featurize.py
 
 ## Make Perseus dataset
 make_dataset: | data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
 
 data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl: | get_data
 	$(info Making dataset)
-	python src/cgpos/data/make_dataset.py
+	python src/cgpos/data/process.py
 
 ## Get raw data
 get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
