@@ -19,7 +19,7 @@ $$\begin{align*}
 \end{align*} $$
 
 ## Stupid Bayes
-[`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
+[`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. The maximum n-gram length to be generated is controllable via the `ngram_depth` parameter. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
 Predictions are generated during test time by simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
 
