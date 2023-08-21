@@ -6,9 +6,9 @@ A syllable-based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_c
 
 This morphological approach addresses a major difficulty of part-of-speeching tagging Ancient Greek using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model): namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) that results in many [singularly occurring words](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples) and a highly flexible word order within sentences[^1].
 
-# Implementation
+# Models
 ## Multinomial Naive Bayes
-`MultinomialNaiveBayes`[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
+[`MultinomialNaiveBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L14C11-L14C11)[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
 
 The second pass normalizes the raw counts to produce probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) for numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below). As likelihood probability distributions are sparse, dictionaries and default values are used to speed up computation.
 
@@ -21,7 +21,7 @@ $$\begin{align*}
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `MultinomialNaiveBayes` per target.
 
 ## Stupid Bayes
-`StupidBayes`[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
+[`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
 Predictions are generated during test time by simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
 
@@ -31,14 +31,20 @@ $$\begin{align*}
 
 Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target.
 
-# Results
+# Implementation
+## Training and evaluation
+Module training and evaluation are carried out via `cgpos.eval` using [config parameters](https://github.com/tejomaygadgil/cgpos/blob/main/conf/main.yaml).
+
+`cgpos.eval.train`
+
+`cgpos.eval.eval`
 
 
+## Results
+Module evalution script  `cgpos.eval.eval`. It prints a text report showing the main classification metrics, as well as the overall accuracy classification score. It also writes a confusion matrix to reports/report.txt.
 
-
-# Running the code
-## Instructions
-### 1. Set environment
+# Build instructions
+## 1. Set environment
 Get project requirements by setting up a `poetry` environment:
 1. Install [poetry](https://python-poetry.org/docs/#installation)
 2. In the terminal, run:
@@ -51,11 +57,11 @@ Installing dependencies from lock file
 
 No dependencies to install or update
 
-Installing the current project: cgpos (0.1.0)
+Installing the current project: cgpos (1.0.0)
 ...
 ```
 
-### 2. Get data
+## 2. Get data
 Grab project data:
 ```
 $ cd /dir/to/repository
@@ -66,7 +72,7 @@ Grabbing Perseus data
 ...
 ```
 
-### 3. Build features
+## 3. Build features
 Ready data for training by tokenizing word syllables: 
 ```
 $ cd /dir/to/repository
@@ -76,7 +82,7 @@ python src/cgpos/data/features.py
 ...
 ```
 
-### 4. Train model
+## 4. Train model
 Train the part-of-speech tagger and evaluate performance using: 
 ```
 $ cd /dir/to/repository
