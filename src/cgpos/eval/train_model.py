@@ -25,7 +25,7 @@ from cgpos.eval.util import get_clf_args, run_clf
 from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
-@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="config", version_base=None)
 def train_model(config: DictConfig):
     """
     Train model with shuffled CV and stratified shuffled CV for hyperparameter tuning.
@@ -35,7 +35,7 @@ def train_model(config: DictConfig):
 
     # Import data
     clfs_name = config.train.clfs
-    _, _, targets = import_pkl(config.data.cleaned)
+    _, targets = import_pkl(config.data.cleaned)
     features = import_pkl(config.data.features)
     targets_name, _, _ = import_pkl(config.reference.targets_map)
 

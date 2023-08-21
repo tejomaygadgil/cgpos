@@ -25,6 +25,11 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
+## Evaluate performance for latest model rul
+eval_model: |
+	$(info Evaluating model)
+	python src/cgpos/eval/eval_model.py
+
 ## Train model and evaluate performance
 train_model: | build_features
 	$(info Training model)

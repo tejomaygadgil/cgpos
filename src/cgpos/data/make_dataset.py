@@ -17,7 +17,7 @@ from cgpos.util.greek import is_greek, is_punctuation
 from cgpos.util.path import export_pkl, get_abs_dir, import_pkl
 
 
-@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="config", version_base=None)
 def process_raw_data(config: DictConfig):
     """
     Convert raw Perseus treebank XML data into a tabular format.
@@ -34,7 +34,6 @@ def process_raw_data(config: DictConfig):
     logger.info(f"Importing {len(files)} files from {import_dir}")
 
     # Collect words from files
-    sentence_id = 0  # Create sentence-level ID
     data = []
     for file in files:
         file_dir = os.path.join(import_dir, file)
@@ -54,8 +53,7 @@ def process_raw_data(config: DictConfig):
         # Get POS tags
         for sentence in root.iter("sentence"):
             sentence_attrib = sentence.attrib.copy()
-            sentence_attrib["sentence_id"] = str(sentence_id)
-            sentence_id += 1
+            sentence_attrib["sentence_id"] = sentence_attrib.pop("id")
             for word in sentence.iter("word"):
                 word_attrib = word.attrib.copy()
                 word_attrib.update(sentence_attrib)
@@ -68,7 +66,7 @@ def process_raw_data(config: DictConfig):
     logger.info(f"Success! Extracted {len(data)} words from {len(files)} files.")
 
 
-@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="config", version_base=None)
 def get_targets_map(config: DictConfig):
     """
     Build map to parse targets.
@@ -93,15 +91,12 @@ def get_targets_map(config: DictConfig):
         data[2].append([])
         data[1][-1].append("-")
         data[2][-1].append("N/A")
-        for _i, value in enumerate(element.find("values"), start=1):
+        for value in element.find("values"):
             short = value.find("postag").text
             long = value.find("long").text
-            data[1][-1].append(short)
-            data[2][-1].append(long)
-
-    # Accept irregular pos tag
-    data[1][0].append("x")
-    data[2][0].append("irregular")
+            if long not in ["none of the above", "I do not know"]:
+                data[1][-1].append(short)
+                data[2][-1].append(long)
 
     # Export
     export_pkl(data, export_dir)
@@ -109,7 +104,7 @@ def get_targets_map(config: DictConfig):
     logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
 
-@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="config", version_base=None)
 def normalize(config: DictConfig):
     """
     Normalize Perseus data by
@@ -149,7 +144,7 @@ def normalize(config: DictConfig):
     )
 
 
-@hydra.main(config_path="../../../conf", config_name="config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="config", version_base=None)
 def clean(config: DictConfig):
     """
     Clean normalized data for training:
@@ -173,15 +168,18 @@ def clean(config: DictConfig):
     _, targets_short, _ = import_pkl(targets_map_dir)
 
     # Normalize
-    cleaned = [[], [], []]
+    cleaned = [[], []]
     malform = []
     for word in data:
         try:
-            assert len(word.get("postag", "")) == 9
-            sentence_id = word["sentence_id"]
+            # Check form
+            assert "postag" in word and "norm" in word
+            assert len(word["postag"]) == 9
+            assert word["postag"] != "undefined"
+            assert word["norm"]
             # Build features
             norm = word["norm"]
-            feature = syllabify(norm)
+            syllables = syllabify(norm)
             # Build target
             target = []
             postag = word["postag"]
@@ -192,17 +190,13 @@ def clean(config: DictConfig):
                 value = targets_short[i].index(short)
                 target.append(value)
             # Append
-            cleaned[0].append(sentence_id)
-            cleaned[1].append(feature)
-            cleaned[2].append(target)
+            cleaned[0].append(syllables)
+            cleaned[1].append(target)
         except (AssertionError, ValueError):
             malform.append(word)
 
-    n = len(cleaned[0])
-    length_match = [len(collection) == n for collection in cleaned]
-    assert (
-        length_match
-    ), f"Cleaned lengths ({len(cleaned[0])}, {len(cleaned[1])}, {len(cleaned[2])}) do not match."
+    length_match = len(cleaned[0]) == len(cleaned[1])
+    assert length_match, "Syllables and target lengths do not match."
 
     # Export
     export_pkl(cleaned, export_dir)
