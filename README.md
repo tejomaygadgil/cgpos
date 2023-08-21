@@ -39,7 +39,7 @@ The best model is stored in [`models/pos_tagger.pkl`](https://github.com/tejomay
 ### Best model
 **The overall fine-grained test accuracy for the best model after hyperparameter tuning is 80.19%.**
 
-Performance for morphologically-driven elements (nouns, adjectives, and verbs) is 87.32%.
+**Test accuracy for morphologically-driven elements (nouns, adjectives, and verbs) is 87.32%.**
 
 This is the best model architecture after hyperparameter tuning:
 ```
