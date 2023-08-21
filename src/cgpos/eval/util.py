@@ -190,12 +190,12 @@ def get_report_contents(
             y_test_i,
             labels=target_len,
             target_names=target_long,
+            zero_division=0.0,
         )
         confusion_matrix_i = pd.DataFrame(
             confusion_matrix(
                 y_pred_i,
                 y_test_i,
-                zero_division=0.0,
             ),
             index=target_long,
             columns=target_long,

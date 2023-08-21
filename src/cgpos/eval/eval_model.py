@@ -70,30 +70,32 @@ def eval_model(config: DictConfig):
         target_eval = eval_scores(scores)
 
         # Find best model
-        tagger_args = find_best_model(target_eval, param_grids, clfs_name, targets_name)
-        pp_tagger_args = pprint.pformat(tagger_args)
-        logger.info(f"Best model parameters: \n{pp_tagger_args}")
+        pos_tagger_args = find_best_model(
+            target_eval, param_grids, clfs_name, targets_name
+        )
+        pp_pos_tagger_args = pprint.pformat(pos_tagger_args)
+        logger.info(f"Best model parameters: \n{pp_pos_tagger_args}")
 
         # Build best model
-        tagger_clfs = {}
-        for target_name, (clf_name, clf_arg) in tagger_args.items():
+        pos_tagger_clfs = {}
+        for target_name, (clf_name, clf_arg) in pos_tagger_args.items():
             clf_method = getattr(clf_module, clf_name)
-            tagger_clf = clf_method(**clf_arg)
-            tagger_clfs[target_name] = tagger_clf
-        tagger = PartOfSpeechTagger(targets_name, tagger_clfs)
+            pos_tagger_clf = clf_method(**clf_arg)
+            pos_tagger_clfs[target_name] = pos_tagger_clf
+        pos_tagger = PartOfSpeechTagger(targets_name, pos_tagger_clfs)
 
         # Calculate accuracy
-        y_pred = tagger.fit(X_train, y_train).predict(X_test)
+        y_pred = pos_tagger.fit(X_train, y_train).predict(X_test)
         accuracy = np.mean((y_pred == y_test).all(axis=1))
         print(f"Best model accuracy: {(accuracy * 100):.2f}%")
 
         # Export model
-        tagger_dir = os.path.join(config.eval.models_dir, "tagger_cv.pkl")
-        export_pkl(tagger, tagger_dir)
+        pos_tagger_dir = os.path.join(config.eval.models_dir, "pos_tagger.pkl")
+        export_pkl(pos_tagger, pos_tagger_dir)
 
         # Generate report
         report_content = get_report_contents(
-            y_pred, y_test, pp_tagger_args, targets_name, targets_long
+            y_pred, y_test, pp_pos_tagger_args, targets_name, targets_long
         )
         file_path = get_abs_dir("reports/report.txt")
         with open(file_path, "w") as file:
