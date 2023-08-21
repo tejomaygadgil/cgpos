@@ -37,6 +37,9 @@ The best model is stored in [`models/pos_tagger.pkl`](https://github.com/tejomay
 
 ## Performance
 ### Best model
+**Overall, the fine-grained test accuracy for the best model selected after hyperparameter tuning is 80.19%.**
+
+Here is the best model architecture based on hyperparameter tuning:
 ```
      pos: ('StupidBayes', {'ngram_depth': 9}),
   person: ('MultinomialNaiveBayes', {'alpha': 0.5, 'ngram_range': (1, 2)}),
@@ -48,8 +51,6 @@ The best model is stored in [`models/pos_tagger.pkl`](https://github.com/tejomay
    voice: ('MultinomialNaiveBayes', {'alpha': 0.8, 'ngram_range': (1, 5)})}
   degree: ('StupidBayes', {'ngram_depth': 9}),
 ```
-
-**Overall, the fine-grained test accuracy for the best model selected after hyperparameter tuning is 80.19%.**
 
 ### Classification reports
 #### Part of speech
