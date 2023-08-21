@@ -16,7 +16,7 @@ perseus:
 
 # Training configs
 runs:
-  runs_dir: data/runs
+  runs_dir: runs
   run:
 
 train:

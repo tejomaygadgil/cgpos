@@ -6,7 +6,7 @@ A syllable-based [Naive Bayes model](https://en.wikipedia.org/wiki/Naive_Bayes_c
 
 This morphological approach addresses a major difficulty of part-of-speeching tagging Ancient Greek using [classical methods](https://en.wikipedia.org/wiki/Hidden_Markov_model): namely, the [complex system of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) that results in many [singularly occurring words](https://en.wikipedia.org/wiki/Hapax_legomenon#Ancient_Greek_examples) and a highly flexible word order within sentences[^1].
 
-# Models
+# Implementation
 ## Multinomial Naive Bayes
 [`MultinomialNaiveBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L14C11-L14C11)[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
 
@@ -18,8 +18,6 @@ $$\begin{align*}
 \text{argmax}_c \log P(\text{class}_c|\text{syllables}) &= \text{argmax}_c \sum_i  \log P(\text{syllable}_i|\text{class}_c)  + \log P(\text{class}_c)
 \end{align*} $$
 
-Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `MultinomialNaiveBayes` per target.
-
 ## Stupid Bayes
 [`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
@@ -29,18 +27,13 @@ $$\begin{align*}
 \text{argmax}_c (\text{class}_c|\text{syllables}) &= \sum_i  C(\text{class}_c|\text{syllable}_i)
 \end{align*} $$
 
-Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target.
+# Results
+## Training
+Module training is carried out by [`cgpos.eval.train`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/train.py). Training and test sets are produced using a [shuffled split](https://scikit-learn.org/stable/modules/cross_validation.html#shufflesplit) strategy. Training is parallelized via [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html#module-concurrent.futures) to speed up training time. Results are stored in `runs/YYYY-mm-dd_HH-MM-SS`.
 
-# Implementation
-## Training and evaluation
-Module training and evaluation are carried out via `cgpos.eval` using [config parameters](https://github.com/tejomaygadgil/cgpos/blob/main/conf/main.yaml).
+[`cgpos.eval.eval`](https://github.com/tejomaygadgil/cgpos/blob/main/src/cgpos/eval/eval.py) carries out hyperparameter tuning and model selection according to [`config.yaml`](https://github.com/tejomaygadgil/cgpos/blob/f78e7ce3f9674ed7c9c44d666ac7cbef61a2f4fc/config/config.yaml#L22). [Stratified k-fold shuffle](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html) strategy (`k=5`) and [F1 score evaluation metric](https://en.wikipedia.org/wiki/F-score) are employed to handle class imbalance issues.  Multioutput predictions are achieved by following the [simple strategy](https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.MultiOutputClassifier.html) of fitting one `StupidBayes` per target.
 
-`cgpos.eval.train`
-
-`cgpos.eval.eval`
-
-
-## Results
+## Results on the test set
 Module evalution script  `cgpos.eval.eval`. It prints a text report showing the main classification metrics, as well as the overall accuracy classification score. It also writes a confusion matrix to reports/report.txt.
 
 # Build instructions

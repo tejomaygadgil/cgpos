@@ -67,6 +67,7 @@ target/
 
 # Data folder
 /data/
+/runs/*
 
 # Pycharm
 .idea
