@@ -215,7 +215,7 @@ weighted avg       1.00      1.00      1.00     52715
 | particle     |         7 |      7 |          11 |         4 |     24 |     1033 |            6 |           252 |         0 |              0 |       3464 |             0 |
 | punctuation  |         0 |      0 |           0 |         0 |      0 |        0 |            0 |             0 |         0 |              0 |          0 |          5545 |
 
-As expected, the part-of-speech tagger does well on classifying highly morphologically-driven elements such as nouns and verbs, but struggles to addressing positionally-driven elements such as conjugations or particles. Some kind of positional augmentation (provided via models such as [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field)) would be necessary to address this.  
+As expected, the part-of-speech tagger does well on classifying highly morphologically-driven elements such as nouns and verbs, but struggles to addressing positionally-driven elements such as conjugations or particles. Some kind of [positional augmentation architecture](https://en.wikipedia.org/wiki/Conditional_random_field) would be necessary to address this.
 
 # Build instructions
 ## 1. Set environment
