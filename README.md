@@ -8,9 +8,9 @@ This morphological approach addresses a major difficulty of part-of-speeching ta
 
 # Implementation
 ## Multinomial Naive Bayes
-[`MultinomialNaiveBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L14C11-L14C11)[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter, with `ngram_range=(1, 5)` providing the best performance on the development set (see below). The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
+[`MultinomialNaiveBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L14C11-L14C11)[^2] is trained on n-grams of word syllables generated from [The Ancient Greek and Latin Dependency Treebank](https://perseusdl.github.io/treebank_data/). N-gram depth is controllable via the `ngram_range` parameter. The first training pass counts the occurrence of syllables per category, as well as class occurrences. [Greek diacritics](https://en.wikipedia.org/wiki/Greek_diacritics), which are usually stripped, are preserved to give more information to the model.
 
-The second pass normalizes the raw counts to produce probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) for numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime, with `alpha=0.2` giving best results on the development set (see below). As likelihood probability distributions are sparse, dictionaries and default values are used to speed up computation.
+The second pass normalizes the raw counts to produce probabilities (represented via [log probabilities](https://en.wikipedia.org/wiki/Log_probability) for numerical stability) for syllable likelihoods and class priors. [Laplace/Lidstone smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) is implemented using an `alpha` parameter that can be adjusted at runtime. As likelihood probability distributions are sparse, dictionaries and default values are used to speed up computation.
 
 At prediction time the model uses [Bayes' theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) (assuming [conditional independence](https://en.wikipedia.org/wiki/Conditional_independence#Uses_in_Bayesian_inference)) to estimate the most likely class using the following relationship:
 
@@ -19,7 +19,7 @@ $$\begin{align*}
 \end{align*} $$
 
 ## Stupid Bayes
-[`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
+[`StupidBayes`](https://github.com/tejomaygadgil/cgpos/blob/9e49c0872ff4146b824521cf7c506ec3465e9ea5/src/cgpos/model/multinomial_naive_bayes.py#L102)[^3], on the other hand, is a variant of `MultinomialNaiveBayes` that skips probabilities altogether. The training pass only stores occurrence of syllables per category. The maximum n-gram length to be generated is controllable via the `ngram_depth` parameter. A simplified version of [n-grams backoff](https://en.wikipedia.org/wiki/Katz%27s_back-off_model) is implemented to only generate shorter n-grams in order to fill in lookup gaps. 
 
 Predictions are generated during test time by simply returns the class with the highest count amongst all the input n-grams. Formally, this is given by: 
 
@@ -215,7 +215,7 @@ weighted avg       1.00      1.00      1.00     52715
 | particle     |         7 |      7 |          11 |         4 |     24 |     1033 |            6 |           252 |         0 |              0 |       3464 |             0 |
 | punctuation  |         0 |      0 |           0 |         0 |      0 |        0 |            0 |             0 |         0 |              0 |          0 |          5545 |
 
-As expected, the part-of-speech tagger does well on classifying highly morphologically-driven elements such as nouns and verbs, but struggles to addressing positionally-driven elements such as conjugations or particles. Some kind of positional augmentation (provided via models such as [Conditional Random Fields](https://en.wikipedia.org/wiki/Conditional_random_field)) would be necessary to address this.  
+As expected, the part-of-speech tagger does well classifying highly morphologically-driven elements such as nouns and verbs. But the model struggles to discern positionally-driven elements such as conjugations or particles. Some kind of modeling architecture that supports [positional augmentation](https://en.wikipedia.org/wiki/Conditional_random_field) would be necessary to address this gap.
 
 # Build instructions
 ## 1. Set environment
