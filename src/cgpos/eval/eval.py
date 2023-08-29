@@ -100,13 +100,13 @@ def eval_model(config: DictConfig):
         export_pkl(best_model, best_model_dir)
 
         # Generate report
-        logger.info("Generating report")
         report_content = get_report_contents(
             y_pred_test, y_test, pp_pos_tagger_args, targets_name, targets_long
         )
         file_path = get_abs_dir("reports/report.txt")
         with open(file_path, "w") as file:
             file.write(report_content)
+        logger.info(f"Exported report to {file_path}")
 
 
 if __name__ == "__main__":
