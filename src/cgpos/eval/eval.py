@@ -76,26 +76,33 @@ def eval_model(config: DictConfig):
         pp_pos_tagger_args = pprint.pformat(pos_tagger_args)
         logger.info(f"Best model parameters: \n{pp_pos_tagger_args}")
 
-        # Build best model
-        pos_tagger_clfs = {}
+        # Fit best model
+        best_model_clfs = {}
         for target_name, (clf_name, clf_arg) in pos_tagger_args.items():
             clf_method = getattr(clf_module, clf_name)
-            pos_tagger_clf = clf_method(**clf_arg)
-            pos_tagger_clfs[target_name] = pos_tagger_clf
-        pos_tagger = PartOfSpeechTagger(targets_name, pos_tagger_clfs)
+            best_model_clf = clf_method(**clf_arg)
+            best_model_clfs[target_name] = best_model_clf
+        best_model = PartOfSpeechTagger(targets_name, best_model_clfs)
+        best_model.fit(X_train, y_train)
 
-        # Calculate accuracy
-        y_pred = pos_tagger.fit(X_train, y_train).predict(X_test)
-        accuracy = np.mean((y_pred == y_test).all(axis=1))
-        print(f"Best model accuracy: {(accuracy * 100):.2f}%")
+        # Calculate train and test accuracy
+        logger.info("Evaluating best model:")
+        y_pred_train = best_model.predict(X_train)
+        y_pred_test = best_model.predict(X_test)
+        accuracy_train = np.mean((y_pred_train == y_train).all(axis=1))
+        accuracy_test = np.mean((y_pred_test == y_test).all(axis=1))
+        logger.info(f"Train accuracy: {(accuracy_train * 100):.2f}%")
+        logger.info(f"Test accuracy: {(accuracy_test * 100):.2f}%")
 
         # Export model
-        pos_tagger_dir = os.path.join(config.eval.models_dir, "pos_tagger.pkl")
-        export_pkl(pos_tagger, pos_tagger_dir)
+        logger.info("Exporting model")
+        best_model_dir = os.path.join(config.eval.models_dir, "pos_tagger.pkl")
+        export_pkl(best_model, best_model_dir)
 
         # Generate report
+        logger.info("Generating report")
         report_content = get_report_contents(
-            y_pred, y_test, pp_pos_tagger_args, targets_name, targets_long
+            y_pred_test, y_test, pp_pos_tagger_args, targets_name, targets_long
         )
         file_path = get_abs_dir("reports/report.txt")
         with open(file_path, "w") as file:
