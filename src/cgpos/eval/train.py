@@ -58,6 +58,22 @@ def train_model(config: DictConfig):
     f1_average = config.train.f1_average
     export_pred = config.train.export_pred
 
+    # Log info
+    total_obs = len(targets)
+    logger.info(f"Total observations: {total_obs}")
+    test_train_size = test_split_args["train_size"]
+    tune_train_size = tune_split_args["train_size"]
+    train_size = test_train_size * tune_train_size
+    dev_size = test_train_size * (1 - tune_train_size)
+    test_size = 1 - test_train_size
+    logger.info(
+        f"Train-dev-test split: {train_size:.2f}-{dev_size:.2f}-{test_size:.2f}"
+    )
+    train_obs = int(total_obs * train_size)
+    dev_obs = int(total_obs * dev_size)
+    test_obs = int(total_obs * test_size)
+    logger.info(f"Train-dev-test obs: {train_obs}, {dev_obs}, {test_obs}")
+
     # Test CV loop
     test_splitter = ShuffleSplit(**test_split_args)
     dummy_X = [0] * len(y)
