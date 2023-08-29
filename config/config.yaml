@@ -24,11 +24,11 @@ train:
   clfs: [MultinomialNaiveBayes, StupidBayes]
   test_split:
     n_splits: 1
-    train_size: 0.9
+    train_size: 0.98
     random_state: 30
   tune_split:
     n_splits: 5
-    train_size: 0.8888
+    train_size: 0.96
     random_state: 20
   f1_average: "macro"
   export_pred: False
