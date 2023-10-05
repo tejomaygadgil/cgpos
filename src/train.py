@@ -33,7 +33,7 @@ n_layer = 6
 dropout = 0.7
 
 # Read cleaned data
-cleaned = read_pkl(config.cleaned)
+cleaned = read_pkl(config.ft_cleaned)
 
 # Tokenize and flatten into one big list
 text = [s for s_list in [syllabify(w) + [" "] for w in cleaned] for s in s_list]

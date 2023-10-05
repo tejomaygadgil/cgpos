@@ -3,14 +3,17 @@ Config values.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
+# PRE-TRAINING
 
+
+# FINE-TUNING
 # Import dirs
-process_import = "data/raw/treebank_data-master/v1.6/greek/data"
-target_map_import = "data/raw/treebank_data-master/v2.0/Greek/TAGSETS.xml"
+ft_raw_data = "data/raw/treebank_data-master/v1.6/greek/data"
+ft_raw_targets_map = "data/raw/treebank_data-master/v2.0/Greek/TAGSETS.xml"
 
 # Save dirs
-processed = "data/interim/perseus_raw.pkl"
-target_map = "data/reference/targets_map.pkl"
-normalized = "data/interim/perseus_normalized.pkl"
-cleaned = "data/processed/cleaned.pkl"
-targets = "data/processed/targets.pkl"
+ft_processed = "data/interim/ft_raw.pkl"
+ft_targets_map = "data/reference/ft_targets_map.pkl"
+ft_normalized = "data/interim/ft_normalized.pkl"
+ft_cleaned = "data/processed/ft_cleaned.pkl"
+ft_targets = "data/processed/ft_targets.pkl"

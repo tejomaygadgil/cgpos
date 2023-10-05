@@ -23,8 +23,8 @@ def process_raw_data():
     logger.info("Processing Perseus data:")
 
     # Set import and export directories
-    import_dir = main_dir / config.process_import
-    export_dir = main_dir / config.processed
+    import_dir = main_dir / config.ft_raw_data
+    export_dir = main_dir / config.ft_processed
 
     # Process files
     files = import_dir.iterdir()
@@ -69,8 +69,8 @@ def get_targets_map():
     logger.info("Building targets map:")
 
     # Set import and export directories
-    import_dir = main_dir / config.target_map_import
-    export_dir = main_dir / config.target_map
+    import_dir = main_dir / config.ft_raw_targets_map
+    export_dir = main_dir / config.ft_targets_map
 
     # Build map
     tree = ET.parse(import_dir)
@@ -107,8 +107,8 @@ def normalize():
     logger.info("Normalizing Perseus data:")
 
     # Set import and export directories
-    import_dir = main_dir / config.processed
-    export_dir = main_dir / config.normalized
+    import_dir = main_dir / config.ft_processed
+    export_dir = main_dir / config.ft_normalized
 
     # Import data
     data = read_pkl(import_dir)
@@ -148,10 +148,10 @@ def clean():
     logger.info("Cleaning data for training:")
 
     # Set import and export directories
-    import_dir = main_dir / config.normalized
-    targets_map_dir = main_dir / config.target_map
-    cleaned_dir = main_dir / config.cleaned
-    targets_dir = main_dir / config.targets
+    import_dir = main_dir / config.ft_normalized
+    targets_map_dir = main_dir / config.ft_targets_map
+    cleaned_dir = main_dir / config.ft_cleaned
+    targets_dir = main_dir / config.ft_targets
 
     # Import data
     data = read_pkl(import_dir)
