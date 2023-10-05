@@ -16,7 +16,7 @@ from greek_accentuation.characters import (
 
 
 # Path functions
-def import_pkl(path, verbose=True):
+def read_pkl(path, verbose=True):
     logger = logging.getLogger(__name__)
     with open(path, "rb") as file:
         data = pickle.load(file)
@@ -25,7 +25,7 @@ def import_pkl(path, verbose=True):
     return data
 
 
-def export_pkl(data, path, verbose=True):
+def write_pkl(data, path, verbose=True):
     logger = logging.getLogger(__name__)
     with open(path, "wb") as file:
         pickle.dump(data, file)

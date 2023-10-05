@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import config
-from util import is_greek, is_punctuation, import_pkl, export_pkl
+from util import is_greek, is_punctuation, read_pkl, write_pkl
 
 # Set main dir
 main_dir = Path(__file__).parents[1]
@@ -57,7 +57,7 @@ def process_raw_data():
                 data.append(word_attrib)
 
     # Export
-    export_pkl(data, export_dir)
+    write_pkl(data, export_dir)
 
     logger.info(f"Success! Extracted {len(data)} words.")
 
@@ -92,7 +92,7 @@ def get_targets_map():
                 data[2][-1].append(long)
 
     # Export
-    export_pkl(data, export_dir)
+    write_pkl(data, export_dir)
 
     logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
@@ -112,7 +112,7 @@ def normalize():
     export_dir = main_dir / config.normalized
 
     # Import data
-    data = import_pkl(import_dir)
+    data = read_pkl(import_dir)
 
     # Normalize
     for word in data:
@@ -129,7 +129,7 @@ def normalize():
         word["norm"] = form
 
     # Export
-    export_pkl(data, export_dir)
+    write_pkl(data, export_dir)
 
     logger.info(
         "Success! Performed unicode normalization and stripped non-Greek characters."
@@ -155,8 +155,8 @@ def clean():
     targets_dir = main_dir / config.targets
 
     # Import data
-    data = import_pkl(import_dir)
-    _, targets_str, _ = import_pkl(targets_map_dir)
+    data = read_pkl(import_dir)
+    _, targets_str, _ = read_pkl(targets_map_dir)
 
     # Normalize
     cleaned = []
@@ -192,8 +192,8 @@ def clean():
     ), f"Syllables and target lengths do not match: {len(cleaned[0])}, {len(targets[1])}"
 
     # Export
-    export_pkl(cleaned, cleaned_dir)
-    export_pkl(targets, targets_dir)
+    write_pkl(cleaned, cleaned_dir)
+    write_pkl(targets, targets_dir)
 
     logger.info(
         f"Success! Exporting {len(cleaned)} words (dropped {len(malform)} malformed words)."
