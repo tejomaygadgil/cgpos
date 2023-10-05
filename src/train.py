@@ -5,6 +5,7 @@ import logging
 
 import torch
 from greek_accentuation.syllabify import syllabify
+from tqdm import tqdm
 
 import config
 
@@ -23,11 +24,11 @@ eval_interval = 500
 learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
-generate_len = 500
+generate_len = 100
 n_emb = 384
 n_head = 6
 n_layer = 6
-dropout = 0.2
+dropout = 0.3
 
 # Read cleaned data
 cleaned = read_pkl(config.cleaned)
@@ -229,17 +230,23 @@ class Transformer(nn.Module):
         return idx
 
 
+def generate(length=100):
+    context = torch.zeros((1, 1), dtype=torch.long, device=device)
+    return decode(model.generate(context, length)[0].tolist())
+
+
 # Train
 model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb)
 m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
-for step in range(max_iters):
+for step in tqdm(range(max_iters)):
     # Evaluate training and val loss every eval_interval
     if step % eval_interval == 0:
         losses = estimate_loss()
         print(
             f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
         )
+        generate()
 
     # Sample batch
     xb, yb = get_batch("train")
@@ -249,12 +256,6 @@ for step in range(max_iters):
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
-
-
-# Generate text
-def generate(length=100):
-    context = torch.zeros((1, 1), dtype=torch.long, device=device)
-    return decode(model.generate(context, length)[0].tolist())
 
 
 # Generate example
