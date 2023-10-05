@@ -1,57 +1,6 @@
 .PHONY: clean data lint requirements
 
-#################################################################################
-# GLOBALS                                                                       #
-#################################################################################
-
-
-
-#################################################################################
-# SETUP                                                                      #
-#################################################################################
-## Activate poetry environment
-activate_poetry: install_poetry
-	poetry shell
-
-## Install poetry environment
-install_poetry:
-	poetry install
-	poetry run pre-commit install
-
-## Run tests
-tests:
-	pytest
-
-#################################################################################
-# PROJECT RULES                                                                 #
-#################################################################################
-## Evaluate performance for latest model rul
-eval_model: |
-	$(info Evaluating model)
-	python src/cgpos/eval/eval.py
-
-## Train model and evaluate performance
-train_model: | build_features
-	$(info Training model)
-	python src/cgpos/eval/train.py
-	$(info Evaluating model)
-	python src/cgpos/eval/eval.py
-
-## Build features
-build_features: | data/reference/features_map.pkl  data/processed/features.pkl
-
-data/reference/features_map.pkl  data/processed/features.pkl: | make_dataset
-	$(info Building features)
-	python src/cgpos/data/featurize.py
-
-## Make Perseus dataset
-make_dataset: | data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl
-
-data/interim/perseus_raw.pkl data/reference/targets_map.pkl data/interim/perseus_normalized.pkl data/processed/cleaned.pkl: | get_data
-	$(info Making dataset)
-	python src/cgpos/data/process.py
-
-## Get raw data
+## Download raw data
 get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
 
 data/raw/treebank_data-master/README.md: | data/raw/zip
@@ -74,14 +23,9 @@ init_data_dir: | data/raw data/processed data/interim data/reference
 data/raw data/processed data/interim data/reference:
 	mkdir -p $@
 
-## Remove processed data
-remove_data: init_data_dir
-	$(info Removing project data (excluding data/raw))
-	rm -rf data/processed/* data/interim/* data/reference/*
-
-## Remove all data
+## Remove data
 remove_all_data: init_data_dir
-	$(info Removing all data)
+	$(info Removing data)
 	rm -rf data/raw/*  data/processed/* data/interim/* data/reference/*
 
 #################################################################################
