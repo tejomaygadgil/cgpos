@@ -26,11 +26,11 @@ eval_interval = max_iters // 20
 learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
-generate_len = 16
+generate_len = 32
 n_emb = 384
 n_head = 6
 n_layer = 6
-dropout = 0.7
+dropout = 0.8
 
 # Read cleaned data
 cleaned = read_pkl(config.cleaned)
