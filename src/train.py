@@ -4,6 +4,8 @@ Pre-train transformers model on cleaned Greek data.
 import logging
 
 import torch
+import torch.nn as nn
+from torch.nn import functional as F
 from greek_accentuation.syllabify import syllabify
 from tqdm import tqdm
 
@@ -19,8 +21,8 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 # Hyperparameters
 batch_size = 64
 block_size = 256
-max_iters = 5000
-eval_interval = 500
+max_iters = 1000
+eval_interval = max_iters // 20
 learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
@@ -87,14 +89,6 @@ def estimate_loss():
         out[split] = losses.mean()
     model.train()
     return out
-
-
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
-
-
-# Get loss
 
 
 class Head(nn.Module):
@@ -243,10 +237,10 @@ for step in tqdm(range(max_iters)):
     # Evaluate training and val loss every eval_interval
     if step % eval_interval == 0:
         losses = estimate_loss()
-        print(
+        logging.info(
             f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
         )
-        generate()
+        logging.info(generate(generate_len))
 
     # Sample batch
     xb, yb = get_batch("train")
@@ -259,4 +253,4 @@ for step in tqdm(range(max_iters)):
 
 
 # Generate example
-print(generate(generate_len))
+logging.info(generate(generate_len))
