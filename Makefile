@@ -1,21 +1,19 @@
 .PHONY: clean data lint requirements
 
-## Download raw data
-get_data: | data/raw/treebank_data-master/README.md
-#/data/raw/Greek-Dependency-Trees-master/README.md
+# Download data for pre-training
+get_pt_data: | data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml
+
+data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml: | data/raw/zip
+	curl -Lo data/raw/zip/diorisis.zip https://figshare.com/ndownloader/files/11296247
+	unzip data/raw/zip/diorisis.zip -d data/raw/diorisis
+
+## Download data for fine-tuning
+get_ft_data: | data/raw/treebank_data-master/README.md
 
 data/raw/treebank_data-master/README.md: | data/raw/zip
 	$(info Grabbing Perseus data)
 	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
 	unzip data/raw/zip/perseus.zip -d data/raw
-
-#data/raw/Greek-Dependency-Trees-master/README.md: | data/raw/zip
-#	$(info Grabbing Greek Dependency Trees data)
-#	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
-#	unzip data/raw/zip/gorman.zip -d data/raw
-
-data/raw/zip: | init_data_dir
-	mkdir $@
 
 ## Initialize data directory
 init_data_dir: | data/raw data/processed data/interim data/reference
