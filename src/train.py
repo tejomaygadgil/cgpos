@@ -59,7 +59,7 @@ def decode(tokens):
 
 # Train and test
 data = torch.tensor(encode(text), dtype=torch.long)
-n = int(len(data) * 0.9)
+n = int(len(data) * 0.98)
 train_data = data[:n]
 val_data = data[n:]
 
