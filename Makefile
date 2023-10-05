@@ -1,17 +1,18 @@
 .PHONY: clean data lint requirements
 
 ## Download raw data
-get_data: | data/raw/treebank_data-master/README.md data/raw/Greek-Dependency-Trees-master/README.md
+get_data: | data/raw/treebank_data-master/README.md
+#/data/raw/Greek-Dependency-Trees-master/README.md
 
 data/raw/treebank_data-master/README.md: | data/raw/zip
 	$(info Grabbing Perseus data)
 	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
 	unzip data/raw/zip/perseus.zip -d data/raw
 
-data/raw/Greek-Dependency-Trees-master/README.md: | data/raw/zip
-	$(info Grabbing Greek Dependency Trees data)
-	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
-	unzip data/raw/zip/gorman.zip -d data/raw
+#data/raw/Greek-Dependency-Trees-master/README.md: | data/raw/zip
+#	$(info Grabbing Greek Dependency Trees data)
+#	curl -Lo data/raw/zip/gorman.zip https://github.com/vgorman1/Greek-Dependency-Trees/archive/master.zip
+#	unzip data/raw/zip/gorman.zip -d data/raw
 
 data/raw/zip: | init_data_dir
 	mkdir $@
