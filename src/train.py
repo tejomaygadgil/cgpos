@@ -30,7 +30,7 @@ generate_len = 100
 n_emb = 384
 n_head = 6
 n_layer = 6
-dropout = 0.3
+dropout = 0.5
 
 # Read cleaned data
 cleaned = read_pkl(config.cleaned)
