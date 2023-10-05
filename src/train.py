@@ -1,3 +1,93 @@
+"""
+Pre-train transformers model on cleaned Greek data.
+"""
+import logging
+
+import torch
+from greek_accentuation.syllabify import syllabify
+
+import config
+
+# from model import Transformer
+from util import read_pkl
+
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+
+# Hyperparameters
+batch_size = 64
+block_size = 256
+max_iters = 5000
+eval_interval = 500
+learning_rate = 1e-4
+device = "cuda" if torch.cuda.is_available() else "cpu"
+eval_iters = 200
+generate_len = 500
+n_emb = 384
+n_head = 6
+n_layer = 6
+dropout = 0.2
+
+# Read cleaned data
+cleaned = read_pkl(config.cleaned)
+
+# Tokenize and flatten into one big list
+text = [s for s_list in [syllabify(w) + [" "] for w in cleaned] for s in s_list]
+
+# # Get vocabulary
+chars = sorted(set(text))
+vocab_size = len(chars)
+
+logging.info(f"Vocab size: {vocab_size}")
+
+# # Tokenize
+stoi = {ch: i for i, ch in enumerate(chars)}
+itos = {i: ch for ch, i in stoi.items()}
+
+
+def encode(text):
+    return [stoi[c] for c in text]
+
+
+def decode(tokens):
+    return "".join([itos[i] for i in tokens])
+
+
+# Train and test
+data = torch.tensor(encode(text), dtype=torch.long)
+n = int(len(data) * 0.9)
+train_data = data[:n]
+val_data = data[n:]
+
+
+# Data loading
+def get_batch(split):
+    # Generate a batch of data of inputs X and targets Y
+    data = train_data if split == "train" else val_data
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i : i + block_size] for i in ix])
+    y = torch.stack([data[i + 1 : i + block_size + 1] for i in ix])
+    x, y = x.to(device), y.to(device)
+
+    return x, y
+
+
+@torch.no_grad()
+def estimate_loss():
+    out = {}
+    model.eval()
+    for split in ["train", "val"]:
+        losses = torch.zeros(eval_iters, device=device)
+        for k in range(eval_iters):
+            X, Y = get_batch(split)
+            logits, loss = model(X, Y)
+            losses[k] = loss.item()
+        out[split] = losses.mean()
+    model.train()
+    return out
+
+
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -137,3 +227,35 @@ class Transformer(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)  # Concatenate (B, T + 1)
 
         return idx
+
+
+# Train
+model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb)
+m = model.to(device)
+optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
+for step in range(max_iters):
+    # Evaluate training and val loss every eval_interval
+    if step % eval_interval == 0:
+        losses = estimate_loss()
+        print(
+            f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
+        )
+
+    # Sample batch
+    xb, yb = get_batch("train")
+
+    # Evaluate loss
+    logits, loss = m(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+
+
+# Generate text
+def generate(length=100):
+    context = torch.zeros((1, 1), dtype=torch.long, device=device)
+    return decode(model.generate(context, length)[0].tolist())
+
+
+# Generate example
+print(generate(generate_len))
