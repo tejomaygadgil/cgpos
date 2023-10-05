@@ -1,7 +1,6 @@
 """
 Performs data processing and data cleaning.
 """
-
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 import logging

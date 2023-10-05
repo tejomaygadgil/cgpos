@@ -1,3 +1,9 @@
+"""
+Config values.
+"""
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
+
 # Import dirs
 process_import = "data/raw/treebank_data-master/v1.6/greek/data"
 target_map_import = "data/raw/treebank_data-master/v2.0/Greek/TAGSETS.xml"

@@ -1,10 +1,11 @@
 """
 Contains utility functions to read data and clean Greek text.
 """
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
 import logging
 import pickle
 
-# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 from greek_accentuation.characters import (
     Accent,
