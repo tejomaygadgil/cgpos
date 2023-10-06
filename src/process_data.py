@@ -39,7 +39,7 @@ def read_raw(read_dir, write_dir, postag):
                         word_data["form"] = node.attrib.get("form")
                         if postag:
                             word_data["postag"] = node.attrib.get("postag")
-                            data.append(word_data)
+                        data.append(word_data)
                     case "punct":
                         word_data["form"] = node.attrib.get("mark")
                         data.append(word_data)
@@ -194,17 +194,17 @@ if __name__ == "__main__":
 
     match sys.argv[1]:
         case "pt":  # Pre-training
-            # read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
-            # beta2uni_pt()  # src.pt_beta -> src.beta_uni
-            normalize(cfg.pt_uni, cfg.pt_norm)
-            syllablize(cfg.pt_norm, cfg.pt_syl)
+            read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
+            beta2uni_pt()  # src.pt_beta -> src.beta_uni
+            # normalize(cfg.pt_uni, cfg.pt_norm)
+            # syllablize(cfg.pt_norm, cfg.pt_syl)
 
         case "ft":  # Fine-tuning
             read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
             read_targets_map_ft()  # cfg.ft_targets_map_dir -> cfg.ft_targets_map
             clean_ft()  # cfg.ft_raw, cfg.ft_targets_map -> cfg.ft_clean, cfg.ft_targets
-            normalize(cfg.ft_clean, cfg.ft_text)
-            syllablize(cfg.ft_text, cfg.ft_syl)
+            normalize(cfg.ft_clean, cfg.ft_norm)
+            syllablize(cfg.ft_norm, cfg.ft_syl)
 
         case _:
             "Please select either 'pt' or 'ft' as options."

@@ -7,7 +7,7 @@ Config values.
 pt_dir = "data/raw/diorisis"
 pt_beta = "data/interim/pt_beta.pkl"
 pt_uni = "data/interim/pt_uni.pkl"
-pt_norm = "data/interim/pt_norm.pkl"
+pt_norm = "data/processed/pt_norm.pkl"
 pt_syl = "data/processed/pt_syl.pkl"
 
 # FINE-TUNING

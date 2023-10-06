@@ -6,9 +6,9 @@
 #################################################################################
 # 1. PRE-TRAINING DATA
 ## Process pre-training data.
-process_pt_data: | data/interim/pt_beta.pkl data/interim/pt_uni.pkl data/interim/pt_norm.pkl data/processed/pt_syl.pkl
+process_pt_data: | data/interim/pt_beta.pkl data/interim/pt_uni.pkl data/processed/pt_norm.pkl data/processed/pt_syl.pkl
 
-data/interim/pt_beta.pkl data/interim/pt_uni.pkl data/interim/pt_norm.pkl data/processed/pt_syl.pkl: | get_pt_data
+data/interim/pt_beta.pkl data/interim/pt_uni.pkl data/processed/pt_norm.pkl data/processed/pt_syl.pkl: | get_pt_data
 	$(info Making pre-training dataset)
 	python src/process_data.py pt
 
