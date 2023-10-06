@@ -146,7 +146,7 @@ def clean():
     # Set import and export directories
     import_dir = cfg.ft_normalized
     targets_map_dir = cfg.ft_targets_map
-    cleaned_dir = cfg.ft_cleaned
+    cleaned_dir = cfg.ft_text
     targets_dir = cfg.ft_targets
 
     # Import data
