@@ -15,7 +15,7 @@ data/interim/pt_raw.pkl data/interim/pt_normalized.pkl: | get_pt_data
 ## Download pre-training data. (large!)
 get_pt_data: | data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml
 
-data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml: | data/zip
+data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml: | init_data_dir
 	curl -C - -Lo data/zip/diorisis.zip https://figshare.com/ndownloader/files/11296247
 	unzip data/zip/diorisis.zip -d data/raw/diorisis
 
@@ -30,7 +30,7 @@ data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normal
 ## Download fine-tuning data.
 get_ft_data: | data/raw/treebank_data-master/README.md
 
-data/raw/treebank_data-master/README.md: | data/zip
+data/raw/treebank_data-master/README.md: | init_data_dir
 	$(info Grabbing Perseus data)
 	curl -C - -Lo data/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
 	unzip data/zip/perseus.zip -d data/raw
