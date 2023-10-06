@@ -48,7 +48,7 @@ def read_raw(read_dir, write_dir, postag):
     logger.info(f"Success! Extracted {len(data)} words: {data[:10]}")
 
 
-def read_targets_map():
+def read_targets_map_ft():
     """
     Build map to parse targets.
     """
@@ -56,7 +56,7 @@ def read_targets_map():
     logger.info("Building targets map:")
 
     # Set import and export directories
-    import_dir = cfg.ft_raw_targets_map
+    import_dir = cfg.ft_targets_map_dir
     export_dir = cfg.ft_targets_map
 
     # Build map
@@ -82,43 +82,19 @@ def read_targets_map():
     logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
 
-def beta2uni():
+def beta2uni_pt():
     logger = logging.getLogger(__name__)
-    logger.info("Converting Beta Code to Greek Unicode:")
-    data = read_pkl(cfg.pt_processed)
+    data = read_pkl(cfg.pt_beta)
+    logger.info(f"Converting from Beta Code: {data[:10]}")
+    uni = []
     for word_data in tqdm(data):
-        word_data["form"] = beta_code_to_greek(word_data["form"])
+        uni.append(beta_code_to_greek(word_data["form"]))
 
-    write_pkl(data, cfg.pt_processed)
-
-
-def normalize(read_dir, write_dir):
-    """
-    - Decompose unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
-    - Strip non-Greek characters.
-    - Recompose diacritics (for better syllablization)
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("Normalizing data:")
-    data = read_pkl(read_dir)
-    for word_data in tqdm(data):
-        try:  # Decompose and recompose, dropping non-Greek characters
-            word = word_data["form"]
-            norm = unicodedata.normalize("NFD", word)
-            norm = "".join([ch for ch in norm if (is_greek(ch) or is_punctuation(ch))])
-            norm = unicodedata.normalize("NFC", norm)
-            word_data["form"] = norm
-        except KeyError:  # Skip over words missing keys (pre-trained data)
-            pass
-
-    # Export
-    write_pkl(data, write_dir)
-    logger.info(
-        "Success! Performed unicode normalization and stripped non-Greek characters."
-    )
+    logger.info(f"Success! Converted to Greek Unicode: {data[:10]}")
+    write_pkl(uni, cfg.pt_uni)
 
 
-def clean():
+def clean_ft():
     """
     Clean normalized data for training:
 
@@ -128,17 +104,11 @@ def clean():
     Export: [form_1, ...], [[target_1_1, target_1_2, ...], ...]
     """
     logger = logging.getLogger(__name__)
-    logger.info("Cleaning data for training:")
-
-    # Set import and export directories
-    import_dir = cfg.ft_normalized
-    targets_map_dir = cfg.ft_targets_map
-    cleaned_dir = cfg.ft_text
-    targets_dir = cfg.ft_targets
+    logger.info("Cleaning fine-tuning data:")
 
     # Import data
-    data = read_pkl(import_dir)
-    _, targets_str, _ = read_pkl(targets_map_dir)
+    data = read_pkl(cfg.ft_raw)
+    _, targets_str, _ = read_pkl(cfg.ft_targets_map)
 
     # Normalize
     cleaned = []
@@ -171,14 +141,57 @@ def clean():
     length_match = len(cleaned) == len(targets)
     assert (
         length_match
-    ), f"Syllables and target lengths do not match: {len(cleaned[0])}, {len(targets[1])}"
+    ), f"Syllables and target lengths do not match: {len(cleaned)}, {len(targets)}"
 
     # Export
-    write_pkl(cleaned, cleaned_dir)
-    write_pkl(targets, targets_dir)
+    write_pkl(cleaned, cfg.ft_clean)
+    write_pkl(targets, cfg.ft_targets)
 
+    logger.info(f"Success! Exported {len(cleaned)} words ({malform} malformed words).")
+
+
+def clean_pt():
+    logger = logging.getLogger(__name__)
+    logger.info("Cleaning pre-training data:")
+
+    data = read_pkl(cfg.pt_norm)
+
+    malform = 0
+    text = []
+    for word_data in data:
+        try:
+            assert word_data["form"]
+            text.append(word_data["form"])
+
+        except:
+            malform += 1
+
+    # Export
+    write_pkl(text, cfg.pt_text)
+
+    logger.info(f"Success! Exported {len(text)} words ({malform} malformed words).")
+
+
+def normalize(read_dir, write_dir):
+    """
+    - Decompose unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
+    - Strip non-Greek characters.
+    - Recompose diacritics (for better syllablization)
+    """
+    logger = logging.getLogger(__name__)
+    logger.info("Normalizing data:")
+    data = read_pkl(read_dir)
+    normed = []
+    for word in tqdm(data):
+        norm = unicodedata.normalize("NFD", word)
+        norm = "".join([ch for ch in norm if (is_greek(ch) or is_punctuation(ch))])
+        norm = unicodedata.normalize("NFC", norm)
+        normed.append(norm)
+
+    # Export
+    write_pkl(normed, write_dir)
     logger.info(
-        f"Success! Exporting {len(cleaned)} words (dropped {malform} malformed words)."
+        "Success! Performed unicode normalization and stripped non-Greek characters."
     )
 
 
@@ -202,15 +215,17 @@ if __name__ == "__main__":
 
     match sys.argv[1]:
         case "pt":  # Pre-training
-            read_raw(cfg.pt_raw, cfg.pt_processed, postag=False)
-            # normalize(cfg.pt_processed, cfg.pt_text)
-            # syllablize(cfg.pt_text, cfg.pt_syl)
+            # read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
+            # beta2uni_pt() # src.pt_beta -> src.beta_uni
+            # normalize(cfg.pt_uni, cfg.pt_norm)
+            # clean_pt() # cfg.pt_norm -> cfg.pt_text
+            syllablize(cfg.pt_text, cfg.pt_syl)
 
         case "ft":  # Fine-tuning
-            read_raw(cfg.ft_raw, cfg.ft_processed, postag=True)
-            read_targets_map()  # -> cfg.ft_targets
-            normalize(cfg.ft_processed, cfg.ft_normalized)
-            clean()  # cfg.ft_normalized, cfg.ft_targets_map -> cfg.ft_text, cfg.ft_targets
+            read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
+            read_targets_map_ft()  # cfg.ft_targets_map_dir -> cfg.ft_targets_map
+            clean_ft()  # cfg.ft_raw, cfg.ft_targets_map -> cfg.ft_clean, cfg.ft_targets
+            normalize(cfg.ft_clean, cfg.ft_text)
             syllablize(cfg.ft_text, cfg.ft_syl)
 
         case _:
