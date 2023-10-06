@@ -6,9 +6,9 @@
 #################################################################################
 # 1. PRE-TRAINING DATA
 ## Process pre-training data.
-process_pt_data: | data/interim/pt_raw.pkl data/processed/pt_text.pkl
+process_pt_data: | data/interim/pt_raw.pkl data/processed/pt_text.pkl data/processed/pt_syl.pkl
 
-data/interim/pt_raw.pkl data/processed/pt_text.pkl: | get_pt_data
+data/interim/pt_raw.pkl data/processed/pt_text.pkl data/processed/pt_syl.pkl: | get_pt_data
 	$(info Making pre-training dataset)
 	python src/process_data.py pt
 
@@ -21,9 +21,9 @@ data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).x
 
 # 2. FINE-TUNING DATA
 ## Process fine-tuning data.
-process_ft_data: | data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_cleaned.pkl data/processed/ft_targets.pkl
+process_ft_data: | data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_text.pkl data/processed/ft_targets.pkl data/processed/ft_syl.pkl
 
-data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_cleaned.pkl data/processed/ft_targets.pkl: | get_ft_data
+data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_text.pkl data/processed/ft_targets.pkl data/processed/ft_syl.pkl: | get_ft_data
 	$(info Making fine-tuning dataset)
 	python src/process_data.py ft
 

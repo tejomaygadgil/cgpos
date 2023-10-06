@@ -28,18 +28,17 @@ learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
 generate_len = 32
-n_head = 6
-n_emb = n_head * 64
+n_head = 8
+n_emb = 64 * n_head
 n_layer = 6
-dropout = 0.0
+dropout = 0.3
 
 # Read, tokenize, and flatten text into one big list
-raw = read_pkl(config.pt_text)
-text = [s for s_list in [syllabify(w) + [" "] for w in raw] for s in s_list]
-chars = sorted(set(text))
-vocab_size = len(chars)
+tokens = read_pkl(config.pt_syl)
+vocab = sorted(set(tokens))
+vocab_size = len(vocab)
 logging.info(f"Vocab size: {vocab_size}")
-stoi = {ch: i for i, ch in enumerate(chars)}
+stoi = {ch: i for i, ch in enumerate(vocab)}
 itos = {i: ch for ch, i in stoi.items()}
 
 
@@ -52,7 +51,7 @@ def decode(tokens):
 
 
 # Train and test
-data = torch.tensor(encode(text), dtype=torch.long)
+data = torch.tensor(encode(tokens), dtype=torch.long)
 n = int(len(data) * 0.98)
 train_data = data[:n]
 val_data = data[n:]

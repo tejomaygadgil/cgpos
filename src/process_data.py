@@ -9,6 +9,8 @@ import unicodedata
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from beta_code import beta_code_to_greek
+from greek_accentuation.syllabify import syllabify
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -16,50 +18,34 @@ import config as cfg
 from util import is_greek, is_punctuation, read_pkl, write_pkl
 
 
-def read_raw(import_dir, export_dir):
+def read_raw(read_dir, write_dir, postag):
     """
     Convert raw XML data into a tabular format.
     """
     logger = logging.getLogger(__name__)
-    files = sorted(list(Path(import_dir).iterdir()))
-    logger.info(f"Reading {len(files)} files from {import_dir}")
+    files = sorted(list(Path(read_dir).iterdir()))
+    logger.info(f"Reading {len(files)} files from {read_dir}")
     data = []
     for file_dir in tqdm(files):
         with logging_redirect_tqdm():
             logger.info(f"Processing {file_dir}")
-
-        # Load XML
         tree = ET.parse(file_dir)
         root = tree.getroot()
-
-        # Get title and author
-        work_attrib = {}
-        for field in ["author", "title"]:
-            element = list(root.iter(field))
-            if len(element):  # Some files are missing author info
-                work_attrib[field] = element[0].text
-
-        # Get POS tags
         for sentence in root.iter("sentence"):
-            sentence_attrib = sentence.attrib.copy()
-            sentence_attrib["sentence_id"] = sentence_attrib.pop("id")
-            for word in sentence.iter("word"):
-                word_attrib = word.attrib.copy()
-                lemma = word.find("lemma")  # Pre-training data has lemma
-                if lemma:
-                    lemma_attrib = lemma.attrib.copy()
-                    lemma_attrib.update(work_attrib)
-                    lemma_attrib.update(sentence_attrib)
-                    lemma_attrib.update(word_attrib)
-                    data.append(lemma_attrib)
-                else:
-                    word_attrib.update(work_attrib)
-                    word_attrib.update(sentence_attrib)
-                    data.append(word_attrib)
+            for node in sentence.iter():
+                word_data = {}
+                match node.tag:
+                    case "word":
+                        word_data["form"] = node.attrib.get("form")
+                        if postag:
+                            word_data["postag"] = node.attrib.get("postag")
+                    case "punct":
+                        word_data["form"] = node.attrib.get("mark")
+                data.append(word_data)
 
     # Export
-    write_pkl(data, export_dir)
-    logger.info(f"Success! Extracted {len(data)} words.")
+    write_pkl(data, write_dir)
+    logger.info(f"Success! Extracted {len(data)} words: {data[:10]}")
 
 
 def read_targets_map():
@@ -96,36 +82,37 @@ def read_targets_map():
     logger.info(f"Success! Built targets map for {len(data[0])} targets: {data[0]}")
 
 
-def normalize(import_dir, export_dir, word_key):
+def beta2uni():
+    logger = logging.getLogger(__name__)
+    logger.info("Converting Beta Code to Greek Unicode:")
+    data = read_pkl(cfg.pt_processed)
+    for word_data in tqdm(data):
+        word_data["form"] = beta_code_to_greek(word_data["form"])
+
+    write_pkl(data, cfg.pt_processed)
+
+
+def normalize(read_dir, write_dir):
     """
-    Normalize Perseus data by
-    - Decomposing unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
-    - Stripping non-Greek characters.
-    - Recomposing diacritics (for better syllablization)
+    - Decompose unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
+    - Strip non-Greek characters.
+    - Recompose diacritics (for better syllablization)
     """
     logger = logging.getLogger(__name__)
     logger.info("Normalizing data:")
-    data = read_pkl(import_dir)
-    if word_key == "entry":
-        normed = []
+    data = read_pkl(read_dir)
     for word_data in tqdm(data):
         try:  # Decompose and recompose, dropping non-Greek characters
-            word = word_data[word_key]
+            word = word_data["form"]
             norm = unicodedata.normalize("NFD", word)
             norm = "".join([ch for ch in norm if (is_greek(ch) or is_punctuation(ch))])
             norm = unicodedata.normalize("NFC", norm)
-            if word_key == "entry":
-                normed.append(norm)
-            else:
-                word_data["norm"] = norm
+            word_data["form"] = norm
         except KeyError:  # Skip over words missing keys (pre-trained data)
             pass
 
     # Export
-    if word_key == "entry":
-        write_pkl(normed, export_dir)
-    else:
-        write_pkl(data, export_dir)
+    write_pkl(data, write_dir)
     logger.info(
         "Success! Performed unicode normalization and stripped non-Greek characters."
     )
@@ -156,16 +143,16 @@ def clean():
     # Normalize
     cleaned = []
     targets = []
-    malform = []
+    malform = 0
     for word in tqdm(data):
         try:
-            # Check form
-            assert "postag" in word and "norm" in word
+            assert "postag" in word and "form" in word
+            assert word["form"]
+            assert word["postag"]
             assert len(word["postag"]) == 9
             assert word["postag"] != "undefined"
-            assert word["norm"]
             # Build features
-            norm = word["norm"]
+            form = word["form"]
             # Build target
             target = []
             postag = word["postag"]
@@ -176,10 +163,10 @@ def clean():
                 value = targets_str[i].index(short)
                 target.append(value)
             # Append
-            cleaned.append(norm)
+            cleaned.append(form)
             targets.append(target)
-        except (AssertionError, ValueError):
-            malform.append(word["form"])
+        except (AssertionError, ValueError, TypeError):
+            malform += 1
 
     length_match = len(cleaned) == len(targets)
     assert (
@@ -191,8 +178,22 @@ def clean():
     write_pkl(targets, targets_dir)
 
     logger.info(
-        f"Success! Exporting {len(cleaned)} words (dropped {len(malform)} malformed words)."
+        f"Success! Exporting {len(cleaned)} words (dropped {malform} malformed words)."
     )
+
+
+def syllablize(read_dir, write_dir):
+    logger = logging.getLogger(__name__)
+    text = read_pkl(read_dir)
+    logger.info(f"Syllabifying {len(text)} words: {text[:10]}")
+    tokens = []
+    for word in tqdm(text):
+        syllables = syllabify(word) + [" "]
+        tokens.extend(syllables)
+
+    # Export
+    write_pkl(tokens, write_dir)
+    logger.info(f"Success! Generated {len(tokens)} syllables: {tokens[:10]}")
 
 
 if __name__ == "__main__":
@@ -200,15 +201,17 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
     match sys.argv[1]:
-        case "pt":  # Pre-training (read and normalize)
-            read_raw(cfg.pt_raw, cfg.pt_processed)
-            normalize(cfg.pt_processed, cfg.pt_text, word_key="entry")
+        case "pt":  # Pre-training
+            read_raw(cfg.pt_raw, cfg.pt_processed, postag=False)
+            # normalize(cfg.pt_processed, cfg.pt_text)
+            # syllablize(cfg.pt_text, cfg.pt_syl)
 
-        case "ft":  # Fine-tuning (read data, read map, normalize, and clean)
-            read_raw(cfg.ft_raw, cfg.ft_processed)
-            read_targets_map()
-            normalize(cfg.ft_processed, cfg.ft_normalized, word_key="form")
-            clean()
+        case "ft":  # Fine-tuning
+            read_raw(cfg.ft_raw, cfg.ft_processed, postag=True)
+            read_targets_map()  # -> cfg.ft_targets
+            normalize(cfg.ft_processed, cfg.ft_normalized)
+            clean()  # cfg.ft_normalized, cfg.ft_targets_map -> cfg.ft_text, cfg.ft_targets
+            syllablize(cfg.ft_text, cfg.ft_syl)
 
         case _:
             "Please select either 'pt' or 'ft' as options."
