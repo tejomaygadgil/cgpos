@@ -39,9 +39,10 @@ def read_raw(read_dir, write_dir, postag):
                         word_data["form"] = node.attrib.get("form")
                         if postag:
                             word_data["postag"] = node.attrib.get("postag")
+                            data.append(word_data)
                     case "punct":
                         word_data["form"] = node.attrib.get("mark")
-                data.append(word_data)
+                        data.append(word_data)
 
     # Export
     write_pkl(data, write_dir)
@@ -150,28 +151,6 @@ def clean_ft():
     logger.info(f"Success! Exported {len(cleaned)} words ({malform} malformed words).")
 
 
-def clean_pt():
-    logger = logging.getLogger(__name__)
-    logger.info("Cleaning pre-training data:")
-
-    data = read_pkl(cfg.pt_norm)
-
-    malform = 0
-    text = []
-    for word_data in data:
-        try:
-            assert word_data["form"]
-            text.append(word_data["form"])
-
-        except:
-            malform += 1
-
-    # Export
-    write_pkl(text, cfg.pt_text)
-
-    logger.info(f"Success! Exported {len(text)} words ({malform} malformed words).")
-
-
 def normalize(read_dir, write_dir):
     """
     - Decompose unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
@@ -216,10 +195,9 @@ if __name__ == "__main__":
     match sys.argv[1]:
         case "pt":  # Pre-training
             # read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
-            # beta2uni_pt() # src.pt_beta -> src.beta_uni
-            # normalize(cfg.pt_uni, cfg.pt_norm)
-            # clean_pt() # cfg.pt_norm -> cfg.pt_text
-            syllablize(cfg.pt_text, cfg.pt_syl)
+            # beta2uni_pt()  # src.pt_beta -> src.beta_uni
+            normalize(cfg.pt_uni, cfg.pt_norm)
+            syllablize(cfg.pt_norm, cfg.pt_syl)
 
         case "ft":  # Fine-tuning
             read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
