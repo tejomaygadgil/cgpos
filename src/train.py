@@ -30,19 +30,19 @@ generate_len = 32
 n_emb = 384
 n_head = 6
 n_layer = 6
-dropout = 0.7
+dropout = 0.5
 
 # Read, tokenize, and flatten text into one big list
 text = read_pkl(config.pt_text)
 text = [s for s_list in [syllabify(w) + [" "] for w in text] for s in s_list]
 
-# # Get vocabulary
+# Get vocabulary
 chars = sorted(set(text))
 vocab_size = len(chars)
 
 logging.info(f"Vocab size: {vocab_size}")
 
-# # Tokenize
+# Tokenize
 stoi = {ch: i for i, ch in enumerate(chars)}
 itos = {i: ch for ch, i in stoi.items()}
 
