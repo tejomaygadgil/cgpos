@@ -27,9 +27,9 @@ learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
 generate_len = 32
-n_emb = 384
-n_head = 6
-n_layer = 6
+n_emb = 512
+n_head = 8
+n_layer = 8
 dropout = 0.3
 
 # Read, tokenize, and flatten text into one big list
