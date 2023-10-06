@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 from greek_accentuation.syllabify import syllabify
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config
 
@@ -230,10 +231,11 @@ for step in tqdm(range(max_iters + 1)):
     # Evaluate training and val loss every eval_interval
     if step % eval_interval == 0:
         losses = estimate_loss()
-        logging.info(
-            f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
-        )
-        logging.info(generate(generate_len))
+        with logging_redirect_tqdm():
+            logging.info(
+                f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
+            )
+            logging.info(generate(generate_len))
 
     # Sample batch
     xb, yb = get_batch("train")
