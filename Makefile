@@ -5,41 +5,48 @@
 # PROJECT RULES                                                                 #
 #################################################################################
 # 1. PRE-TRAINING DATA
-## Download data for pre-training. (large!)
+## Process pre-training data.
+process_pt_data: | data/interim/pt_raw.pkl data/interim/pt_normalized.pkl
+
+data/interim/pt_raw.pkl data/interim/pt_normalized.pkl: | get_pt_data
+	$(info Making pre-training dataset)
+	python src/process_data.py pt
+
+## Download pre-training data. (large!)
 get_pt_data: | data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml
 
-data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml: | data/raw/zip
-	curl -Lo data/raw/zip/diorisis.zip https://figshare.com/ndownloader/files/11296247
-	unzip data/raw/zip/diorisis.zip -d data/raw/diorisis
+data/raw/diorisis/Achilles\ Tatius\ (0532)\ -\ Leucippe\ and\ Clitophon\ (001).xml: | data/zip
+	curl -C - -Lo data/zip/diorisis.zip https://figshare.com/ndownloader/files/11296247
+	unzip data/zip/diorisis.zip -d data/raw/diorisis
 
 # 2. FINE-TUNING DATA
 ## Process fine-tuning data.
 process_ft_data: | data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_cleaned.pkl data/processed/ft_targets.pkl
 
 data/interim/ft_raw.pkl data/reference/ft_targets_map.pkl data/interim/ft_normalized.pkl data/processed/ft_cleaned.pkl data/processed/ft_targets.pkl: | get_ft_data
-	$(info Making dataset)
-	python src/process_ft_data.py
+	$(info Making fine-tuning dataset)
+	python src/process_data.py ft
 
-## Download data for fine-tuning.
+## Download fine-tuning data.
 get_ft_data: | data/raw/treebank_data-master/README.md
 
-data/raw/treebank_data-master/README.md: | data/raw/zip
+data/raw/treebank_data-master/README.md: | data/zip
 	$(info Grabbing Perseus data)
-	curl -Lo data/raw/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
-	unzip data/raw/zip/perseus.zip -d data/raw
+	curl -C - -Lo data/zip/perseus.zip https://github.com/PerseusDL/treebank_data/archive/master.zip
+	unzip data/zip/perseus.zip -d data/raw
 
 # 3. DATA DIRECTORY
 ## Initialize data directory.
-init_data_dir: | data/raw/zip data/processed data/interim data/reference
+init_data_dir: | data/zip data/raw data/processed data/interim data/reference
 	$(info Initializing data directory)
 
-data/raw/zip data/processed data/interim data/reference:
+data/zip data/raw data/processed data/interim data/reference:
 	mkdir -p $@
 
 ## Remove all data in repository.
 remove_data: init_data_dir
 	$(info Removing data)
-	rm -rf data/raw/*  data/processed/* data/interim/* data/reference/*
+	rm -rf data/zip/* data/raw/*  data/processed/* data/interim/* data/reference/*
 
 #################################################################################
 # Self Documenting Commands                                                     #
