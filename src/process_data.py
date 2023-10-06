@@ -33,15 +33,14 @@ def read_raw(read_dir, write_dir, postag):
         root = tree.getroot()
         for sentence in root.iter("sentence"):
             for node in sentence.iter():
-                word_data = {}
                 match node.tag:
                     case "word":
-                        word_data["form"] = node.attrib.get("form")
+                        word_data = {"form": node.attrib.get("form")}
                         if postag:
                             word_data["postag"] = node.attrib.get("postag")
                         data.append(word_data)
                     case "punct":
-                        word_data["form"] = node.attrib.get("mark")
+                        word_data = {"form": node.attrib.get("mark")}
                         data.append(word_data)
 
     # Export
@@ -91,7 +90,7 @@ def beta2uni_pt():
     for word_data in tqdm(data):
         uni.append(beta_code_to_greek(word_data["form"]))
 
-    logger.info(f"Success! Converted to Greek Unicode: {data[:10]}")
+    logger.info(f"Success! Converted to Greek Unicode: {uni[:10]}")
     write_pkl(uni, cfg.pt_uni)
 
 
@@ -194,10 +193,10 @@ if __name__ == "__main__":
 
     match sys.argv[1]:
         case "pt":  # Pre-training
-            read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
-            beta2uni_pt()  # src.pt_beta -> src.beta_uni
+            # read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
+            # beta2uni_pt()  # src.pt_beta -> src.beta_uni
             # normalize(cfg.pt_uni, cfg.pt_norm)
-            # syllablize(cfg.pt_norm, cfg.pt_syl)
+            syllablize(cfg.pt_norm, cfg.pt_syl)
 
         case "ft":  # Fine-tuning
             read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
