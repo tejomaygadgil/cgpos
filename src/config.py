@@ -7,7 +7,7 @@ Config values.
 # Raw data dir
 pt_raw = "data/raw/diorisis"
 pt_processed = "data/interim/pt_raw.pkl"
-pt = "data/processed/pt.pkl"
+pt_text = "data/processed/pt_text.pkl"
 
 # FINE-TUNING
 # Raw data dir
@@ -17,5 +17,5 @@ ft_raw_targets_map = "data/raw/treebank_data-master/v2.0/Greek/TAGSETS.xml"
 ft_processed = "data/interim/ft_raw.pkl"
 ft_targets_map = "data/reference/ft_targets_map.pkl"
 ft_normalized = "data/interim/ft_normalized.pkl"
-ft_cleaned = "data/processed/ft_cleaned.pkl"
+ft_text = "data/processed/ft_text.pkl"
 ft_targets = "data/processed/ft_targets.pkl"

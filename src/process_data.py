@@ -200,9 +200,9 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
     match sys.argv[1]:
-        case "pt":  # Pre-training (just read and normalize)
+        case "pt":  # Pre-training (read and normalize)
             # read_raw(cfg.pt_raw, cfg.pt_processed)
-            normalize(cfg.pt_processed, cfg.pt, word_key="entry")
+            normalize(cfg.pt_processed, cfg.pt_text, word_key="entry")
 
         case "ft":  # Fine-tuning (read data, read map, normalize, and clean)
             read_raw(cfg.ft_raw, cfg.ft_processed)
