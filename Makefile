@@ -6,9 +6,9 @@
 #################################################################################
 # 1. PRE-TRAINING DATA
 ## Process pre-training data.
-process_pt_data: | data/interim/pt_raw.pkl data/interim/pt_normalized.pkl
+process_pt_data: | data/interim/pt_raw.pkl data/processed/pt_text.pkl
 
-data/interim/pt_raw.pkl data/interim/pt_normalized.pkl: | get_pt_data
+data/interim/pt_raw.pkl data/processed/pt_text.pkl: | get_pt_data
 	$(info Making pre-training dataset)
 	python src/process_data.py pt
 
