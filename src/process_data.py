@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
     match sys.argv[1]:
         case "pt":  # Pre-training (read and normalize)
-            # read_raw(cfg.pt_raw, cfg.pt_processed)
+            read_raw(cfg.pt_raw, cfg.pt_processed)
             normalize(cfg.pt_processed, cfg.pt_text, word_key="entry")
 
         case "ft":  # Fine-tuning (read data, read map, normalize, and clean)
