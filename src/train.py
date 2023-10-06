@@ -32,11 +32,9 @@ n_head = 6
 n_layer = 6
 dropout = 0.7
 
-# Read cleaned data
-cleaned = read_pkl(config.pt_text)
-
-# Tokenize and flatten into one big list
-text = [s for s_list in [syllabify(w) + [" "] for w in cleaned] for s in s_list]
+# Read, tokenize, and flatten text into one big list
+text = read_pkl(config.pt_text)
+text = [s for s_list in [syllabify(w) + [" "] for w in text] for s in s_list]
 
 # # Get vocabulary
 chars = sorted(set(text))
