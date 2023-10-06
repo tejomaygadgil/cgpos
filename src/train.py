@@ -20,29 +20,24 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
 # Hyperparameters
 batch_size = 64
-block_size = 512
+block_size = 256
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 1e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200
 generate_len = 32
-n_head = 8
+n_head = 6
 n_emb = n_head * 64
-n_layer = 8
-dropout = 0.3
+n_layer = 6
+dropout = 0.0
 
 # Read, tokenize, and flatten text into one big list
 raw = read_pkl(config.pt_text)
 text = [s for s_list in [syllabify(w) + [" "] for w in raw] for s in s_list]
-
-# Get vocabulary
 chars = sorted(set(text))
 vocab_size = len(chars)
-
 logging.info(f"Vocab size: {vocab_size}")
-
-# Tokenize
 stoi = {ch: i for i, ch in enumerate(chars)}
 itos = {i: ch for ch, i in stoi.items()}
 
@@ -82,7 +77,7 @@ def estimate_loss():
         losses = torch.zeros(eval_iters, device=device)
         for k in range(eval_iters):
             X, Y = get_batch(split)
-            logits, loss = model(X, Y)
+            _, loss = model(X, Y)
             losses[k] = loss.item()
         out[split] = losses.mean()
     model.train()
@@ -230,8 +225,8 @@ def generate(length=100):
 # Train
 model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb)
 m = model.to(device)
-optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
-for step in tqdm(range(max_iters)):
+optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
+for step in tqdm(range(max_iters + 1)):
     # Evaluate training and val loss every eval_interval
     if step % eval_interval == 0:
         losses = estimate_loss()
@@ -242,13 +237,7 @@ for step in tqdm(range(max_iters)):
 
     # Sample batch
     xb, yb = get_batch("train")
-
-    # Evaluate loss
-    logits, loss = m(xb, yb)
+    _, loss = m(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
-
-
-# Generate example
-logging.info(generate(generate_len))
