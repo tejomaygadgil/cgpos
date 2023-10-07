@@ -27,7 +27,7 @@ n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.5
 # Training hyperparameters
-train_size = 0.95
+train_size = 0.90
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -54,7 +54,7 @@ train_data = data[:n]
 val_data = data[n:]
 
 logging.info(f"vocab_size: {vocab_size:,}")
-logging.info(f"train_size: f{train_size}")
+logging.info(f"train_size: {train_size}")
 logging.info(f"Train set: {len(train_data):,} obs")
 logging.info(f"Val set: {len(val_data):,} obs")
 
