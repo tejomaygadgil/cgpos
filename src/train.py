@@ -27,6 +27,7 @@ n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.2
 # Training hyperparameters
+train_size = 0.9
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -47,7 +48,7 @@ decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 
 # Train and test
 data = torch.tensor(encode(tokens), dtype=torch.long)
-n = int(len(data) * 0.98)
+n = int(len(data) * train_size)
 train_data = data[:n]
 val_data = data[n:]
 
