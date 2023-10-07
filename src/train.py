@@ -22,10 +22,10 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
 batch_size = 64
 block_size = 256
-n_head = 6
+n_head = 8
 n_emb = 64 * n_head
 n_layer = 6
-dropout = 0.5
+dropout = 0.7
 # Training hyperparameters
 train_size = 0.90
 max_iters = 5000
@@ -55,8 +55,7 @@ val_data = data[n:]
 
 logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: {train_size}")
-logging.info(f"Train set: {len(train_data):,} obs")
-logging.info(f"Val set: {len(val_data):,} obs")
+logging.info(f"Train set: {len(train_data):,} obs, val set: {len(val_data):,} obs")
 
 
 # Data loading
