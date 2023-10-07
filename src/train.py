@@ -1,83 +1,59 @@
 """
 Pre-train transformers model on cleaned Greek data.
 """
+# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
 
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from greek_accentuation.syllabify import syllabify
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-import config
-
-# from model import Transformer
+import config as cfg
 from util import read_pkl
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-# Hyperparameters
-batch_size = 64
-block_size = 256
-max_iters = 5000
-eval_interval = max_iters // 20
-learning_rate = 3e-4
+# Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
-eval_iters = 200
-generate_len = 32
-n_head = 6
+# Model hyperparameters
+batch_size = 8  # 64
+block_size = 64  # 256
+n_head = 1  # 6
 n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.2
+# Training hyperparameters
+max_iters = 5000
+eval_interval = max_iters // 20
+learning_rate = 3e-4
+# Monitor settings
+eval_iters = 200
+generate_len = 32
 
-# Read, tokenize, and flatten text into one big list
-# tokens = read_pkl(config.ft_syl)
-# vocab = sorted(set(tokens))
-# vocab_size = len(vocab)
-# logging.info(f"Vocab size: {vocab_size}")
-# stoi = {ch: i for i, ch in enumerate(vocab)}
-# itos = {i: ch for ch, i in stoi.items()}
+# Read data
+tokens = read_pkl(cfg.ft_syl)
+vocab = sorted(set(tokens))
+vocab_size = len(vocab)
 
+# Build tokenizer
+tok2int = {ch: i for i, ch in enumerate(vocab)}
+int2tok = {i: ch for ch, i in tok2int.items()}
+encode = lambda text: [tok2int[c] for c in text]
+decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 
-# def encode(text):
-#     return [stoi[c] for c in text]
-#
-#
-# def decode(tokens):
-#     return "".join([itos[i] for i in tokens])
-#
-#
-# # Train and test
-# data = torch.tensor(encode(tokens), dtype=torch.long)
-# n = int(len(data) * 0.98)
-# train_data = data[:n]
-# val_data = data[n:]
-
-# wget https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
-with open("data/raw/input.txt", "r", encoding="utf-8") as f:
-    text = f.read()
-
-# here are all the unique characters that occur in this text
-chars = sorted(list(set(text)))
-vocab_size = len(chars)
-# create a mapping from characters to integers
-stoi = {ch: i for i, ch in enumerate(chars)}
-itos = {i: ch for i, ch in enumerate(chars)}
-encode = lambda s: [
-    stoi[c] for c in s
-]  # encoder: take a string, output a list of integers
-decode = lambda l: "".join(
-    [itos[i] for i in l]
-)  # decoder: take a list of integers, output a string
-
-# Train and test splits
-data = torch.tensor(encode(text), dtype=torch.long)
-n = int(0.9 * len(data))  # first 90% will be train, rest val
+# Train and test
+data = torch.tensor(encode(tokens), dtype=torch.long)
+n = int(len(data) * 0.98)
 train_data = data[:n]
 val_data = data[n:]
+
+logging.info(f"Vocab size: {vocab_size}")
+logging.info(f"Train size: {len(train_data)}")
+logging.info(f"Test size: {len(val_data)}")
 
 
 # Data loading
