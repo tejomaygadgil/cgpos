@@ -22,7 +22,8 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 # Train split parameters
 train_size = 0.95
 n_chunks = 500
-random.seed(20)
+seed = 20
+random.seed(seed)
 # Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
