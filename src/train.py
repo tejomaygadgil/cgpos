@@ -4,7 +4,6 @@ Pre-train transformers model on cleaned Greek data.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
 import random
-from math import floor, ceil
 
 import torch
 import torch.nn as nn
@@ -56,7 +55,7 @@ decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 # Train and test split
 data = torch.tensor(encode(tokens), dtype=torch.long)
 chunks = torch.split(data, len(data) // (n_chunks - 1))
-l = [1] * floor(n_chunks * train_size) + [0] * ceil(n_chunks * (1 - train_size))
+l = [1] * int(n_chunks * train_size) + [0] * int(n_chunks * (1 - train_size))
 random.shuffle(l)
 train_data = torch.cat([chunks[i] for i, v in enumerate(l) if v])
 val_data = torch.cat([chunks[i] for i, v in enumerate(l) if not v])
@@ -191,6 +190,16 @@ class Transformer(nn.Module):
         self.blocks = nn.Sequential(*[Block(n_emb, n_head) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_emb)
         self.lm_head = nn.Linear(n_emb, vocab_size)
+
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
