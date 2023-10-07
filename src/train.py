@@ -100,7 +100,7 @@ def generate(length, model):
 
 
 # Train
-model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb, dropout)
+model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb, dropout, device)
 m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
 for step in tqdm(range(max_iters)):

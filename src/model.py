@@ -98,8 +98,9 @@ class Transformer(nn.Module):
     Predicts next character using only input character embeddings.
     """
 
-    def __init__(self, vocab_size, block_size, n_layer, n_head, n_emb, dropout):
+    def __init__(self, vocab_size, block_size, n_layer, n_head, n_emb, dropout, device):
         super().__init__()
+        self.device = device
         self.tok_emb_table = nn.Embedding(vocab_size, n_emb)
         self.pos_emb_table = nn.Embedding(block_size, n_emb)
         self.blocks = nn.Sequential(
@@ -123,7 +124,7 @@ class Transformer(nn.Module):
 
         # idx and targets are both (B, T) tensor of integers
         tok_emb = self.tok_emb_table(idx)  # (B, T, C)
-        pos_emb = self.pos_emb_table(torch.arange(T))  # T, C
+        pos_emb = self.pos_emb_table(torch.arange(T), device=self.device)  # T, C
         x = tok_emb + pos_emb  # Broadcasting will update pos_emb to (B, T, C)
         x = self.blocks(x)  # Attention block
         x = self.ln_f(x)  # Final layer norm
