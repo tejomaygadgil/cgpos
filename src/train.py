@@ -27,7 +27,7 @@ n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.5
 # Training hyperparameters
-train_size = 0.9
+train_size = 0.95
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
