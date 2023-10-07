@@ -18,9 +18,10 @@ from util import read_pkl
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
+torch.manual_seed(20)
 # Train params
-train_size = 0.90
-n_chunks = 100
+train_size = 0.98
+n_chunks = 500
 random_seed = 40
 random.seed(random_seed)
 # Device params
@@ -64,7 +65,7 @@ logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: {train_size}")
 logging.info(f"n_chunks: {n_chunks}")
 logging.info(f"Train set: {len(train_data):,} obs")
-logging.info(f"val set: {len(val_data):,} obs")
+logging.info(f"Val set: {len(val_data):,} obs")
 
 
 # Data loading
