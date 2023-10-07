@@ -125,7 +125,7 @@ def estimate_loss(eval_iters, device, *batch_args):
             X, Y = get_batch(split, *batch_args)
             _, loss = model(X, Y)
             losses[k] = loss.item()
-        out.append(split)
+        out.append(losses.mean())
     model.train()
     return out
 
