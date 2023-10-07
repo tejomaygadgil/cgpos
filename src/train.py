@@ -3,6 +3,8 @@ Pre-train transformers model on cleaned Greek data.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
+from math import floor, ceil
+from random import shuffle
 
 import torch
 import torch.nn as nn
@@ -27,7 +29,8 @@ n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.7
 # Training hyperparameters
-train_size = 0.90
+train_size = 0.98
+n_chunks = 500
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -47,15 +50,20 @@ int2tok = {i: ch for ch, i in tok2int.items()}
 encode = lambda text: [tok2int[c] for c in text]
 decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 
-# Train and test
+# Train and test split
 data = torch.tensor(encode(tokens), dtype=torch.long)
-n = int(len(data) * train_size)
-train_data = data[:n]
-val_data = data[n:]
+chunks = torch.split(data, len(data) // (n_chunks - 1))
+l = [1] * floor(n_chunks * train_size) + [0] * ceil(n_chunks * (1 - train_size))
+shuffle(l)
+train_data = torch.cat([chunk for i, chunk in enumerate(chunks) if l[i]])
+val_data = torch.cat([chunk for i, chunk in enumerate(chunks) if not l[i]])
 
 logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: {train_size}")
-logging.info(f"Train set: {len(train_data):,} obs, val set: {len(val_data):,} obs")
+logging.info(f"n_chunks: {n_chunks}")
+logging.info(f"Chunk size: {len(chunks[0]):,} obs")
+logging.info(f"Train set: {len(train_data):,} obs")
+logging.info(f"val set: {len(val_data):,} obs")
 
 
 # Data loading
