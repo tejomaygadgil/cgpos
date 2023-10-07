@@ -25,7 +25,7 @@ block_size = 256
 n_head = 6
 n_emb = 64 * n_head
 n_layer = 6
-dropout = 0.2
+dropout = 0.3
 # Training hyperparameters
 train_size = 0.9
 max_iters = 5000
