@@ -36,7 +36,7 @@ eval_iters = 200
 generate_len = 32
 
 # Read data
-tokens = read_pkl(cfg.ft_syl)
+tokens = read_pkl(cfg.pt_syl)
 vocab = sorted(set(tokens))
 vocab_size = len(vocab)
 
@@ -52,9 +52,10 @@ n = int(len(data) * train_size)
 train_data = data[:n]
 val_data = data[n:]
 
-logging.info(f"Vocab size: {vocab_size}")
-logging.info(f"Train size: {len(train_data)}")
-logging.info(f"Test size: {len(val_data)}")
+logging.info(f"vocab_size: {vocab_size:_}")
+logging.info(f"train_size: f{train_size}")
+logging.info(f"n_train: {len(train_data):_}")
+logging.info(f"n_val: {len(val_data):_}")
 
 
 # Data loading
