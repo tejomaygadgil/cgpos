@@ -30,7 +30,7 @@ n_layer = 6
 dropout = 0.7
 # Training hyperparameters
 train_size = 0.98
-n_chunks = 500
+n_chunks = 100
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -61,7 +61,6 @@ val_data = torch.cat([chunk for i, chunk in enumerate(chunks) if not l[i]])
 logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: {train_size}")
 logging.info(f"n_chunks: {n_chunks}")
-logging.info(f"Chunk size: {len(chunks[0]):,} obs")
 logging.info(f"Train set: {len(train_data):,} obs")
 logging.info(f"val set: {len(val_data):,} obs")
 
