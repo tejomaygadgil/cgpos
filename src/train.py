@@ -7,6 +7,7 @@ import random
 from sys import argv
 
 import torch
+import wandb
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -18,29 +19,54 @@ from util import read_pkl
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-torch.manual_seed(20)
+
+wandb.init(
+    project="ncgpos",
+    config={
+        "train_size": 0.98,  # Train params
+        "n_chunks": 500,
+        "unc_rate": 0.01,
+        "device": "cuda" if torch.cuda.is_available() else "cpu",  # Device params
+        "batch_size": 64,  # Model hyperparameters
+        "block_size": 256,
+        "n_head": 8,
+        "n_emb": 64 * 8,
+        "n_layer": 6,
+        "dropout": 0.6,  # Training hyperparameters
+        "max_iters": 5000,
+        "eval_interval": 5000 // 20,
+        "learning_rate": 3e-4,
+        "eval_iters": 200,  # Monitor settings
+        "generate_len": 32,
+        "torch_seed": 20,  # Seeds
+        "random_seed": 40,
+    },
+)
+
+# Seeds
+torch.manual_seed(wandb.config.torch_seed)
+random.seed(wandb.config.random_seed)
 # Train params
-train_size = 0.98
-n_chunks = 500
-random_seed = 40
-random.seed(random_seed)
-unc_rate = 0.01
+train_size = wandb.config.train_size
+n_chunks = wandb.config.n_chunks
+random_seed = wandb.config.random_seed
+unc_rate = wandb.config.unc_rate
 # Device params
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = wandb.config.device
 # Model hyperparameters
-batch_size = 64
-block_size = 256
-n_head = 8
-n_emb = 64 * n_head
-n_layer = 6
-dropout = 0.6
+batch_size = wandb.config.batch_size
+block_size = wandb.config.block_size
+n_head = wandb.config.n_head
+n_emb = wandb.config.n_emb
+n_layer = wandb.config.n_layer
+dropout = wandb.config.dropout
 # Training hyperparameters
-max_iters = 5000
-eval_interval = max_iters // 20
-learning_rate = 3e-4
+max_iters = wandb.config.max_iters
+eval_interval = wandb.config.eval_interval
+learning_rate = wandb.config.learning_rate
 # Monitor settings
-eval_iters = 200
-generate_len = 32
+eval_iters = wandb.config.eval_iters
+generate_len = wandb.config.generate_len
 
 # Read data
 match argv[1]:
@@ -78,7 +104,7 @@ logging.info(f"Val set: {len(val_data):,} obs")
 
 
 # Data loading
-def get_batch(split):
+def get_batch(split, block_size, batch_size, device):
     # Generate a small batch of data of inputs x and targets y
     data = train_data if split == "train" else val_data
     ix = torch.randint(len(data) - block_size, (batch_size,))
@@ -90,21 +116,21 @@ def get_batch(split):
 
 
 @torch.no_grad()
-def estimate_loss():
-    out = {}
+def estimate_loss(eval_iters, device, *batch_args):
+    out = []
     model.eval()
     for split in ["train", "val"]:
         losses = torch.zeros(eval_iters, device=device)
         for k in range(eval_iters):
-            X, Y = get_batch(split)
+            X, Y = get_batch(split, *batch_args)
             _, loss = model(X, Y)
             losses[k] = loss.item()
-        out[split] = losses.mean()
+        out.append(split)
     model.train()
     return out
 
 
-def generate(length, model):
+def generate(length, block_size, model, device):
     context = torch.zeros((1, 1), dtype=torch.long, device=device)
     return decode(model.generate(context, length, block_size)[0].tolist())
 
@@ -115,17 +141,22 @@ m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
 for step in tqdm(range(max_iters)):
     # Evaluate training and val loss every eval_interval
-    if step % eval_interval == 0 or iter == max_iters - 1:
-        losses = estimate_loss()
+    if (step % eval_interval == 0) or (iter == max_iters - 1):
+        train_loss, val_loss = estimate_loss(
+            eval_iters, device, block_size, batch_size, device
+        )
+        wandb.log({"train_loss": train_loss, "loss": val_loss})
         with logging_redirect_tqdm():
             logging.info(
-                f"step {step}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}"
+                f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
             )
-            logging.info(generate(generate_len, model))
+            logging.info(generate(generate_len, block_size, model, device))
 
     # Sample batch
-    xb, yb = get_batch("train")
+    xb, yb = get_batch("train", block_size, batch_size, device)
     _, loss = m(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
+
+wandb.finish()
