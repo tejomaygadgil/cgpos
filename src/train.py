@@ -34,25 +34,48 @@ n_layer = 6
 dropout = 0.2
 
 # Read, tokenize, and flatten text into one big list
-tokens = read_pkl(config.ft_syl)
-vocab = sorted(set(tokens))
-vocab_size = len(vocab)
-logging.info(f"Vocab size: {vocab_size}")
-stoi = {ch: i for i, ch in enumerate(vocab)}
-itos = {i: ch for ch, i in stoi.items()}
+# tokens = read_pkl(config.ft_syl)
+# vocab = sorted(set(tokens))
+# vocab_size = len(vocab)
+# logging.info(f"Vocab size: {vocab_size}")
+# stoi = {ch: i for i, ch in enumerate(vocab)}
+# itos = {i: ch for ch, i in stoi.items()}
 
 
-def encode(text):
-    return [stoi[c] for c in text]
+# def encode(text):
+#     return [stoi[c] for c in text]
+#
+#
+# def decode(tokens):
+#     return "".join([itos[i] for i in tokens])
+#
+#
+# # Train and test
+# data = torch.tensor(encode(tokens), dtype=torch.long)
+# n = int(len(data) * 0.98)
+# train_data = data[:n]
+# val_data = data[n:]
 
+# wget https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
+with open("data/raw/input.txt", "r", encoding="utf-8") as f:
+    text = f.read()
 
-def decode(tokens):
-    return "".join([itos[i] for i in tokens])
+# here are all the unique characters that occur in this text
+chars = sorted(list(set(text)))
+vocab_size = len(chars)
+# create a mapping from characters to integers
+stoi = {ch: i for i, ch in enumerate(chars)}
+itos = {i: ch for i, ch in enumerate(chars)}
+encode = lambda s: [
+    stoi[c] for c in s
+]  # encoder: take a string, output a list of integers
+decode = lambda l: "".join(
+    [itos[i] for i in l]
+)  # decoder: take a list of integers, output a string
 
-
-# Train and test
-data = torch.tensor(encode(tokens), dtype=torch.long)
-n = int(len(data) * 0.98)
+# Train and test splits
+data = torch.tensor(encode(text), dtype=torch.long)
+n = int(0.9 * len(data))  # first 90% will be train, rest val
 train_data = data[:n]
 val_data = data[n:]
 

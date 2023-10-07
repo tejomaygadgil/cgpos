@@ -5,6 +5,12 @@
 # PROJECT RULES                                                                 #
 #################################################################################
 # 1. PRE-TRAINING DATA
+## Get shakespeare dataset
+shakespeare: | data/raw/input.txt
+
+data/raw/input.txt:
+	wget -P data/raw https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
+
 ## Process pre-training data.
 process_pt_data: | data/interim/pt_beta.pkl data/interim/pt_uni.pkl data/processed/pt_norm.pkl data/processed/pt_syl.pkl
 
