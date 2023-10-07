@@ -24,6 +24,7 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
 n_head = 8
 max_iters = 20
+n_eval = 1
 
 wandb.init(
     project="ncgpos",
@@ -39,7 +40,7 @@ wandb.init(
         "n_layer": 6,
         "dropout": 0.6,  # Training hyperparameters
         "max_iters": max_iters,
-        "eval_interval": max_iters // 20,
+        "eval_interval": max_iters // n_eval,
         "learning_rate": 3e-4,
         "eval_iters": 200,  # Monitor settings
         "generate_len": 32,
