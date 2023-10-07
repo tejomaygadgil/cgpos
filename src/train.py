@@ -23,8 +23,8 @@ log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
 n_head = 8
-max_iters = 20
-n_eval = 1
+max_iters = 10000
+n_eval = 20
 
 wandb.init(
     project="ncgpos",
