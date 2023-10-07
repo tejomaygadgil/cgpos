@@ -261,7 +261,7 @@ for step in tqdm(range(max_iters)):
 
     # Sample batch
     xb, yb = get_batch("train")
-    _, loss = model(xb, yb)
+    _, loss = m(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
