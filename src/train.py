@@ -20,9 +20,9 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 # Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
-batch_size = 8  # 64
-block_size = 64  # 256
-n_head = 1  # 6
+batch_size = 64
+block_size = 256
+n_head = 6
 n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.2
