@@ -36,7 +36,8 @@ eval_iters = 200
 generate_len = 32
 
 # Read data
-tokens = read_pkl(cfg.pt_syl)
+# tokens = read_pkl(cfg.pt_syl)
+tokens = read_pkl("/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl")
 vocab = sorted(set(tokens))
 vocab_size = len(vocab)
 
