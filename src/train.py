@@ -2,6 +2,8 @@
 Pre-train transformers model on cleaned Greek data.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
+
+from datetime import datetime
 import logging
 import random
 import sys
@@ -21,7 +23,7 @@ log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
 n_head = 8
-max_iters = 5000
+max_iters = 20
 
 wandb.init(
     project="ncgpos",
@@ -164,3 +166,8 @@ for step in tqdm(range(max_iters)):
     optimizer.step()
 
 wandb.finish()
+
+
+# Save model
+save_dir = f"wts/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pth"
+torch.save(model.state_dict(), save_dir)
