@@ -193,9 +193,9 @@ if __name__ == "__main__":
 
     match sys.argv[1]:
         case "pt":  # Pre-training
-            # read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
-            # beta2uni_pt()  # src.pt_beta -> src.beta_uni
-            # normalize(cfg.pt_uni, cfg.pt_norm)
+            read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
+            beta2uni_pt()  # src.pt_beta -> src.beta_uni
+            normalize(cfg.pt_uni, cfg.pt_norm)
             syllablize(cfg.pt_norm, cfg.pt_syl)
 
         case "ft":  # Fine-tuning

@@ -34,7 +34,7 @@ n_layer = 6
 dropout = 0.3
 
 # Read, tokenize, and flatten text into one big list
-tokens = read_pkl(config.pt_syl)
+tokens = read_pkl(config.ft_syl)
 vocab = sorted(set(tokens))
 vocab_size = len(vocab)
 logging.info(f"Vocab size: {vocab_size}")
@@ -157,10 +157,10 @@ class Block(nn.Module):
     def __init__(self, n_emb, n_head):
         super().__init__()
         head_size = n_emb // n_head
-        self.sa = MultiHeadAttention(n_head, head_size)
-        self.ffwd = FeedForward(n_emb)
         self.ln1 = nn.LayerNorm(n_emb)  # Prenorm formulation
+        self.sa = MultiHeadAttention(n_head, head_size)
         self.ln2 = nn.LayerNorm(n_emb)  # Prenorm formulation
+        self.ffwd = FeedForward(n_emb)
 
     def forward(self, x):
         x = x + self.sa(self.ln1(x))  # Skip connections
