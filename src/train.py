@@ -3,8 +3,8 @@ Pre-train transformers model on cleaned Greek data.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
+import random
 from math import floor, ceil
-from random import shuffle
 
 import torch
 import torch.nn as nn
@@ -19,6 +19,11 @@ from util import read_pkl
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
+# Train params
+train_size = 0.98
+n_chunks = 100
+random_seed = 40
+random.seed(random_seed)
 # Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
@@ -27,10 +32,8 @@ block_size = 256
 n_head = 8
 n_emb = 64 * n_head
 n_layer = 6
-dropout = 0.7
+dropout = 0.6
 # Training hyperparameters
-train_size = 0.98
-n_chunks = 100
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -54,9 +57,9 @@ decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 data = torch.tensor(encode(tokens), dtype=torch.long)
 chunks = torch.split(data, len(data) // (n_chunks - 1))
 l = [1] * floor(n_chunks * train_size) + [0] * ceil(n_chunks * (1 - train_size))
-shuffle(l)
-train_data = torch.cat([chunk for i, chunk in enumerate(chunks) if l[i]])
-val_data = torch.cat([chunk for i, chunk in enumerate(chunks) if not l[i]])
+random.shuffle(l)
+train_data = torch.cat([chunks[i] for i, v in enumerate(l) if v])
+val_data = torch.cat([chunks[i] for i, v in enumerate(l) if not v])
 
 logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: {train_size}")
