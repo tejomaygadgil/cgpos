@@ -53,10 +53,10 @@ n = int(len(data) * train_size)
 train_data = data[:n]
 val_data = data[n:]
 
-logging.info(f"vocab_size: {vocab_size:_}")
+logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: f{train_size}")
-logging.info(f"n_train: {len(train_data):_}")
-logging.info(f"n_val: {len(val_data):_}")
+logging.info(f"n_train: {len(train_data):,}")
+logging.info(f"n_val: {len(val_data):,}")
 
 
 # Data loading
