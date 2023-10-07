@@ -4,6 +4,7 @@ Pre-train transformers model on cleaned Greek data.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
 import random
+import sys
 from sys import argv
 
 import torch
@@ -13,12 +14,14 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config as cfg
 from model import Transformer
-from util import read_pkl
+from util import read_pkl, display_bar
 
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
+n_head = 8
+max_iters = 5000
 
 wandb.init(
     project="ncgpos",
@@ -29,12 +32,12 @@ wandb.init(
         "device": "cuda" if torch.cuda.is_available() else "cpu",  # Device params
         "batch_size": 64,  # Model hyperparameters
         "block_size": 256,
-        "n_head": 8,
-        "n_emb": 64 * 8,
+        "n_head": n_head,
+        "n_emb": 64 * n_head,
         "n_layer": 6,
         "dropout": 0.6,  # Training hyperparameters
-        "max_iters": 5000,
-        "eval_interval": 5000 // 20,
+        "max_iters": max_iters,
+        "eval_interval": max_iters // 20,
         "learning_rate": 3e-4,
         "eval_iters": 200,  # Monitor settings
         "generate_len": 32,
@@ -101,6 +104,7 @@ logging.info(f"train_size: {train_size}")
 logging.info(f"n_chunks: {n_chunks}")
 logging.info(f"Train set: {len(train_data):,} obs")
 logging.info(f"Val set: {len(val_data):,} obs")
+display_bar(l)
 
 
 # Data loading
@@ -145,7 +149,7 @@ for step in tqdm(range(max_iters)):
         train_loss, val_loss = estimate_loss(
             eval_iters, device, block_size, batch_size, device
         )
-        wandb.log({"train_loss": train_loss, "loss": val_loss})
+        wandb.log({"train_loss": train_loss, "val_loss": val_loss})
         with logging_redirect_tqdm():
             logging.info(
                 f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"

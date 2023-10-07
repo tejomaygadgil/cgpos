@@ -5,7 +5,7 @@ Contains utility functions to read data and clean Greek text.
 
 import logging
 import pickle
-
+import sys
 
 from greek_accentuation.characters import (
     Accent,
@@ -14,6 +14,21 @@ from greek_accentuation.characters import (
     Length,
     Subscript,
 )
+
+
+# Just for fun
+def display_bar(data, line_len=50):
+    out = ""
+    for i, v in enumerate(data):
+        if i % 50 == 0:
+            out += "\n"
+        match v:
+            case 1:
+                out += "\033[42m \033[0m"
+            case 0:
+                out += "\033[41m \033[0m"
+    sys.stdout.write(out)
+    sys.stdout.flush()
 
 
 # Path functions
