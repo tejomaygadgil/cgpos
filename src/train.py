@@ -96,7 +96,7 @@ def estimate_loss():
 
 def generate(length, model):
     context = torch.zeros((1, 1), dtype=torch.long, device=device)
-    return decode(model.generate(context, length)[0].tolist())
+    return decode(model.generate(context, length, block_size)[0].tolist())
 
 
 # Train
