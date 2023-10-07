@@ -55,8 +55,8 @@ val_data = data[n:]
 
 logging.info(f"vocab_size: {vocab_size:,}")
 logging.info(f"train_size: f{train_size}")
-logging.info(f"n_train: {len(train_data):,}")
-logging.info(f"n_val: {len(val_data):,}")
+logging.info(f"Train set: {len(train_data):,} obs")
+logging.info(f"Val set: {len(val_data):,} obs")
 
 
 # Data loading
