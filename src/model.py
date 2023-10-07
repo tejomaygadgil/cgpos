@@ -124,7 +124,7 @@ class Transformer(nn.Module):
 
         # idx and targets are both (B, T) tensor of integers
         tok_emb = self.tok_emb_table(idx)  # (B, T, C)
-        pos_emb = self.pos_emb_table(torch.arange(T), device=self.device)  # T, C
+        pos_emb = self.pos_emb_table(torch.arange(T, device=self.device))  # T, C
         x = tok_emb + pos_emb  # Broadcasting will update pos_emb to (B, T, C)
         x = self.blocks(x)  # Attention block
         x = self.ln_f(x)  # Final layer norm
