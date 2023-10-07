@@ -3,8 +3,8 @@ Pre-train transformers model on cleaned Greek data.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
-import random
 from math import floor, ceil
+from random import shuffle
 
 import torch
 import torch.nn as nn
@@ -19,11 +19,6 @@ from util import read_pkl
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-# Train split parameters
-train_size = 0.95
-n_chunks = 500
-seed = 20
-random.seed(seed)
 # Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
@@ -34,6 +29,8 @@ n_emb = 64 * n_head
 n_layer = 6
 dropout = 0.7
 # Training hyperparameters
+train_size = 0.98
+n_chunks = 500
 max_iters = 5000
 eval_interval = max_iters // 20
 learning_rate = 3e-4
@@ -57,7 +54,7 @@ decode = lambda tokens: "".join([int2tok[i] for i in tokens])
 data = torch.tensor(encode(tokens), dtype=torch.long)
 chunks = torch.split(data, len(data) // (n_chunks - 1))
 l = [1] * floor(n_chunks * train_size) + [0] * ceil(n_chunks * (1 - train_size))
-random.shuffle(l)
+shuffle(l)
 train_data = torch.cat([chunk for i, chunk in enumerate(chunks) if l[i]])
 val_data = torch.cat([chunk for i, chunk in enumerate(chunks) if not l[i]])
 
@@ -192,16 +189,6 @@ class Transformer(nn.Module):
         self.blocks = nn.Sequential(*[Block(n_emb, n_head) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_emb)
         self.lm_head = nn.Linear(n_emb, vocab_size)
-
-    #     self.apply(self._init_weights)
-    #
-    # def _init_weights(self, module):
-    #     if isinstance(module, nn.Linear):
-    #         torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
-    #         if module.bias is not None:
-    #             torch.nn.init.zeros_(module.bias)
-    #     elif isinstance(module, nn.Embedding):
-    #         torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
