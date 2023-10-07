@@ -59,7 +59,7 @@ val_data = data[n:]
 
 # Data loading
 def get_batch(split):
-    # Generate a batch of data of inputs X and targets Y
+    # Generate a small batch of data of inputs x and targets y
     data = train_data if split == "train" else val_data
     ix = torch.randint(len(data) - block_size, (batch_size,))
     x = torch.stack([data[i : i + block_size] for i in ix])
@@ -122,7 +122,7 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, num_heads, head_size):
         super().__init__()
         self.heads = nn.ModuleList([Head(head_size) for _ in range(num_heads)])
-        self.proj = nn.Linear(n_emb, n_emb)
+        self.proj = nn.Linear(head_size * num_heads, n_emb)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -181,7 +181,7 @@ class Transformer(nn.Module):
         self.ln_f = nn.LayerNorm(n_emb)
         self.lm_head = nn.Linear(n_emb, vocab_size)
 
-    def forward(self, idx, targets):
+    def forward(self, idx, targets=None):
         B, T = idx.shape
 
         # idx and targets are both (B, T) tensor of integers
@@ -208,7 +208,7 @@ class Transformer(nn.Module):
         for _ in range(max_tokens):
             # Crop idx
             idx_cond = idx[:, -block_size:]
-            logits, _ = self(idx_cond, None)  # Get prediction
+            logits, _ = self(idx_cond)  # Get prediction
             logits = logits[:, -1, :]  # Last time step (B, C)
             probs = F.softmax(logits, dim=-1)  # Convert to probs
             idx_next = torch.multinomial(probs, num_samples=1)  # Sample (B, 1)
@@ -226,9 +226,9 @@ def generate(length=100):
 model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb)
 m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
-for step in tqdm(range(max_iters + 1)):
+for step in tqdm(range(max_iters)):
     # Evaluate training and val loss every eval_interval
-    if step % eval_interval == 0:
+    if step % eval_interval == 0 or iter == max_iters - 1:
         losses = estimate_loss()
         with logging_redirect_tqdm():
             logging.info(
@@ -238,7 +238,7 @@ for step in tqdm(range(max_iters + 1)):
 
     # Sample batch
     xb, yb = get_batch("train")
-    _, loss = m(xb, yb)
+    _, loss = model(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
