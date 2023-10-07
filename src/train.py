@@ -4,6 +4,7 @@ Pre-train transformers model on cleaned Greek data.
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 import logging
 import random
+from sys import argv
 
 import torch
 from tqdm import tqdm
@@ -23,6 +24,7 @@ train_size = 0.98
 n_chunks = 500
 random_seed = 40
 random.seed(random_seed)
+unc_rate = 0.01
 # Device params
 device = "cuda" if torch.cuda.is_available() else "cpu"
 # Model hyperparameters
@@ -41,9 +43,17 @@ eval_iters = 200
 generate_len = 32
 
 # Read data
-# tokens = read_pkl(cfg.pt_syl)
-tokens = read_pkl("/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl")
-vocab = sorted(set(tokens))
+match argv[1]:
+    case "local_pt":
+        data = read_pkl(cfg.pt_syl)
+    case "local_ft":
+        data = read_pkl(cfg.ft_syl)
+    case "cloud_pt":
+        data = read_pkl("/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl")
+    case _:
+        raise ValueError("Specify a read location.")
+data = [d if random.random() > unc_rate else "<UNK>" for d in data]
+vocab = sorted(set(data))
 vocab_size = len(vocab)
 
 # Build tokenizer
@@ -51,10 +61,10 @@ tok2int = {ch: i for i, ch in enumerate(vocab)}
 int2tok = {i: ch for ch, i in tok2int.items()}
 encode = lambda text: [tok2int[c] for c in text]
 decode = lambda tokens: "".join([int2tok[i] for i in tokens])
+tokens = torch.tensor(encode(data), dtype=torch.long)
 
 # Train and test split
-data = torch.tensor(encode(tokens), dtype=torch.long)
-chunks = torch.split(data, len(data) // (n_chunks - 1))
+chunks = torch.split(tokens, len(data) // (n_chunks - 1))
 l = [1] * int(n_chunks * train_size) + [0] * int(n_chunks * (1 - train_size))
 random.shuffle(l)
 train_data = torch.cat([chunks[i] for i, v in enumerate(l) if v])
