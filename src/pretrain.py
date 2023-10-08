@@ -19,7 +19,7 @@ from model import Transformer
 from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode
 
 
-def setup():
+def setup(read_loc):
     logger = logging.getLogger(__name__)
     logger.info("Pre-training setup:")
 
@@ -53,7 +53,7 @@ def setup():
     random.seed(random_seed)
 
     # Read data
-    match argv[1]:
+    match read_loc:
         case "local_pt":
             data = read_pkl(cfg.pt_syl)
         case "local_ft":
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     match argv[1]:
         case "setup":
-            setup()
+            setup(argv[2])
         case "train":
             setup()
             train()
