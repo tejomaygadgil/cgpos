@@ -43,16 +43,16 @@ data/raw/treebank_data-master/README.md: | init_data_dir
 
 # 3. DATA DIRECTORY
 ## Initialize data directory.
-init_data_dir: | data/zip data/raw data/processed data/interim data/reference
+init_data_dir: | data/zip data/raw data/processed data/interim data/reference data/train
 	$(info Initializing data directory)
 
-data/zip data/raw data/processed data/interim data/reference:
+data/zip data/raw data/processed data/interim data/reference data/train:
 	mkdir -p $@
 
 ## Remove all data in repository.
 remove_data: init_data_dir
 	$(info Removing data)
-	rm -rf data/zip/* data/raw/*  data/processed/* data/interim/* data/reference/*
+	rm -rf data/raw/*  data/processed/* data/interim/* data/reference/*
 
 #################################################################################
 # Self Documenting Commands                                                     #

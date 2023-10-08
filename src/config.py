@@ -11,12 +11,13 @@ pt_beta = "data/interim/pt_beta.pkl"
 pt_uni = "data/interim/pt_uni.pkl"
 pt_norm = "data/processed/pt_norm.pkl"
 pt_syl = "data/processed/pt_syl.pkl"
-# Dict
-pt_vocab = "data/reference/pt_vocab.pkl"
-pt_stoi = "data/reference/pt_stoi.pkl"
-pt_itos = "data/reference/pt_itos.pkl"
-# Weights
-wts = f"/content/drive/MyDrive/Colab Notebooks/wts.pth"
+# Train
+pt_params = "data/train/pt_params.pkl"
+pt_stoi = "data/train/pt_stoi.pkl"
+pt_itos = "data/train/pt_itos.pkl"
+pt_train = "data/train/pt_train"
+pt_val = "data/train/pt_val"
+pt_wts = f"/content/drive/MyDrive/Colab Notebooks/wts.pth"
 
 
 # FINE-TUNING
