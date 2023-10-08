@@ -160,18 +160,21 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
+    def get_read_loc(arg):
+        match arg:
+            case "pt_local":
+                read_loc = cfg.pt_syl
+            case "ft_local":
+                read_loc = cfg.ft_syl
+            case "pt_cloud":
+                read_loc = cfg.pt_syl_cloud
+            case "":
+                raise ValueError("Specify a read location.")
+        return read_loc
+
     match argv[1]:
         case "setup":
-            match argv[2]:
-                case "pt_local":
-                    read_loc = cfg.pt_syl
-                case "ft_local":
-                    read_loc = cfg.ft_syl
-                case "pt_cloud":
-                    read_loc = cfg.pt_syl_cloud
-                case "":
-                    raise ValueError("Specify a read location.")
-            setup(read_loc)
+            setup(get_read_loc(argv[2]))
         case "train":
-            setup()
+            setup(get_read_loc(argv[2]))
             train()
