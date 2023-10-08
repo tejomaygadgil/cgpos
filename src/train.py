@@ -9,9 +9,10 @@ import logging
 import random
 from sys import argv
 
-import torch
 import wandb
+import torch
 from torch import nn
+from torch.nn import functional as F
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -231,21 +232,28 @@ def fine_tune():
         model.eval()
         for tokens, labels in [(train_tokens, train_labels), (val_tokens, val_labels)]:
             losses = torch.zeros(eval_iters, device=device)
+            accs = torch.zeros(eval_iters, device=device)
             for k in range(eval_iters):
                 X, Y = get_batch(tokens, block_size, batch_size, device, y=labels)
-                _, loss = model(X, Y)
+                logits, loss = model(X, Y)
+                preds = F.softmax(logits, dim=-1).argmax(dim=-1)
+                acc = (preds == Y).mean()
                 losses[k] = loss.item()
-            out.append(losses.mean())
+                accs[k] = acc
+            out.append([losses.mean(), accs.mean()])
         model.train()
         return out
 
     optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
     for step in tqdm(range(max_iters)):
         if (step % eval_interval == 0) or (iter == max_iters - 1):
-            train_loss, val_loss = estimate_loss()
+            [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
             with logging_redirect_tqdm():
-                print(
+                logger.info(
                     f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
+                )
+                logger.info(
+                    f"step {step}: train acc {train_acc:.4f}, val loss {val_acc:.4f}"
                 )
             wandb.log({"train_loss": train_loss, "val_loss": val_loss})
         xb, yb = get_batch(train_tokens, block_size, batch_size, device, y=train_labels)
