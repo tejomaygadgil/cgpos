@@ -82,12 +82,12 @@ class Block(nn.Module):
         super().__init__()
         head_size = emb_size // n_head
         self.ln1 = nn.LayerNorm(emb_size)  # So-called "prenorm" formulation
-        self.sa = MultiHeadAttention(n_head, head_size, emb_size, block_size, dropout)
+        self.mha = MultiHeadAttention(n_head, head_size, emb_size, block_size, dropout)
         self.ln2 = nn.LayerNorm(emb_size)  # So-called "prenorm" formulation
         self.ffwd = FeedForward(emb_size, dropout)
 
     def forward(self, x):
-        x = x + self.sa(self.ln1(x))  # Norm -> MHA -> Skipg
+        x = x + self.mha(self.ln1(x))  # Norm -> MHA -> Skipg
         x = x + self.ffwd(self.ln2(x))  # Norm -> FFWD -> Skip
         return x
 

@@ -3,6 +3,7 @@ Pre-train transformers model on cleaned Greek data.
 """
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
+from collections import defaultdict
 from datetime import datetime
 import logging
 import random
@@ -87,7 +88,7 @@ data = [d if random.random() > unc_rate else "<UNK>" for d in data]
 vocab_size = len(vocab)
 
 # Build tokenizer
-stoi = {ch: i for i, ch in enumerate(vocab)}
+stoi = defaultdict(lambda: 0, {ch: i for i, ch in enumerate(vocab)})  # Default to <UNK>
 itos = {i: ch for ch, i in stoi.items()}
 tokens = torch.tensor(encode(stoi, data), dtype=torch.long)
 write_pkl(stoi, cfg.pt_stoi)
