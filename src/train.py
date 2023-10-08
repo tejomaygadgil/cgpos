@@ -51,7 +51,7 @@ def setup(read_loc):
         "n_head": n_head,
         "emb_size": 64 * n_head,
         "n_layer": 6,
-        "dropout": 0.2,  # Training hyperparameters
+        "dropout": 0.3,  # Training hyperparameters
         "max_iters": max_iters,
         "eval_interval": 250,
         "learning_rate": 1e-4,
@@ -102,7 +102,7 @@ def setup(read_loc):
     display_bar(l)
 
 
-def pre_train(load_from_checkpoint):
+def pre_train(resume):
     logger = logging.getLogger(__name__)
     logger.info("Pre-training!")
 
@@ -136,7 +136,7 @@ def pre_train(load_from_checkpoint):
         model.train()
         return out
 
-    # Load model, optimizer, and schedular
+    # Load model, optimizer, and scheduler
     model = Transformer(
         vocab_size=vocab_size,
         block_size=block_size,
@@ -151,7 +151,9 @@ def pre_train(load_from_checkpoint):
         optimizer=optimizer,
         lr_lambda=lambda step: rate(step, model_size=emb_size, factor=1.0, warmup=3000),
     )
-    if load_from_checkpoint:
+
+    # Load from checkpoint
+    if resume:
         logger.info(f"Continuing from checkpoint: {cfg.pt_checkpoint}")
         checkpoint = torch.load(cfg.pt_checkpoint, map_location=torch.device(device))
         model.load_state_dict(checkpoint["model_state_dict"])
@@ -338,8 +340,8 @@ if __name__ == "__main__":
                 case _:
                     raise ValueError("Not a valid read location.")
         case "pre_train":
-            load_from_checkpoint = True if argv[2] == "load_from_checkpoint" else False
-            pre_train(load_from_checkpoint)
+            resume = True if argv[2] == "resume" else False
+            pre_train(resume)
         case "fine_tune":
-            load_from_checkpoint = True if argv[2] == "load_from_checkpoint" else False
-            fine_tune(load_from_checkpoint)
+            resume = True if argv[2] == "resume" else False
+            fine_tune(resume)
