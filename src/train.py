@@ -146,7 +146,7 @@ for step in tqdm(range(max_iters)):
             logging.info(generate(generate_len, block_size, model, device))
 
     # Sample batch
-    xb, yb = get_batch("train", block_size, batch_size, device)
+    xb, yb = get_batch(train_data, block_size, batch_size, device)
     _, loss = m(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
