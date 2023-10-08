@@ -57,6 +57,7 @@ def setup(read_loc):
     vocab = ["<UNK>"] + sorted(set(data))
     data = [d if random.random() > unc_rate else "<UNK>" for d in data]
     vocab_size = len(vocab)
+    params["vocab_size"] = vocab_size
 
     # Build tokenizer
     stoi = {ch: i for i, ch in enumerate(vocab)}
