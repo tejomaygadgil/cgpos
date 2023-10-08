@@ -162,7 +162,11 @@ def fine_tune():
     logger = logging.getLogger(__name__)
     logger.info("Fine-tuning!")
 
+    # Get params
     params = read_pkl(cfg.pt_params)
+    params["learning_rate"] = 1e-4
+    params["max_iters"] = 2000
+    params["dropout"] = 0.8
     wandb.init(project="ncgpos_ft", config=params)
     for param, value in params.items():
         globals()[param] = value
@@ -254,6 +258,7 @@ def fine_tune():
 
     # Save weights
     torch.save(model.state_dict(), cfg.ft_wts)
+    write_pkl(params, cfg.ft_params)
 
 
 if __name__ == "__main__":

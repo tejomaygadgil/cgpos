@@ -32,4 +32,5 @@ ft_norm = "data/processed/ft_norm.pkl"
 ft_targets = "data/processed/ft_targets.pkl"
 ft_syl = "data/processed/ft_syl.pkl"
 # Train
+ft_params = "data/train/ft_params.pkl"
 ft_wts = "/content/drive/MyDrive/Colab Notebooks/ft_wts.pth"
