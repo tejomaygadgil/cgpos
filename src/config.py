@@ -18,8 +18,7 @@ pt_stoi = "data/train/pt_stoi.pkl"
 pt_itos = "data/train/pt_itos.pkl"
 pt_train = "data/train/pt_train"
 pt_val = "data/train/pt_val"
-pt_wts = "/content/drive/MyDrive/Colab Notebooks/wts.pth"
-
+pt_wts = "/content/drive/MyDrive/Colab Notebooks/pt_wts.pth"
 
 # FINE-TUNING
 # Directories
@@ -32,3 +31,5 @@ ft_clean = "data/interim/ft_clean.pkl"
 ft_norm = "data/processed/ft_norm.pkl"
 ft_targets = "data/processed/ft_targets.pkl"
 ft_syl = "data/processed/ft_syl.pkl"
+# Train
+ft_wts = "/content/drive/MyDrive/Colab Notebooks/ft_wts.pth"
