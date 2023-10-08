@@ -88,7 +88,7 @@ data = [d if random.random() > unc_rate else "<UNK>" for d in data]
 vocab_size = len(vocab)
 
 # Build tokenizer
-stoi = defaultdict(lambda: 0, {ch: i for i, ch in enumerate(vocab)})  # Default to <UNK>
+stoi = {ch: i for i, ch in enumerate(vocab)}
 itos = {i: ch for ch, i in stoi.items()}
 tokens = torch.tensor(encode(stoi, data), dtype=torch.long)
 write_pkl(stoi, cfg.pt_stoi)
