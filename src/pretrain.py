@@ -163,14 +163,13 @@ if __name__ == "__main__":
     def get_read_loc(arg):
         match arg:
             case "pt_local":
-                read_loc = cfg.pt_syl
+                return cfg.pt_syl
             case "ft_local":
-                read_loc = cfg.ft_syl
+                return cfg.ft_syl
             case "pt_cloud":
-                read_loc = cfg.pt_syl_cloud
+                return cfg.pt_syl_cloud
             case "":
                 raise ValueError("Specify a read location.")
-        return read_loc
 
     match argv[1]:
         case "setup":
