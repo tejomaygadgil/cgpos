@@ -70,7 +70,6 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x):
-        print(x.shape)
         return self.net(x)
 
 
