@@ -7,6 +7,7 @@ import logging
 import pickle
 import sys
 
+import torch
 from greek_accentuation.characters import (
     Accent,
     Breathing,
@@ -16,7 +17,28 @@ from greek_accentuation.characters import (
 )
 
 
-# Just for fun
+# TRAIN
+# Tokenizing
+def encode(stoi, text):
+    return [stoi[c] for c in text]
+
+
+def decode(itos, tokens):
+    return "".join([itos[i] for i in tokens])
+
+
+# Data loading
+def get_batch(data, block_size, batch_size, device):
+    # Generate a small batch of data of inputs x and targets y
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i : i + block_size] for i in ix])
+    y = torch.stack([data[i + 1 : i + block_size + 1] for i in ix])
+    x, y = x.to(device), y.to(device)
+
+    return x, y
+
+
+# FUN
 def display_bar(data, line_len=50):
     out = ""
     for i, v in enumerate(data):
@@ -31,7 +53,7 @@ def display_bar(data, line_len=50):
     sys.stdout.flush()
 
 
-# Path functions
+# PATHING
 def read_pkl(path, verbose=True):
     logger = logging.getLogger(__name__)
     with open(path, "rb") as file:
@@ -49,6 +71,7 @@ def write_pkl(data, path, verbose=True):
         logger.info(f"Exported {path}")
 
 
+# GREEK
 # Some sets of Unicode Greek characters. Useful for normalization
 GREEK_LOWER = set(range(0x03B1, 0x03CA))
 GREEK_UPPER = set(range(0x0391, 0x03AA))

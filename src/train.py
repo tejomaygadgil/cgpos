@@ -6,7 +6,6 @@ Pre-train transformers model on cleaned Greek data.
 from datetime import datetime
 import logging
 import random
-import sys
 from sys import argv
 
 import torch
@@ -16,9 +15,8 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config as cfg
 from model import Transformer
-from util import read_pkl, display_bar
+from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode
 
-# Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
@@ -36,7 +34,7 @@ wandb.init(
         "batch_size": 64,  # Model hyperparameters
         "block_size": 256,
         "n_head": n_head,
-        "n_emb": 64 * n_head,
+        "emb_size": 64 * n_head,
         "n_layer": 6,
         "dropout": 0.6,  # Training hyperparameters
         "max_iters": max_iters,
@@ -63,7 +61,7 @@ device = wandb.config.device
 batch_size = wandb.config.batch_size
 block_size = wandb.config.block_size
 n_head = wandb.config.n_head
-n_emb = wandb.config.n_emb
+emb_size = wandb.config.emb_size
 n_layer = wandb.config.n_layer
 dropout = wandb.config.dropout
 # Training hyperparameters
@@ -89,11 +87,11 @@ vocab = sorted(set(data))
 vocab_size = len(vocab)
 
 # Build tokenizer
-tok2int = {ch: i for i, ch in enumerate(vocab)}
-int2tok = {i: ch for ch, i in tok2int.items()}
-encode = lambda text: [tok2int[c] for c in text]
-decode = lambda tokens: "".join([int2tok[i] for i in tokens])
-tokens = torch.tensor(encode(data), dtype=torch.long)
+stoi = {ch: i for i, ch in enumerate(vocab)}
+itos = {i: ch for ch, i in stoi.items()}
+tokens = torch.tensor(encode(stoi, data), dtype=torch.long)
+write_pkl(stoi, cfg.pt_stoi)
+write_pkl(itos, cfg.pt_itos)
 
 # Train and test split
 chunks = torch.split(tokens, len(data) // (n_chunks - 1))
@@ -110,26 +108,14 @@ logging.info(f"Val set: {len(val_data):,} obs")
 display_bar(l)
 
 
-# Data loading
-def get_batch(split, block_size, batch_size, device):
-    # Generate a small batch of data of inputs x and targets y
-    data = train_data if split == "train" else val_data
-    ix = torch.randint(len(data) - block_size, (batch_size,))
-    x = torch.stack([data[i : i + block_size] for i in ix])
-    y = torch.stack([data[i + 1 : i + block_size + 1] for i in ix])
-    x, y = x.to(device), y.to(device)
-
-    return x, y
-
-
 @torch.no_grad()
 def estimate_loss(eval_iters, device, *batch_args):
     out = []
     model.eval()
-    for split in ["train", "val"]:
+    for data in [train_data, val_data]:
         losses = torch.zeros(eval_iters, device=device)
         for k in range(eval_iters):
-            X, Y = get_batch(split, *batch_args)
+            X, Y = get_batch(data, *batch_args)
             _, loss = model(X, Y)
             losses[k] = loss.item()
         out.append(losses.mean())
@@ -139,11 +125,11 @@ def estimate_loss(eval_iters, device, *batch_args):
 
 def generate(length, block_size, model, device):
     context = torch.zeros((1, 1), dtype=torch.long, device=device)
-    return decode(model.generate(context, length, block_size)[0].tolist())
+    return decode(itos, model.generate(context, length, block_size)[0].tolist())
 
 
 # Train
-model = Transformer(vocab_size, block_size, n_layer, n_head, n_emb, dropout, device)
+model = Transformer(vocab_size, block_size, emb_size, n_layer, n_head, dropout, device)
 m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
 for step in tqdm(range(max_iters)):

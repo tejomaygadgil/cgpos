@@ -9,6 +9,10 @@ pt_beta = "data/interim/pt_beta.pkl"
 pt_uni = "data/interim/pt_uni.pkl"
 pt_norm = "data/processed/pt_norm.pkl"
 pt_syl = "data/processed/pt_syl.pkl"
+# Dict
+pt_vocab = "data/reference/pt_vocab.pkl"
+pt_stoi = "data/reference/pt_stoi.pkl"
+pt_itos = "data/reference/pt_itos.pkl"
 
 # FINE-TUNING
 # Directories

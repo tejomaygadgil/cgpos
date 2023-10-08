@@ -12,12 +12,11 @@ class Head(nn.Module):
     Self-attention decoder (unidirectional).
     """
 
-    def __init__(self, head_size, n_emb, block_size, dropout):
+    def __init__(self, head_size, emb_size, block_size, dropout):
         super().__init__()
-        self.head_size = head_size
-        self.key = nn.Linear(n_emb, head_size, bias=False)
-        self.query = nn.Linear(n_emb, head_size, bias=False)
-        self.value = nn.Linear(n_emb, head_size, bias=False)
+        self.key = nn.Linear(emb_size, head_size, bias=False)
+        self.query = nn.Linear(emb_size, head_size, bias=False)
+        self.value = nn.Linear(emb_size, head_size, bias=False)
         self.register_buffer("tril", torch.tril(torch.ones(block_size, block_size)))
         self.dropout = nn.Dropout(dropout)
 
@@ -28,7 +27,7 @@ class Head(nn.Module):
         q = self.query(x)  # What am I interested in?
         v = self.value(x)  # What will I actually give you if we match?
         # Compute attention score ("affinities")
-        wei = q @ k.transpose(-2, -1) * (self.head_size**-0.5)  # Normalized attention
+        wei = q @ k.transpose(-2, -1) * (k.shape[-1] ** -0.5)  # Normalized attention
         wei = wei.masked_fill(self.tril[:T, :T] == 0, float("-inf"))  # Mask
         wei = F.softmax(wei, dim=-1)  # Normalize
         wei = self.dropout(wei)
@@ -42,12 +41,12 @@ class MultiHeadAttention(nn.Module):
     Compute multiple self-attention heads in parallel.
     """
 
-    def __init__(self, num_heads, head_size, n_emb, block_size, dropout):
+    def __init__(self, num_heads, head_size, emb_size, block_size, dropout):
         super().__init__()
         self.heads = nn.ModuleList(
-            [Head(head_size, n_emb, block_size, dropout) for _ in range(num_heads)]
+            [Head(head_size, emb_size, block_size, dropout) for _ in range(num_heads)]
         )
-        self.proj = nn.Linear(head_size * num_heads, n_emb)
+        self.proj = nn.Linear(head_size * num_heads, emb_size)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -61,16 +60,17 @@ class FeedForward(nn.Module):
     Simple MLP.
     """
 
-    def __init__(self, n_emb, dropout):
+    def __init__(self, emb_size, dropout):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(n_emb, 4 * n_emb),
+            nn.Linear(emb_size, 4 * emb_size),
             nn.ReLU(),
-            nn.Linear(4 * n_emb, n_emb),
+            nn.Linear(4 * emb_size, emb_size),
             nn.Dropout(dropout),
         )
 
     def forward(self, x):
+        print(x.shape)
         return self.net(x)
 
 
@@ -79,17 +79,17 @@ class Block(nn.Module):
     Transformer block: communication -> computation.
     """
 
-    def __init__(self, n_emb, n_head, block_size, dropout):
+    def __init__(self, emb_size, n_head, block_size, dropout):
         super().__init__()
-        head_size = n_emb // n_head
-        self.ln1 = nn.LayerNorm(n_emb)  # Prenorm formulation
-        self.sa = MultiHeadAttention(n_head, head_size, n_emb, block_size, dropout)
-        self.ln2 = nn.LayerNorm(n_emb)  # Prenorm formulation
-        self.ffwd = FeedForward(n_emb, dropout)
+        head_size = emb_size // n_head
+        self.ln1 = nn.LayerNorm(emb_size)  # So-called "prenorm" formulation
+        self.sa = MultiHeadAttention(n_head, head_size, emb_size, block_size, dropout)
+        self.ln2 = nn.LayerNorm(emb_size)  # So-called "prenorm" formulation
+        self.ffwd = FeedForward(emb_size, dropout)
 
     def forward(self, x):
-        x = x + self.sa(self.ln1(x))  # Skip connections
-        x = x + self.ffwd(self.ln2(x))
+        x = x + self.sa(self.ln1(x))  # Norm -> MHA -> Skipg
+        x = x + self.ffwd(self.ln2(x))  # Norm -> FFWD -> Skip
         return x
 
 
@@ -98,16 +98,18 @@ class Transformer(nn.Module):
     Predicts next character using only input character embeddings.
     """
 
-    def __init__(self, vocab_size, block_size, n_layer, n_head, n_emb, dropout, device):
+    def __init__(
+        self, vocab_size, block_size, emb_size, n_layer, n_head, dropout, device
+    ):
         super().__init__()
         self.device = device
-        self.tok_emb_table = nn.Embedding(vocab_size, n_emb)
-        self.pos_emb_table = nn.Embedding(block_size, n_emb)
+        self.tok_emb_table = nn.Embedding(vocab_size, emb_size)
+        self.pos_emb_table = nn.Embedding(block_size, emb_size)
         self.blocks = nn.Sequential(
-            *[Block(n_emb, n_head, block_size, dropout) for _ in range(n_layer)]
+            *[Block(emb_size, n_head, block_size, dropout) for _ in range(n_layer)]
         )
-        self.ln_f = nn.LayerNorm(n_emb)
-        self.lm_head = nn.Linear(n_emb, vocab_size)
+        self.ln_f = nn.LayerNorm(emb_size)
+        self.lm_head = nn.Linear(emb_size, vocab_size)
 
         self.apply(self._init_weights)
 
