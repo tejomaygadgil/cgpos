@@ -152,7 +152,7 @@ def pre_train():
     torch.save(model.state_dict(), cfg.pt_wts)
 
 
-def fine_tune():
+def fine_tune(reload):
     logger = logging.getLogger(__name__)
     logger.info("Fine-tuning!")
 
@@ -219,7 +219,10 @@ def fine_tune():
         dropout=dropout,
         device=device,
     )
-    model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
+    if reload:
+        model.load_state_dict(torch.load(cfg.ft_wts, map_location=torch.device(device)))
+    else:
+        model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
     model.lm_head = nn.Sequential(
         nn.Linear(emb_size, emb_size * 2),
         nn.ReLU(),
@@ -298,5 +301,6 @@ if __name__ == "__main__":
             setup(get_read_loc(argv[2]))
             pre_train()
         case "fine_tune":
+            reload = True if argv[3] == "reload" else False
             setup(get_read_loc(argv[2]))
-            fine_tune()
+            fine_tune(reload)
