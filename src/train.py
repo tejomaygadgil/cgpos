@@ -219,15 +219,17 @@ def fine_tune(reload):
         dropout=dropout,
         device=device,
     )
-    if reload:
-        model.load_state_dict(torch.load(cfg.ft_wts, map_location=torch.device(device)))
-    else:
-        model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
-    model.lm_head = nn.Sequential(
+    new_head = nn.Sequential(
         nn.Linear(emb_size, emb_size * 2),
         nn.ReLU(),
         nn.Linear(emb_size * 2, len(ft_targets_map[1][0])),
     )
+    if reload:
+        model.lm_head = new_head
+        model.load_state_dict(torch.load(cfg.ft_wts, map_location=torch.device(device)))
+    else:
+        model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
+        model.lm_head = new_head
     m = model.to(device)
 
     @torch.no_grad()
