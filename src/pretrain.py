@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     match argv[1]:
         case "setup":
-            setup(argv[2])
+            setup(argv[2])  # read location (most likely "cloud_pt")
         case "train":
             setup()
             train()
