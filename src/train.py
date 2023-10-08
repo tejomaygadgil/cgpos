@@ -159,7 +159,7 @@ def fine_tune(reload):
     # Set params
     params = read_pkl(cfg.pt_params)
     params["learning_rate"] = 1e-6
-    params["batch_size"] = 16
+    params["batch_size"] = 32
     params["max_iters"] = 10000
     params["dropout"] = 0.7
     wandb.init(project="ncgpos_ft", config=params)
