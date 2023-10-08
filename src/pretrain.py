@@ -49,8 +49,8 @@ def setup():
         globals()[param] = value
 
     # Seeds
-    torch.manual_seed(wandb.config.torch_seed)
-    random.seed(wandb.config.random_seed)
+    torch.manual_seed(torch_seed)
+    random.seed(random_seed)
 
     # Read data
     match argv[1]:
@@ -110,6 +110,10 @@ def train():
     for param, value in params.items():
         globals()[param] = value
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Seeds
+    torch.manual_seed(torch_seed)
+    random.seed(random_seed)
 
     @torch.no_grad()
     def estimate_loss(eval_iters, device, *batch_args):
