@@ -208,6 +208,7 @@ def fine_tune():
     print(f"Val size: {len(val_tokens):,} obs")
     display_bar(l)
 
+    # Modify last layer
     model = Transformer(
         vocab_size=vocab_size,
         block_size=block_size,
@@ -218,7 +219,11 @@ def fine_tune():
         device=device,
     )
     model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
-    model.lm_head = nn.Linear(512, len(ft_targets_map[1][0]))  # Modify output head
+    model.lm_head = nn.Sequential(
+        nn.Linear(emb_size, emb_size * 2),
+        nn.ReLU(),
+        nn.Linear(emb_size * 2, len(ft_targets_map[1][0])),
+    )
     m = model.to(device)
 
     @torch.no_grad()
@@ -249,7 +254,6 @@ def fine_tune():
                 logger.info(f"val loss {val_loss:.4f}")
                 logger.info(f"train acc {train_acc:.4f}")
                 logger.info(f"val loss {val_acc:.4f}")
-                logger.info(generate(generate_len, block_size, itos, model, device))
             wandb.log(
                 {
                     "train_loss": train_loss,
