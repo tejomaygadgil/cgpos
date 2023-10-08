@@ -18,7 +18,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config as cfg
 from model import Transformer
-from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode
+from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode, generate
 
 
 def setup(read_loc):
@@ -110,22 +110,18 @@ def pre_train():
     random.seed(random_seed)
 
     @torch.no_grad()
-    def estimate_loss(eval_iters, device, *batch_args):
+    def estimate_loss():
         out = []
         model.eval()
         for data in [train_data, val_data]:
             losses = torch.zeros(eval_iters, device=device)
             for k in range(eval_iters):
-                X, Y = get_batch(data, *batch_args)
+                X, Y = get_batch(data, block_size, batch_size, device)
                 _, loss = model(X, Y)
                 losses[k] = loss.item()
             out.append(losses.mean())
         model.train()
         return out
-
-    def generate(length, block_size, model, device):
-        context = torch.zeros((1, 1), dtype=torch.long, device=device)
-        return decode(itos, model.generate(context, length, block_size)[0].tolist())
 
     # Train
     model = Transformer(
@@ -144,7 +140,7 @@ def pre_train():
                 logger.info(
                     f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
                 )
-                logger.info(generate(generate_len, block_size, model, device))
+                logger.info(generate(generate_len, block_size, itos, model, device))
 
         # Sample batch
         xb, yb = get_batch(train_data, block_size, batch_size, device)
@@ -163,26 +159,28 @@ def fine_tune():
     logger = logging.getLogger(__name__)
     logger.info("Fine-tuning!")
 
-    # Get params
+    # Set params
     params = read_pkl(cfg.pt_params)
     params["learning_rate"] = 1e-4
-    params["max_iters"] = 2000
+    params["max_iters"] = 10000
+    params["eval_interval"] = 250
     params["dropout"] = 0.8
     wandb.init(project="ncgpos_ft", config=params)
     for param, value in params.items():
         globals()[param] = value
-
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(device)
 
     # Read encodings
     stoi = read_pkl(cfg.pt_stoi)
     itos = read_pkl(cfg.pt_itos)
+
     # Read data
     ft_syl = read_pkl(cfg.ft_syl)
     ft_targets = read_pkl(cfg.ft_targets)
     ft_targets_map = read_pkl(cfg.ft_targets_map)
     assert len(ft_syl) == len(ft_targets)
+
     # Process data
     default_stoi = defaultdict(lambda: 0, stoi)  # Set to "<UNK>" if OOV
     tokens = []
@@ -197,6 +195,7 @@ def fine_tune():
     assert len(tokens) == len(labels)
     print(list(zip(ft_syl, ft_targets))[:5])
     print(list(zip(tokens.tolist(), labels.tolist()))[:10])
+
     # Train val split
     tokens_chunks = torch.split(tokens, len(tokens) // (n_chunks - 1))
     labels_chunks = torch.split(labels, len(labels) // (n_chunks - 1))
@@ -249,13 +248,20 @@ def fine_tune():
         if (step % eval_interval == 0) or (iter == max_iters - 1):
             [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
             with logging_redirect_tqdm():
-                logger.info(
-                    f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
-                )
-                logger.info(
-                    f"step {step}: train acc {train_acc:.4f}, val loss {val_acc:.4f}"
-                )
-            wandb.log({"train_loss": train_loss, "val_loss": val_loss})
+                logger.info(f"step {step}:")
+                logger.info(f"train loss {train_loss:.4f}")
+                logger.info(f"val loss {val_loss:.4f}")
+                logger.info(f"train acc {train_acc:.4f}")
+                logger.info(f"val loss {val_acc:.4f}")
+                logger.info(generate(generate_len, block_size, itos, model, device))
+            wandb.log(
+                {
+                    "train_loss": train_loss,
+                    "val_loss": val_loss,
+                    "train_acc": train_acc,
+                    "val_acc": val_acc,
+                }
+            )
         xb, yb = get_batch(train_tokens, block_size, batch_size, device, y=train_labels)
         _, loss = m(xb, yb)
         optimizer.zero_grad(set_to_none=True)

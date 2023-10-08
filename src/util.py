@@ -41,6 +41,15 @@ def get_batch(data, block_size, batch_size, device, y=None):
     return x, y
 
 
+@torch.no_grad()
+def generate(length, block_size, itos, model, device):
+    model.eval()
+    context = torch.zeros((1, 1), dtype=torch.long, device=device)
+    text = decode(itos, model.generate(context, length, block_size)[0].tolist())
+    model.train()
+    return text
+
+
 # FUN
 def display_bar(data, line_len=50):
     out = ""
