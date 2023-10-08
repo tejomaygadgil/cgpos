@@ -27,7 +27,6 @@ def setup(read_loc):
 
     n_head = 8
     max_iters = 10000
-    n_eval = 20
 
     params = {
         "train_size": 0.98,  # Train params
@@ -40,7 +39,7 @@ def setup(read_loc):
         "n_layer": 6,
         "dropout": 0.6,  # Training hyperparameters
         "max_iters": max_iters,
-        "eval_interval": max_iters // n_eval,
+        "eval_interval": 250,
         "learning_rate": 3e-4,
         "eval_iters": 200,  # Monitor settings
         "generate_len": 32,
@@ -161,7 +160,6 @@ def fine_tune():
     params = read_pkl(cfg.pt_params)
     params["learning_rate"] = 1e-4
     params["max_iters"] = 10000
-    params["eval_interval"] = 250
     params["dropout"] = 0.8
     wandb.init(project="ncgpos_ft", config=params)
     for param, value in params.items():
