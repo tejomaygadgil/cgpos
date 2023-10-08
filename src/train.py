@@ -158,9 +158,10 @@ def fine_tune():
 
     # Set params
     params = read_pkl(cfg.pt_params)
-    params["learning_rate"] = 1e-4
+    params["learning_rate"] = 5e-5
+    params["batch_size"] = 16
     params["max_iters"] = 10000
-    params["dropout"] = 0.8
+    params["dropout"] = 0.7
     wandb.init(project="ncgpos_ft", config=params)
     for param, value in params.items():
         globals()[param] = value
@@ -249,11 +250,9 @@ def fine_tune():
         if (step % eval_interval == 0) or (iter == max_iters - 1):
             [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
             with logging_redirect_tqdm():
-                logger.info(f"step {step}:")
-                logger.info(f"train loss {train_loss:.4f}")
-                logger.info(f"val loss {val_loss:.4f}")
-                logger.info(f"train acc {train_acc:.4f}")
-                logger.info(f"val loss {val_acc:.4f}")
+                logger.info(f"Step {step}:")
+                logger.info(f"Loss: {train_loss:.4f} train, {val_loss:.4f} val")
+                logger.info(f"Acc: {train_acc:.4f} train, {val_acc:.4f} val")
             wandb.log(
                 {
                     "train_loss": train_loss,
