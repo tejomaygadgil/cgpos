@@ -53,7 +53,6 @@ def setup(read_loc):
     random.seed(random_seed)
 
     # Read data
-    breakpoint()
     data = read_pkl(read_loc)
     vocab = ["<UNK>"] + sorted(set(data))
     data = [d if random.random() > unc_rate else "<UNK>" for d in data]
@@ -170,7 +169,7 @@ if __name__ == "__main__":
                     read_loc = cfg.ft_syl
                 case "pt_cloud":
                     read_loc = cfg.pt_syl_cloud
-                case _:
+                case "":
                     raise ValueError("Specify a read location.")
             setup(read_loc)
         case "train":
