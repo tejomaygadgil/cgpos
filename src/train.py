@@ -237,8 +237,7 @@ def fine_tune():
                 X, Y = get_batch(tokens, block_size, batch_size, device, y=labels)
                 logits, loss = model(X, Y)
                 preds = F.softmax(logits, dim=-1).argmax(dim=-1)
-                breakpoint()
-                acc = (preds == Y).mean()
+                acc = torch.sum(preds == Y.view(-1)) / Y.view(-1).size(0)
                 losses[k] = loss.item()
                 accs[k] = acc
             out.append([losses.mean(), accs.mean()])
