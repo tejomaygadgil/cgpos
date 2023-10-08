@@ -6,7 +6,9 @@ import datetime
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 # PRE-TRAINING
+# Directories
 pt_dir = "data/raw/diorisis"
+# Data
 pt_beta = "data/interim/pt_beta.pkl"
 pt_uni = "data/interim/pt_uni.pkl"
 pt_norm = "data/processed/pt_norm.pkl"
@@ -18,7 +20,8 @@ pt_stoi = "data/train/pt_stoi.pkl"
 pt_itos = "data/train/pt_itos.pkl"
 pt_train = "data/train/pt_train"
 pt_val = "data/train/pt_val"
-pt_wts = "/content/drive/MyDrive/Colab Notebooks/pt_wts.pth"
+# Model
+pt_checkpoint = "/content/drive/MyDrive/Colab Notebooks/pt_checkpoint.tar"
 
 # FINE-TUNING
 # Directories
@@ -33,4 +36,5 @@ ft_targets = "data/processed/ft_targets.pkl"
 ft_syl = "data/processed/ft_syl.pkl"
 # Train
 ft_params = "data/train/ft_params.pkl"
-ft_wts = "/content/drive/MyDrive/Colab Notebooks/ft_wts.pth"
+# Model
+pt_checkpoint = "/content/drive/MyDrive/Colab Notebooks/ft_checkpoint.tar"

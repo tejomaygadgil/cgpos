@@ -25,9 +25,8 @@ from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode, ge
 
 def rate(step, model_size, factor, warmup):
     """
-    we have to default the step to 1 for LambdaLR function
-    to avoid zero raising to negative power.
-    Cf. http://nlp.seas.harvard.edu/annotated-transformer/
+    Noam optimizer.
+    Implementation from http://nlp.seas.harvard.edu/annotated-transformer/
     """
     if step == 0:
         step = 1
@@ -103,7 +102,7 @@ def setup(read_loc):
     display_bar(l)
 
 
-def pre_train():
+def pre_train(load_from_checkpoint):
     logger = logging.getLogger(__name__)
     logger.info("Pre-training!")
 
@@ -137,17 +136,32 @@ def pre_train():
         model.train()
         return out
 
-    # Train
+    # Load model, optimizer, and schedular
     model = Transformer(
-        vocab_size, block_size, emb_size, n_layer, n_head, dropout, device
+        vocab_size=vocab_size,
+        block_size=block_size,
+        emb_size=emb_size,
+        n_layer=n_layer,
+        n_head=n_head,
+        dropout=dropout,
+        device=device,
     )
-    m = model.to(device)
     optimizer = AdamW(model.parameters(), lr=1, betas=(0.9, 0.98), eps=1e-9)
     lr_scheduler = LambdaLR(
         optimizer=optimizer,
         lr_lambda=lambda step: rate(step, model_size=emb_size, factor=1.0, warmup=3000),
     )
+    if load_from_checkpoint:
+        logger.info(f"Continuing from checkpoint: {cfg.pt_checkpoint}")
+        checkpoint = torch.load(cfg.pt_checkpoint, map_location=torch.device(device))
+        model.load_state_dict(checkpoint["model_state_dict"])
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
+    m = model.to(device)
+
+    # Train
     for step in tqdm(range(max_iters)):
+        model.train()
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
             train_loss, val_loss = estimate_loss()
@@ -169,7 +183,14 @@ def pre_train():
     wandb.finish()
 
     # Save weights
-    torch.save(model.state_dict(), cfg.pt_wts)
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "lr_scheduler_state_dict": lr_scheduler.state_dict(),
+        },
+        cfg.pt_checkpoint,
+    )
 
 
 def fine_tune(reload):
@@ -303,26 +324,22 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-    def get_read_loc(arg):
-        match arg:
-            case "pt_local":
-                return cfg.pt_syl
-            case "ft_local":
-                return cfg.ft_syl
-            case "pt_cloud":
-                return cfg.pt_syl_cloud
-            case "":
-                raise ValueError("Specify a read location.")
-            case _:
-                raise ValueError("Not a valid read location.")
-
     match argv[1]:
         case "setup":
-            setup(get_read_loc(argv[2]))
+            match argv[2]:
+                case "pt_local":
+                    setup(cfg.pt_syl)
+                case "ft_local":
+                    setup(cfg.ft_syl)
+                case "pt_cloud":
+                    setup(cfg.pt_syl_cloud)
+                case "":
+                    raise ValueError("Specify a read location.")
+                case _:
+                    raise ValueError("Not a valid read location.")
         case "pre_train":
-            setup(get_read_loc(argv[2]))
-            pre_train()
+            load_from_checkpoint = True if argv[2] == "load_from_checkpoint" else False
+            pre_train(load_from_checkpoint)
         case "fine_tune":
-            reload = True if argv[3] == "reload" else False
-            setup(get_read_loc(argv[2]))
-            fine_tune(reload)
+            load_from_checkpoint = True if argv[2] == "load_from_checkpoint" else False
+            fine_tune(load_from_checkpoint)
