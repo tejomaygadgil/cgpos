@@ -132,9 +132,7 @@ def pre_train():
     for step in tqdm(range(max_iters)):
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
-            train_loss, val_loss = estimate_loss(
-                eval_iters, device, block_size, batch_size, device
-            )
+            train_loss, val_loss = estimate_loss()
             wandb.log({"train_loss": train_loss, "val_loss": val_loss})
             with logging_redirect_tqdm():
                 logger.info(

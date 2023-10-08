@@ -61,6 +61,7 @@ def display_bar(data, line_len=50):
                 out += "\033[42m \033[0m"
             case 0:
                 out += "\033[41m \033[0m"
+    out += "\n"
     sys.stdout.write(out)
     sys.stdout.flush()
 
