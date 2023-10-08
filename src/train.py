@@ -82,8 +82,8 @@ match argv[1]:
         data = read_pkl("/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl")
     case _:
         raise ValueError("Specify a read location.")
+vocab = ["<UNK>"] + sorted(set(data))
 data = [d if random.random() > unc_rate else "<UNK>" for d in data]
-vocab = sorted(set(data))
 vocab_size = len(vocab)
 
 # Build tokenizer
@@ -156,5 +156,5 @@ wandb.finish()
 
 
 # Save model
-save_dir = f"wts/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pth"
+save_dir = f"/content/drive/MyDrive/Colab Notebooks/wts_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pth"
 torch.save(model.state_dict(), save_dir)
