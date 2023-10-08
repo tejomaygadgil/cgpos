@@ -13,12 +13,27 @@ import wandb
 import torch
 from torch import nn
 from torch.nn import functional as F
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import LambdaLR
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config as cfg
 from model import Transformer
 from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode, generate
+
+
+def rate(step, model_size, factor, warmup):
+    """
+    we have to default the step to 1 for LambdaLR function
+    to avoid zero raising to negative power.
+    Cf. http://nlp.seas.harvard.edu/annotated-transformer/
+    """
+    if step == 0:
+        step = 1
+    return factor * (
+        model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5))
+    )
 
 
 def setup(read_loc):
@@ -37,10 +52,10 @@ def setup(read_loc):
         "n_head": n_head,
         "emb_size": 64 * n_head,
         "n_layer": 6,
-        "dropout": 0.6,  # Training hyperparameters
+        "dropout": 0.2,  # Training hyperparameters
         "max_iters": max_iters,
         "eval_interval": 250,
-        "learning_rate": 3e-4,
+        "learning_rate": 1e-4,
         "eval_iters": 200,  # Monitor settings
         "generate_len": 32,
         "torch_seed": 20,  # Seeds
@@ -127,7 +142,11 @@ def pre_train():
         vocab_size, block_size, emb_size, n_layer, n_head, dropout, device
     )
     m = model.to(device)
-    optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
+    optimizer = AdamW(model.parameters(), lr=1, betas=(0.9, 0.98), eps=1e-9)
+    lr_scheduler = LambdaLR(
+        optimizer=optimizer,
+        lr_lambda=lambda step: rate(step, model_size=emb_size, factor=1.0, warmup=3000),
+    )
     for step in tqdm(range(max_iters)):
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
@@ -145,6 +164,7 @@ def pre_train():
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
+        lr_scheduler.step()
 
     wandb.finish()
 
