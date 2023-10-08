@@ -53,15 +53,7 @@ def setup(read_loc):
     random.seed(random_seed)
 
     # Read data
-    match read_loc:
-        case "local_pt":
-            data = read_pkl(cfg.pt_syl)
-        case "local_ft":
-            data = read_pkl(cfg.ft_syl)
-        case "cloud_pt":
-            data = read_pkl("/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl")
-        case _:
-            raise ValueError("Specify a read location.")
+    data = read_pkl(read_loc)
     vocab = ["<UNK>"] + sorted(set(data))
     data = [d if random.random() > unc_rate else "<UNK>" for d in data]
     vocab_size = len(vocab)
@@ -86,11 +78,11 @@ def setup(read_loc):
     write_pkl(val_data, cfg.pt_val)
 
     # Log
-    logging.info(f"vocab_size: {vocab_size:,}")
-    logging.info(f"train_size: {train_size}")
-    logging.info(f"n_chunks: {n_chunks}")
-    logging.info(f"Train set: {len(train_data):,} obs")
-    logging.info(f"Val set: {len(val_data):,} obs")
+    logger.info(f"vocab_size: {vocab_size:,}")
+    logger.info(f"train_size: {train_size}")
+    logger.info(f"n_chunks: {n_chunks}")
+    logger.info(f"Train set: {len(train_data):,} obs")
+    logger.info(f"Val set: {len(val_data):,} obs")
     display_bar(l)
 
 
@@ -99,7 +91,6 @@ def train():
     logger.info("Pre-training!")
 
     # Load data
-    stoi = read_pkl(cfg.pt_stoi)
     itos = read_pkl(cfg.pt_itos)
     train_data = read_pkl(cfg.pt_train)
     val_data = read_pkl(cfg.pt_val)
@@ -147,10 +138,10 @@ def train():
             )
             wandb.log({"train_loss": train_loss, "val_loss": val_loss})
             with logging_redirect_tqdm():
-                logging.info(
+                logger.info(
                     f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
                 )
-                logging.info(generate(generate_len, block_size, model, device))
+                logger.info(generate(generate_len, block_size, model, device))
 
         # Sample batch
         xb, yb = get_batch(train_data, block_size, batch_size, device)
@@ -171,7 +162,16 @@ if __name__ == "__main__":
 
     match argv[1]:
         case "setup":
-            setup(argv[2])  # read location (most likely "cloud_pt")
+            match argv[2]:
+                case "local_pt":
+                    read_loc = read_pkl(cfg.pt_syl)
+                case "local_ft":
+                    read_loc = read_pkl(cfg.ft_syl)
+                case "cloud_pt":
+                    read_loc = read_pkl(cfg.pt_syl_cloud)
+                case _:
+                    raise ValueError("Specify a read location.")
+            setup(read_loc)
         case "train":
             setup()
             train()

@@ -11,6 +11,7 @@ pt_beta = "data/interim/pt_beta.pkl"
 pt_uni = "data/interim/pt_uni.pkl"
 pt_norm = "data/processed/pt_norm.pkl"
 pt_syl = "data/processed/pt_syl.pkl"
+pt_syl_cloud = "/content/drive/MyDrive/Colab Notebooks/pt_syl.pkl"
 # Train
 pt_params = "data/train/pt_params.pkl"
 pt_stoi = "data/train/pt_stoi.pkl"
