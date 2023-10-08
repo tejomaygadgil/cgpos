@@ -158,7 +158,7 @@ def fine_tune():
 
     # Set params
     params = read_pkl(cfg.pt_params)
-    params["learning_rate"] = 5e-5
+    params["learning_rate"] = 1e-6
     params["batch_size"] = 16
     params["max_iters"] = 10000
     params["dropout"] = 0.7
@@ -251,8 +251,8 @@ def fine_tune():
             [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
             with logging_redirect_tqdm():
                 logger.info(f"Step {step}:")
-                logger.info(f"Loss: {train_loss:.4f} train, {val_loss:.4f} val")
-                logger.info(f"Acc: {train_acc:.4f} train, {val_acc:.4f} val")
+                logger.info(f"Loss: train {train_loss:.4f}, val {val_loss:.4f} ")
+                logger.info(f"Acc: train {train_acc:.4f}, val {val_acc:.4f} ")
             wandb.log(
                 {
                     "train_loss": train_loss,
