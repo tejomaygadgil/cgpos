@@ -170,6 +170,8 @@ if __name__ == "__main__":
                 return cfg.pt_syl_cloud
             case "":
                 raise ValueError("Specify a read location.")
+            case _:
+                raise ValueError("Not a valid read location.")
 
     match argv[1]:
         case "setup":
