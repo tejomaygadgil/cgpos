@@ -173,15 +173,17 @@ def normalize(read_dir, write_dir):
     )
 
 
-def syllablize(read_dir, write_dir):
+def syllablize(read_dir, write_dir, flatten):
     logger = logging.getLogger(__name__)
     text = read_pkl(read_dir)
     logger.info(f"Syllabifying {len(text)} words: {text[:10]}")
     tokens = []
     for word in tqdm(text):
-        syllables = syllabify(word) + [" "]
-        tokens.extend(syllables)
-
+        syllables = syllabify(word)
+        if flatten:
+            tokens.extend(syllables)
+        else:
+            tokens.append(syllables)
     # Export
     write_pkl(tokens, write_dir)
     logger.info(f"Success! Generated {len(tokens)} syllables: {tokens[:10]}")
@@ -196,14 +198,14 @@ if __name__ == "__main__":
             read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
             beta2uni_pt()  # src.pt_beta -> src.beta_uni
             normalize(cfg.pt_uni, cfg.pt_norm)
-            syllablize(cfg.pt_norm, cfg.pt_syl)
+            syllablize(cfg.pt_norm, cfg.pt_syl, flatten=True)
 
         case "ft":  # Fine-tuning
             read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
             read_targets_map_ft()  # cfg.ft_targets_map_dir -> cfg.ft_targets_map
             clean_ft()  # cfg.ft_raw, cfg.ft_targets_map -> cfg.ft_clean, cfg.ft_targets
             normalize(cfg.ft_clean, cfg.ft_norm)
-            syllablize(cfg.ft_norm, cfg.ft_syl)
+            syllablize(cfg.ft_norm, cfg.ft_syl, flatten=False)
 
         case _:
             "Please select either 'pt' or 'ft' as options."

@@ -30,7 +30,7 @@ wandb.init(
     config={
         "train_size": 0.98,  # Train params
         "n_chunks": 500,
-        "unc_rate": 0.01,
+        "unc_rate": 0.005,
         "device": "cuda" if torch.cuda.is_available() else "cpu",  # Device params
         "batch_size": 64,  # Model hyperparameters
         "block_size": 256,
