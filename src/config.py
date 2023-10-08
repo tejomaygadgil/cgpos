@@ -1,6 +1,8 @@
 """
 Config values.
 """
+import datetime
+
 # Author: Tejomay Gadgil <tejomaygadgil@gmail.com>
 
 # PRE-TRAINING
@@ -13,6 +15,9 @@ pt_syl = "data/processed/pt_syl.pkl"
 pt_vocab = "data/reference/pt_vocab.pkl"
 pt_stoi = "data/reference/pt_stoi.pkl"
 pt_itos = "data/reference/pt_itos.pkl"
+# Weights
+wts = f"/content/drive/MyDrive/Colab Notebooks/wts.pth"
+
 
 # FINE-TUNING
 # Directories

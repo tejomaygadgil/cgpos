@@ -157,5 +157,4 @@ wandb.finish()
 
 
 # Save model
-save_dir = f"/content/drive/MyDrive/Colab Notebooks/wts_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pth"
-torch.save(model.state_dict(), save_dir)
+torch.save(model.state_dict(), cfg.wts)
