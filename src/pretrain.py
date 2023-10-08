@@ -164,11 +164,11 @@ if __name__ == "__main__":
     match argv[1]:
         case "setup":
             match argv[2]:
-                case "local_pt":
+                case "pt_local":
                     read_loc = cfg.pt_syl
-                case "local_ft":
+                case "ft_local":
                     read_loc = cfg.ft_syl
-                case "cloud_pt":
+                case "pt_cloud":
                     read_loc = cfg.pt_syl_cloud
                 case _:
                     raise ValueError("Specify a read location.")
