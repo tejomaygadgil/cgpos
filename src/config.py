@@ -18,7 +18,7 @@ pt_stoi = "data/train/pt_stoi.pkl"
 pt_itos = "data/train/pt_itos.pkl"
 pt_train = "data/train/pt_train"
 pt_val = "data/train/pt_val"
-pt_wts = f"/content/drive/MyDrive/Colab Notebooks/wts.pth"
+pt_wts = "/content/drive/MyDrive/Colab Notebooks/wts.pth"
 
 
 # FINE-TUNING
