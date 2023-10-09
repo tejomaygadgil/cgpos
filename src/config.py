@@ -21,7 +21,7 @@ pt_itos = "data/train/pt_itos.pkl"
 pt_train = "data/train/pt_train"
 pt_val = "data/train/pt_val"
 # Model
-pt_checkpoint = "/content/drive/MyDrive/Colab Notebooks/pt_checkpoint.tar"
+pt_checkpoint = "/content/drive/MyDrive/Colab Notebooks/pt_checkpoint_"
 
 # FINE-TUNING
 # Directories
@@ -37,4 +37,4 @@ ft_syl = "data/processed/ft_syl.pkl"
 # Train
 ft_params = "data/train/ft_params.pkl"
 # Model
-pt_checkpoint = "/content/drive/MyDrive/Colab Notebooks/ft_checkpoint.tar"
+ft_checkpoint = "/content/drive/MyDrive/Colab Notebooks/ft_checkpoint.tar"

@@ -24,7 +24,7 @@ from util import read_pkl, display_bar, write_pkl, get_batch, encode, generate, 
 
 # Set params
 n_head = 8
-max_iters = 10000
+max_iters = 100
 params = {
     "train_size": 0.98,  # Train params
     "n_chunks": 500,
@@ -91,9 +91,12 @@ def setup(read_loc):
     display_bar(l)
 
 
-def pre_train(resume):
+def pre_train(checkpoint_id, resume):
     logger = logging.getLogger(__name__)
     logger.info("Pre-training!")
+
+    # Set checkpoint dir
+    checkpoint_dir = cfg.pt_checkpoint + checkpoint_id + ".tar"
 
     # Load data
     itos = read_pkl(cfg.pt_itos)
@@ -129,8 +132,7 @@ def pre_train(resume):
 
     # Load from checkpoint
     if resume:
-        logger.info(f"Continuing from checkpoint: {cfg.pt_checkpoint}")
-        checkpoint = torch.load(cfg.pt_checkpoint, map_location=torch.device(device))
+        checkpoint = torch.load(checkpoint_dir, map_location=torch.device(device))
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
@@ -186,7 +188,7 @@ def pre_train(resume):
             "optimizer_state_dict": optimizer.state_dict(),
             "lr_scheduler_state_dict": lr_scheduler.state_dict(),
         },
-        cfg.pt_checkpoint,
+        checkpoint_dir,
     )
 
 
@@ -335,8 +337,18 @@ if __name__ == "__main__":
                 case _:
                     raise ValueError("Not a valid read location.")
         case "pre_train":
-            resume = True if argv[2] == "resume" else False
-            pre_train(resume)
+            if len(argv) == 3:
+                checkpoint_id = argv[1]
+                match argv[2]:
+                    case "resume":
+                        pre_train(resume=True, checkpoint_id=checkpoint_id)
+                    case "new":
+                        pre_train(resume=False, checkpoint_id=checkpoint_id)
+                    case _:
+                        raise ValueError("Invalid resume value.")
+            else:
+                raise ValueError("Please supply a checkpoint ID and resume flag.")
+
         case "fine_tune":
             resume = True if argv[2] == "resume" else False
             fine_tune(resume)
