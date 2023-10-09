@@ -24,7 +24,7 @@ from util import read_pkl, display_bar, write_pkl, get_batch, encode, generate, 
 # Set params
 params = {
     "trunc_len": 500,
-    "batch_size": 32,  # Model hyperparameters
+    "batch_size": 1,  # Model hyperparameters
     "block_size": 256,
     "n_layer": 6,
     "n_head": 8,
