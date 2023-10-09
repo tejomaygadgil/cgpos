@@ -337,17 +337,14 @@ if __name__ == "__main__":
                 case _:
                     raise ValueError("Not a valid read location.")
         case "pre_train":
-            if len(argv) == 3:
-                checkpoint_id = argv[1]
-                match argv[2]:
-                    case "resume":
-                        pre_train(resume=True, checkpoint_id=checkpoint_id)
-                    case "new":
-                        pre_train(resume=False, checkpoint_id=checkpoint_id)
-                    case _:
-                        raise ValueError("Invalid resume value.")
-            else:
-                raise ValueError("Please supply a checkpoint ID and resume flag.")
+            assert len(argv) == 4, "Please supply a checkpoint ID and resume flag."
+            match argv[3]:
+                case "resume":
+                    pre_train(checkpoint_id=argv[2], resume=True)
+                case "new":
+                    pre_train(checkpoint_id=argv[2], resume=False)
+                case _:
+                    raise ValueError("Invalid resume flag.")
 
         case "fine_tune":
             resume = True if argv[2] == "resume" else False
