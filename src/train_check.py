@@ -93,23 +93,21 @@ def zero_loss_check():
 
     @torch.no_grad()
     def estimate_loss():
-        out = []
         model.eval()
         losses = torch.zeros(eval_iters, device=device)
         for k in range(eval_iters):
             X, Y = get_batch(data, block_size, batch_size, device)
             _, loss = model(X, Y)
             losses[k] = loss.item()
-        out.append(losses.mean())
         model.train()
-        return out
+        return losses.mean()
 
     # Train
     for step in tqdm(range(max_iters)):
         model.train()
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
-            train_loss, _ = estimate_loss()
+            train_loss = estimate_loss()
             with logging_redirect_tqdm():
                 logger.info(f"Step {step} - loss: train {train_loss:.3f}")
 
