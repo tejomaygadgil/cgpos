@@ -58,7 +58,7 @@ def zero_loss_check():
 
     # Read data
 
-    data = read_pkl(read_loc)
+    data = read_pkl(cfg.pt_syl_cloud)
     data = data[:trunc_len]  # Truncate data
     vocab = ["<UNK>"] + sorted(set(data))
     data = [d if random.random() > unk_rate else "<UNK>" for d in data]
