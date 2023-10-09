@@ -68,7 +68,7 @@ def zero_loss_check():
     # Build tokenizer
     stoi = {ch: i for i, ch in enumerate(vocab)}
     itos = {i: ch for ch, i in stoi.items()}
-    tokens = torch.tensor(encode(stoi, data), dtype=torch.long)
+    data = torch.tensor(encode(stoi, data), dtype=torch.long)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -114,7 +114,7 @@ def zero_loss_check():
                 logger.info(f"Step {step} - loss: train {train_loss:.3f}")
 
         # Sample batch
-        xb, yb = get_batch(train_data, block_size, batch_size, device)
+        xb, yb = get_batch(data, block_size, batch_size, device)
         _, loss = model(xb, yb)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
