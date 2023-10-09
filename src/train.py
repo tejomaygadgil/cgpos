@@ -175,7 +175,7 @@ def pre_train(checkpoint_id, resume):
 
         # Sample batch
         xb, yb = get_batch(train_data, block_size, batch_size, device)
-        _, loss = m(xb, yb)
+        _, loss = model(xb, yb)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
