@@ -28,7 +28,7 @@ params = {
     "train_size": 0.98,  # Train params
     "n_chunks": 500,
     "unk_rate": 0.005,
-    "batch_size": 32,  # Model hyperparameters
+    "batch_size": 64,  # Model hyperparameters
     "block_size": 256,
     "n_head": n_head,
     "emb_size": 64 * n_head,
@@ -36,7 +36,7 @@ params = {
     "dropout": 0.3,  # Training hyperparameters
     "max_iters": 20000,
     "eval_interval": 250,
-    "base_lr": 5e-2,
+    "base_lr": 1e-1,
     "eval_iters": 200,  # Monitor settings
     "generate_len": 32,
     "torch_seed": 20,  # Seeds
