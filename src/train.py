@@ -46,7 +46,7 @@ def setup(read_loc):
         "train_size": 0.98,  # Train params
         "n_chunks": 500,
         "unc_rate": 0.005,
-        "batch_size": 64,  # Model hyperparameters
+        "batch_size": 32,  # Model hyperparameters
         "block_size": 256,
         "n_head": n_head,
         "emb_size": 64 * n_head,
@@ -54,7 +54,7 @@ def setup(read_loc):
         "dropout": 0.3,  # Training hyperparameters
         "max_iters": max_iters,
         "eval_interval": 250,
-        "learning_rate": 1e-4,
+        "base_lr": 0.1,
         "eval_iters": 200,  # Monitor settings
         "generate_len": 32,
         "torch_seed": 20,  # Seeds
@@ -122,20 +122,6 @@ def pre_train(resume):
     torch.manual_seed(torch_seed)
     random.seed(random_seed)
 
-    @torch.no_grad()
-    def estimate_loss():
-        out = []
-        model.eval()
-        for data in [train_data, val_data]:
-            losses = torch.zeros(eval_iters, device=device)
-            for k in range(eval_iters):
-                X, Y = get_batch(data, block_size, batch_size, device)
-                _, loss = model(X, Y)
-                losses[k] = loss.item()
-            out.append(losses.mean())
-        model.train()
-        return out
-
     # Load model, optimizer, and scheduler
     model = Transformer(
         vocab_size=vocab_size,
@@ -146,7 +132,7 @@ def pre_train(resume):
         dropout=dropout,
         device=device,
     )
-    optimizer = AdamW(model.parameters(), lr=1, betas=(0.9, 0.98), eps=1e-9)
+    optimizer = AdamW(model.parameters(), lr=base_lr, betas=(0.9, 0.98), eps=1e-9)
     lr_scheduler = LambdaLR(
         optimizer=optimizer,
         lr_lambda=lambda step: rate(step, model_size=emb_size, factor=1.0, warmup=3000),
@@ -161,16 +147,36 @@ def pre_train(resume):
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
     m = model.to(device)
 
+    @torch.no_grad()
+    def estimate_loss():
+        out = []
+        model.eval()
+        for data in [train_data, val_data]:
+            losses = torch.zeros(eval_iters, device=device)
+            for k in range(eval_iters):
+                X, Y = get_batch(data, block_size, batch_size, device)
+                _, loss = model(X, Y)
+                losses[k] = loss.item()
+            out.append(losses.mean())
+        model.train()
+        return out
+
     # Train
     for step in tqdm(range(max_iters)):
         model.train()
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
             train_loss, val_loss = estimate_loss()
-            wandb.log({"train_loss": train_loss, "val_loss": val_loss})
+            wandb.log(
+                {
+                    "train_loss": train_loss,
+                    "val_loss": val_loss,
+                    "lr": lr_scheduler.get_last_lr(),
+                }
+            )
             with logging_redirect_tqdm():
                 logger.info(
-                    f"step {step}: train loss {train_loss:.4f}, val loss {val_loss:.4f}"
+                    f"Step {step} - train loss {train_loss:.3f} - val loss {val_loss:.3f}"
                 )
                 logger.info(generate(generate_len, block_size, itos, model, device))
 
