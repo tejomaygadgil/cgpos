@@ -45,9 +45,9 @@ params = {
 }
 
 
-def zero_loss_check(read_loc):
+def zero_loss_check():
     logger = logging.getLogger(__name__)
-    logger.info("Pre-training setup:")
+    logger.info("Checking zero loss:")
 
     for param, value in params.items():
         globals()[param] = value
