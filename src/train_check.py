@@ -55,8 +55,6 @@ def zero_loss_check():
 
     data = read_pkl(cfg.pt_syl_cloud)
     data = data[:trunc_len]  # Truncate data
-    vocab = ["<UNK>"] + sorted(set(data))
-    data = [d if random.random() > unk_rate else "<UNK>" for d in data]
     vocab_size = len(vocab)
     params["vocab_size"] = vocab_size
 
@@ -65,6 +63,7 @@ def zero_loss_check():
     itos = {i: ch for ch, i in stoi.items()}
     data = torch.tensor(encode(stoi, data), dtype=torch.long)
 
+    logger.info(f"vocab_size: {vocab_size}")
     logger.info(f"data len : {data.shape}")
     logger.info(f"data: {data}")
 
