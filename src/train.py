@@ -37,7 +37,7 @@ params = {
     "dropout": 0.3,  # Training hyperparameters
     "max_iters": max_iters,
     "eval_interval": 250,
-    "base_lr": 0.1,
+    "base_lr": 1e-2,
     "eval_iters": 200,  # Monitor settings
     "generate_len": 32,
     "torch_seed": 20,  # Seeds
