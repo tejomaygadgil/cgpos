@@ -34,7 +34,7 @@ params = {
     "emb_size": 64 * n_head,
     "n_layer": 6,
     "dropout": 0.3,  # Training hyperparameters
-    "max_iters": 5000,
+    "max_iters": 20000,
     "eval_interval": 250,
     "base_lr": 5e-2,
     "eval_iters": 200,  # Monitor settings
