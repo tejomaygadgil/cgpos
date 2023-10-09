@@ -105,7 +105,7 @@ def pre_train(checkpoint_id, resume):
 
     # Load params
     params = read_pkl(cfg.pt_params)
-    wandb.init(project="ncgpos", config=params)
+    wandb.init(project="ncgpos_pt", config=params)
     for param, value in params.items():
         globals()[param] = value
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -345,7 +345,6 @@ if __name__ == "__main__":
                     pre_train(checkpoint_id=argv[2], resume=False)
                 case _:
                     raise ValueError("Invalid resume flag.")
-
         case "fine_tune":
             resume = True if argv[2] == "resume" else False
             fine_tune(resume)
