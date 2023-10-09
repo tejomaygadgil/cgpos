@@ -130,16 +130,15 @@ def pre_train(checkpoint_id, resume):
         lr_lambda=lambda step: rate(step, model_size=emb_size, factor=1.0, warmup=3000),
     )
 
+    # Send to device
+    model.to(device)
+
     # Load from checkpoint
     if resume:
         checkpoint = torch.load(checkpoint_dir, map_location=torch.device(device))
-        breakpoint()
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
-
-    # Send to device
-    model.to(device)
 
     @torch.no_grad()
     def estimate_loss():
