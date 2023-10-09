@@ -64,6 +64,8 @@ def zero_loss_check():
     itos = {i: ch for ch, i in stoi.items()}
     data = torch.tensor(encode(stoi, data), dtype=torch.long)
 
+    xb, yb = get_batch(data, block_size, batch_size, device)
+
     logger.info(f"vocab_size: {vocab_size}")
     logger.info(f"data len : {data.shape}")
     logger.info(f"data: {data}")
@@ -89,29 +91,14 @@ def zero_loss_check():
     # Send to device
     model.to(device)
 
-    @torch.no_grad()
-    def estimate_loss():
-        model.eval()
-        losses = torch.zeros(eval_iters, device=device)
-        for k in range(eval_iters):
-            X, Y = get_batch(data, block_size, batch_size, device)
-            _, loss = model(X, Y)
-            losses[k] = loss.item()
-        model.train()
-        return losses.mean()
-
     # Train
     for step in tqdm(range(max_iters)):
         model.train()
-        # Evaluate training and val loss every eval_interval
-        if (step % eval_interval == 0) or (iter == max_iters - 1):
-            train_loss = estimate_loss()
-            with logging_redirect_tqdm():
-                logger.info(f"Step {step} - loss: train {train_loss:.3f}")
 
-        # Sample batch
-        xb, yb = get_batch(data, block_size, batch_size, device)
         _, loss = model(xb, yb)
+        with logging_redirect_tqdm():
+            logger.info(f"Step {step} - loss: train {loss:.3f}")
+
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
