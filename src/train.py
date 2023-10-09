@@ -136,7 +136,9 @@ def pre_train(checkpoint_id, resume):
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
-    m = model.to(device)
+
+    # Send to device
+    model.to(device)
 
     @torch.no_grad()
     def estimate_loss():
