@@ -63,13 +63,12 @@ def zero_loss_check():
     itos = {i: ch for ch, i in stoi.items()}
     data = torch.tensor(encode(stoi, data), dtype=torch.long)
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
     xb, yb = get_batch(data, block_size, batch_size, device)
 
     logger.info(f"vocab_size: {vocab_size}")
-    logger.info(f"data len : {data.shape}")
-    logger.info(f"data: {data}")
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    logger.info(f"data: {list(zip(xb.tolist(), yb.tolist()))}")
 
     # Load model, optimizer, and scheduler
     model = Transformer(
