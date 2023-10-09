@@ -20,9 +20,6 @@ from util import is_greek, is_punctuation, read_pkl, write_pkl
 
 
 def read_raw(read_dir, write_dir, postag):
-    """
-    Convert raw XML data into a tabular format.
-    """
     logger = logging.getLogger(__name__)
     files = sorted(list(Path(read_dir).iterdir()))
     logger.info(f"Reading {len(files)} files from {read_dir}")
@@ -62,9 +59,6 @@ def read_raw(read_dir, write_dir, postag):
 
 
 def read_targets_map_ft():
-    """
-    Build map to parse targets.
-    """
     logger = logging.getLogger(__name__)
     logger.info("Building targets map:")
 
@@ -98,24 +92,18 @@ def read_targets_map_ft():
 def beta2uni_pt():
     logger = logging.getLogger(__name__)
     data = read_pkl(cfg.pt_beta)
-    logger.info(f"Converting from Beta Code: {data[:10]}")
-    uni = []
-    for word_data in tqdm(data):
-        uni.append(beta_code_to_greek(word_data["form"]))
+    logger.info(f"Converting from Beta Code:")
+    for work_i in tqdm(range(len(data))):
+        for sentence_i in range(len(data[work_i])):
+            for word_i, word in enumerate(data[work_i][sentence_i]):
+                data[work_i][sentence_i][word_i] = beta_code_to_greek(word["form"])
 
-    logger.info(f"Success! Converted to Greek Unicode: {uni[:10]}")
-    write_pkl(uni, cfg.pt_uni)
+    logger.info(f"Success! Converted to Greek Unicode:")
+    logger.info(data[0][:2])
+    write_pkl(data, cfg.pt_uni)
 
 
 def clean_ft():
-    """
-    Clean normalized data for training:
-
-    - Drop malformed words
-    - Build targets for training.
-
-    Export: [form_1, ...], [[target_1_1, target_1_2, ...], ...]
-    """
     logger = logging.getLogger(__name__)
     logger.info("Cleaning fine-tuning data:")
 
@@ -185,6 +173,10 @@ def clean_ft():
     logger.info(pd.Series(bad_postag_value).value_counts()[:20])
 
 
+def hellenize(word):
+    return "".join([ch for ch in word if (is_greek(ch) or is_punctuation(ch))])
+
+
 def normalize(read_dir, write_dir):
     """
     - Decompose unicode diacritics (cf. https://www.degruyter.com/document/doi/10.1515/9783110599572-009/html)
@@ -194,34 +186,37 @@ def normalize(read_dir, write_dir):
     logger = logging.getLogger(__name__)
     logger.info("Normalizing data:")
     data = read_pkl(read_dir)
-    normed = []
-    for word in tqdm(data):
-        norm = unicodedata.normalize("NFD", word)
-        norm = "".join([ch for ch in norm if (is_greek(ch) or is_punctuation(ch))])
-        norm = unicodedata.normalize("NFC", norm)
-        normed.append(norm)
+    for work_i in tqdm(range(len(data))):
+        for sentence_i in range(len(data[work_i])):
+            for word_i, word in enumerate(data[work_i][sentence_i]):
+                norm = unicodedata.normalize("NFD", word)
+                norm = hellenize(norm)  # Strip non-Greek
+                norm = unicodedata.normalize("NFC", norm)
+                data[work_i][sentence_i][word_i] = norm
 
     # Export
-    write_pkl(normed, write_dir)
+    write_pkl(data, write_dir)
     logger.info(
         "Success! Performed unicode normalization and stripped non-Greek characters."
     )
+    logger.info(data[0][:2])
 
 
 def syllablize(read_dir, write_dir, flatten):
     logger = logging.getLogger(__name__)
-    text = read_pkl(read_dir)
-    logger.info(f"Syllabifying {len(text)} words: {text[:10]}")
-    tokens = []
-    for word in tqdm(text):
-        syllables = syllabify(word)
-        if flatten:
-            tokens.extend(syllables)
-        else:
-            tokens.append(syllables)
+    data = read_pkl(read_dir)
+    logger.info(f"Syllabifying:")
+
+    data = read_pkl(read_dir)
+    for work_i in tqdm(range(len(data))):
+        for sentence_i in range(len(data[work_i])):
+            for word_i, word in enumerate(data[work_i][sentence_i]):
+                data[work_i][sentence_i][word_i] = syllabify(word)
+
     # Export
-    write_pkl(tokens, write_dir)
-    logger.info(f"Success! Generated {len(tokens)} syllables: {tokens[:10]}")
+    write_pkl(data, write_dir)
+    logger.info(f"Success! Generated syllables:")
+    logger.info(data[0][:2])
 
 
 if __name__ == "__main__":
