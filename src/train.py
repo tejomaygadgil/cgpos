@@ -20,46 +20,35 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 import config as cfg
 from model import Transformer
-from util import read_pkl, display_bar, write_pkl, get_batch, encode, decode, generate
+from util import read_pkl, display_bar, write_pkl, get_batch, encode, generate, rate
 
-
-def rate(step, model_size, factor, warmup):
-    """
-    Noam optimizer.
-    Implementation from http://nlp.seas.harvard.edu/annotated-transformer/
-    """
-    if step == 0:
-        step = 1
-    return factor * (
-        model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5))
-    )
+# Set params
+n_head = 8
+max_iters = 10000
+params = {
+    "train_size": 0.98,  # Train params
+    "n_chunks": 500,
+    "unk_rate": 0.005,
+    "batch_size": 32,  # Model hyperparameters
+    "block_size": 256,
+    "n_head": n_head,
+    "emb_size": 64 * n_head,
+    "n_layer": 6,
+    "dropout": 0.3,  # Training hyperparameters
+    "max_iters": max_iters,
+    "eval_interval": 250,
+    "base_lr": 0.1,
+    "eval_iters": 200,  # Monitor settings
+    "generate_len": 32,
+    "torch_seed": 20,  # Seeds
+    "random_seed": 40,
+}
 
 
 def setup(read_loc):
     logger = logging.getLogger(__name__)
     logger.info("Pre-training setup:")
 
-    n_head = 8
-    max_iters = 10000
-
-    params = {
-        "train_size": 0.98,  # Train params
-        "n_chunks": 500,
-        "unc_rate": 0.005,
-        "batch_size": 32,  # Model hyperparameters
-        "block_size": 256,
-        "n_head": n_head,
-        "emb_size": 64 * n_head,
-        "n_layer": 6,
-        "dropout": 0.3,  # Training hyperparameters
-        "max_iters": max_iters,
-        "eval_interval": 250,
-        "base_lr": 0.1,
-        "eval_iters": 200,  # Monitor settings
-        "generate_len": 32,
-        "torch_seed": 20,  # Seeds
-        "random_seed": 40,
-    }
     for param, value in params.items():
         globals()[param] = value
 
@@ -70,7 +59,7 @@ def setup(read_loc):
     # Read data
     data = read_pkl(read_loc)
     vocab = ["<UNK>"] + sorted(set(data))
-    data = [d if random.random() > unc_rate else "<UNK>" for d in data]
+    data = [d if random.random() > unk_rate else "<UNK>" for d in data]
     vocab_size = len(vocab)
     params["vocab_size"] = vocab_size
 
