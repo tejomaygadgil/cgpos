@@ -171,12 +171,12 @@ def pre_train(resume):
                 {
                     "train_loss": train_loss,
                     "val_loss": val_loss,
-                    "lr": lr_scheduler.get_last_lr(),
+                    "lr": lr_scheduler.get_last_lr()[0],
                 }
             )
             with logging_redirect_tqdm():
                 logger.info(
-                    f"Step {step} - train loss {train_loss:.3f} - val loss {val_loss:.3f}"
+                    f"Step {step} - loss: train {train_loss:.3f} - val {val_loss:.3f}"
                 )
                 logger.info(generate(generate_len, block_size, itos, model, device))
 
