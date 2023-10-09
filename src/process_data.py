@@ -9,6 +9,7 @@ import unicodedata
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import pandas as pd
 from beta_code import beta_code_to_greek
 from greek_accentuation.syllabify import syllabify
 from tqdm import tqdm
@@ -26,26 +27,38 @@ def read_raw(read_dir, write_dir, postag):
     files = sorted(list(Path(read_dir).iterdir()))
     logger.info(f"Reading {len(files)} files from {read_dir}")
     data = []
+    sentence_count = 0
+    word_count = 0
     for file_dir in tqdm(files):
         with logging_redirect_tqdm():
             logger.info(f"Processing {file_dir}")
         tree = ET.parse(file_dir)
         root = tree.getroot()
+        work_data = []
         for sentence in root.iter("sentence"):
+            sentence_data = []
             for node in sentence.iter():
                 match node.tag:
                     case "word":
                         word_data = {"form": node.attrib.get("form")}
                         if postag:
                             word_data["postag"] = node.attrib.get("postag")
-                        data.append(word_data)
+                        sentence_data.append(word_data)
+                        word_count += 1
                     case "punct":
                         word_data = {"form": node.attrib.get("mark")}
-                        data.append(word_data)
+                        sentence_data.append(word_data)
+                        word_count += 1
+            work_data.append(sentence_data)
+            sentence_count += 1
+        data.append(work_data)
 
     # Export
     write_pkl(data, write_dir)
-    logger.info(f"Success! Extracted {len(data)} words: {data[:10]}")
+    logger.info(
+        f"Success! Extracted {word_count:,} words from {sentence_count:,} sentences:"
+    )
+    logger.info(data[0][0])
 
 
 def read_targets_map_ft():
@@ -108,35 +121,51 @@ def clean_ft():
 
     # Import data
     data = read_pkl(cfg.ft_raw)
-    _, targets_str, _ = read_pkl(cfg.ft_targets_map)
+    targets_name, targets_str, _ = read_pkl(cfg.ft_targets_map)
 
     # Normalize
     cleaned = []
     targets = []
-    malform = 0
-    for word in tqdm(data):
-        try:
-            assert "postag" in word and "form" in word
-            assert word["form"]
-            assert word["postag"]
-            assert len(word["postag"]) == 9
-            assert word["postag"] != "undefined"
-            # Build features
-            form = word["form"]
-            # Build target
-            target = []
-            postag = word["postag"]
-            for i, short in enumerate(postag):
-                match (i, short):
-                    case ("5", "d"):  # Treat depondent verbs as medio-passive
-                        i, short = "5", "e"
-                value = targets_str[i].index(short)
-                target.append(value)
-            # Append
-            cleaned.append(form)
-            targets.append(target)
-        except (AssertionError, ValueError, TypeError):
-            malform += 1
+    malformed = []
+    bad_postag_value = []
+    for works in tqdm(data):
+        for sentences in works:
+            for word in sentences:
+                try:
+                    # Catch malformed form
+                    assert "form" in word, "form: missing"
+                    assert word["form"] is not None, "form: None"
+                    form = word["form"]
+
+                    # Catch malformed postag
+                    assert "postag" in word, "postag: missing"
+                    assert word["postag"] is not None, "postag: None"
+                    assert len(word["postag"]) != 0, "postag: zero len"
+                    assert len(word["postag"]) >= 9, "postag: too short"
+                    assert word["postag"] != "undefined", "postag: 'undefined'"
+                    target = []
+                    postag = word["postag"][:9]  # Truncate postag
+                    for i, short in enumerate(postag):
+                        match (i, short):
+                            case ("5", "d"):  # Treat depondent verbs as medio-passive
+                                i, short = "5", "e"
+                        target.append(targets_str[i].index(short))
+
+                    # Append
+                    cleaned.append(form)
+                    targets.append(target)
+
+                except AssertionError as e:
+                    if "postag" in str(e):
+                        cleaned.append(form)
+                        targets.append([-1] * 9)  # Dummy postag
+                    else:
+                        malformed.append(str(e) + f": '{str(word['postag'])}'")
+
+                except ValueError as e:
+                    bad_postag_value.append(
+                        f"{str(e)} {str(targets_str[i])} for target {targets_name[i]}, word {form}, postag {postag}"
+                    )
 
     length_match = len(cleaned) == len(targets)
     assert (
@@ -147,7 +176,13 @@ def clean_ft():
     write_pkl(cleaned, cfg.ft_clean)
     write_pkl(targets, cfg.ft_targets)
 
-    logger.info(f"Success! Exported {len(cleaned)} words ({malform} malformed words).")
+    logger.info(f"Success! Exported {len(cleaned):,} words:")
+    logger.info(
+        f"Malformed {len(malformed):,}, bad postag value {len(bad_postag_value):,}:"
+    )
+
+    logger.info(pd.Series(malformed).value_counts())
+    logger.info(pd.Series(bad_postag_value).value_counts()[:20])
 
 
 def normalize(read_dir, write_dir):
@@ -193,6 +228,8 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
+    assert len(sys.argv) == 2, "Wrong number of args passed in."
+
     match sys.argv[1]:
         case "pt":  # Pre-training
             read_raw(cfg.pt_dir, cfg.pt_beta, postag=False)
@@ -201,11 +238,8 @@ if __name__ == "__main__":
             syllablize(cfg.pt_norm, cfg.pt_syl, flatten=True)
 
         case "ft":  # Fine-tuning
-            read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
-            read_targets_map_ft()  # cfg.ft_targets_map_dir -> cfg.ft_targets_map
+            # read_raw(cfg.ft_dir, cfg.ft_raw, postag=True)
+            # read_targets_map_ft()  # cfg.ft_targets_map_dir -> cfg.ft_targets_map
             clean_ft()  # cfg.ft_raw, cfg.ft_targets_map -> cfg.ft_clean, cfg.ft_targets
-            normalize(cfg.ft_clean, cfg.ft_norm)
-            syllablize(cfg.ft_norm, cfg.ft_syl, flatten=False)
-
-        case _:
-            "Please select either 'pt' or 'ft' as options."
+            # normalize(cfg.ft_clean, cfg.ft_norm)
+            # syllablize(cfg.ft_norm, cfg.ft_syl, flatten=False)
