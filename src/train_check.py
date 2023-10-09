@@ -55,6 +55,7 @@ def zero_loss_check():
 
     data = read_pkl(cfg.pt_syl_cloud)
     data = data[:trunc_len]  # Truncate data
+    vocab = sorted(set(data))
     vocab_size = len(vocab)
     params["vocab_size"] = vocab_size
 
