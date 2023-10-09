@@ -94,13 +94,13 @@ def zero_loss_check():
         model.train()
 
         _, loss = model(xb, yb)
-        with logging_redirect_tqdm():
-            logger.info(f"Step {step} - loss: train {loss:.3f}")
-
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
+
+        with logging_redirect_tqdm():
+            logger.info(f"Step {step} - loss: train {loss:.3f}")
 
 
 if __name__ == "__main__":
