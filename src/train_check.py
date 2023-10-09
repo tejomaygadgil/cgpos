@@ -23,23 +23,18 @@ from model import Transformer
 from util import read_pkl, display_bar, write_pkl, get_batch, encode, generate, rate
 
 # Set params
-trunc_len = 500
-n_head = 8
 params = {
-    "train_size": 0.98,  # Train params
-    "n_chunks": 500,
-    "unk_rate": 0.005,
-    "batch_size": 64,  # Model hyperparameters
+    "trunc_len": 500,
+    "batch_size": 32,  # Model hyperparameters
     "block_size": 256,
-    "n_head": n_head,
-    "emb_size": 64 * n_head,
     "n_layer": 6,
+    "n_head": 8,
+    "emb_size": 64 * 8,
     "dropout": 0.3,  # Training hyperparameters
-    "max_iters": 1000,
+    "max_iters": 5000,
     "eval_interval": 250,
     "base_lr": 1e-1,
     "eval_iters": 200,  # Monitor settings
-    "generate_len": 32,
     "torch_seed": 20,  # Seeds
     "random_seed": 40,
 }
@@ -69,6 +64,9 @@ def zero_loss_check():
     stoi = {ch: i for i, ch in enumerate(vocab)}
     itos = {i: ch for ch, i in stoi.items()}
     data = torch.tensor(encode(stoi, data), dtype=torch.long)
+
+    logger.info(f"data len : {data.shape}")
+    logger.info(f"data: {data}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
