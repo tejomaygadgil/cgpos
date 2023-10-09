@@ -154,12 +154,12 @@ def pre_train(checkpoint_id, resume):
         return out
 
     # Train
+    wandb.watch(model, log="all", log_freq=10)
     for step in tqdm(range(max_iters)):
         model.train()
         # Evaluate training and val loss every eval_interval
         if (step % eval_interval == 0) or (iter == max_iters - 1):
             train_loss, val_loss = estimate_loss()
-            wandb.watch(model)
             wandb.log(
                 {
                     "train_loss": train_loss,
