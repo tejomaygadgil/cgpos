@@ -24,7 +24,6 @@ from util import read_pkl, display_bar, write_pkl, get_batch, encode, generate, 
 
 # Set params
 n_head = 8
-max_iters = 100
 params = {
     "train_size": 0.98,  # Train params
     "n_chunks": 500,
@@ -35,7 +34,7 @@ params = {
     "emb_size": 64 * n_head,
     "n_layer": 6,
     "dropout": 0.3,  # Training hyperparameters
-    "max_iters": max_iters,
+    "max_iters": 5000,
     "eval_interval": 250,
     "base_lr": 1e-2,
     "eval_iters": 200,  # Monitor settings
