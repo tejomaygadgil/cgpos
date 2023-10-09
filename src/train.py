@@ -194,131 +194,131 @@ def pre_train(checkpoint_id, resume):
     )
 
 
-def fine_tune(reload):
-    logger = logging.getLogger(__name__)
-    logger.info("Fine-tuning!")
-
-    # Set params
-    params = read_pkl(cfg.pt_params)
-    params["learning_rate"] = 1e-6
-    params["batch_size"] = 32
-    params["max_iters"] = 10000
-    params["dropout"] = 0.7
-    wandb.init(project="ncgpos_ft", config=params)
-    for param, value in params.items():
-        globals()[param] = value
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
-
-    # Read encodings
-    stoi = read_pkl(cfg.pt_stoi)
-    itos = read_pkl(cfg.pt_itos)
-
-    # Read data
-    ft_syl = read_pkl(cfg.ft_syl)
-    ft_targets = read_pkl(cfg.ft_targets)
-    ft_targets_map = read_pkl(cfg.ft_targets_map)
-    assert len(ft_syl) == len(ft_targets)
-
-    # Process data
-    default_stoi = defaultdict(lambda: 0, stoi)  # Set to "<UNK>" if OOV
-    tokens = []
-    labels = []
-    for i, word in enumerate(ft_syl):
-        for token in encode(default_stoi, word):
-            tokens.append(token)
-            labels.append(ft_targets[i][0])
-
-    tokens = torch.tensor(tokens, dtype=torch.long)
-    labels = torch.tensor(labels, dtype=torch.long)
-    assert len(tokens) == len(labels)
-    print(list(zip(ft_syl, ft_targets))[:5])
-    print(list(zip(tokens.tolist(), labels.tolist()))[:10])
-
-    # Train val split
-    tokens_chunks = torch.split(tokens, len(tokens) // (n_chunks - 1))
-    labels_chunks = torch.split(labels, len(labels) // (n_chunks - 1))
-    l = [1] * int(n_chunks * train_size) + [0] * int(n_chunks * (1 - train_size))
-    random.shuffle(l)
-    train_tokens = torch.cat([tokens_chunks[i] for i, v in enumerate(l) if v])
-    train_labels = torch.cat([labels_chunks[i] for i, v in enumerate(l) if v])
-    val_tokens = torch.cat([tokens_chunks[i] for i, v in enumerate(l) if not v])
-    val_labels = torch.cat([labels_chunks[i] for i, v in enumerate(l) if not v])
-
-    print(f"train_size: {train_size}")
-    print(f"n_chunks: {n_chunks}")
-    print(f"Train size: {len(train_tokens):,} obs")
-    print(f"Val size: {len(val_tokens):,} obs")
-    display_bar(l)
-
-    # Modify last layer
-    model = Transformer(
-        vocab_size=vocab_size,
-        block_size=block_size,
-        emb_size=emb_size,
-        n_layer=n_layer,
-        n_head=n_head,
-        dropout=dropout,
-        device=device,
-    )
-    new_head = nn.Sequential(
-        nn.Linear(emb_size, emb_size * 2),
-        nn.ReLU(),
-        nn.Linear(emb_size * 2, len(ft_targets_map[1][0])),
-    )
-    if reload:
-        model.lm_head = new_head
-        model.load_state_dict(torch.load(cfg.ft_wts, map_location=torch.device(device)))
-    else:
-        model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
-        model.lm_head = new_head
-    m = model.to(device)
-
-    @torch.no_grad()
-    def estimate_loss():
-        out = []
-        model.eval()
-        for tokens, labels in [(train_tokens, train_labels), (val_tokens, val_labels)]:
-            losses = torch.zeros(eval_iters, device=device)
-            accs = torch.zeros(eval_iters, device=device)
-            for k in range(eval_iters):
-                X, Y = get_batch(tokens, block_size, batch_size, device, y=labels)
-                logits, loss = model(X, Y)
-                preds = F.softmax(logits, dim=-1).argmax(dim=-1)
-                acc = torch.sum(preds == Y.view(-1)) / Y.view(-1).size(0)
-                losses[k] = loss.item()
-                accs[k] = acc
-            out.append([losses.mean(), accs.mean()])
-        model.train()
-        return out
-
-    optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
-    for step in tqdm(range(max_iters)):
-        if (step % eval_interval == 0) or (iter == max_iters - 1):
-            [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
-            with logging_redirect_tqdm():
-                logger.info(f"Step {step}:")
-                logger.info(f"Loss: train {train_loss:.4f}, val {val_loss:.4f} ")
-                logger.info(f"Acc: train {train_acc:.4f}, val {val_acc:.4f} ")
-            wandb.log(
-                {
-                    "train_loss": train_loss,
-                    "val_loss": val_loss,
-                    "train_acc": train_acc,
-                    "val_acc": val_acc,
-                }
-            )
-        xb, yb = get_batch(train_tokens, block_size, batch_size, device, y=train_labels)
-        _, loss = m(xb, yb)
-        optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
-
-    wandb.finish()
-
-    # Save weights
-    torch.save(model.state_dict(), cfg.ft_wts)
-    write_pkl(params, cfg.ft_params)
+# def fine_tune(reload):
+#     logger = logging.getLogger(__name__)
+#     logger.info("Fine-tuning!")
+#
+#     # Set params
+#     params = read_pkl(cfg.pt_params)
+#     params["learning_rate"] = 1e-6
+#     params["batch_size"] = 32
+#     params["max_iters"] = 10000
+#     params["dropout"] = 0.7
+#     wandb.init(project="ncgpos_ft", config=params)
+#     for param, value in params.items():
+#         globals()[param] = value
+#     device = "cuda" if torch.cuda.is_available() else "cpu"
+#     print(device)
+#
+#     # Read encodings
+#     stoi = read_pkl(cfg.pt_stoi)
+#     itos = read_pkl(cfg.pt_itos)
+#
+#     # Read data
+#     ft_syl = read_pkl(cfg.ft_syl)
+#     ft_targets = read_pkl(cfg.ft_targets)
+#     ft_targets_map = read_pkl(cfg.ft_targets_map)
+#     assert len(ft_syl) == len(ft_targets)
+#
+#     # Process data
+#     default_stoi = defaultdict(lambda: 0, stoi)  # Set to "<UNK>" if OOV
+#     tokens = []
+#     labels = []
+#     for i, word in enumerate(ft_syl):
+#         for token in encode(default_stoi, word):
+#             tokens.append(token)
+#             labels.append(ft_targets[i][0])
+#
+#     tokens = torch.tensor(tokens, dtype=torch.long)
+#     labels = torch.tensor(labels, dtype=torch.long)
+#     assert len(tokens) == len(labels)
+#     print(list(zip(ft_syl, ft_targets))[:5])
+#     print(list(zip(tokens.tolist(), labels.tolist()))[:10])
+#
+#     # Train val split
+#     tokens_chunks = torch.split(tokens, len(tokens) // (n_chunks - 1))
+#     labels_chunks = torch.split(labels, len(labels) // (n_chunks - 1))
+#     l = [1] * int(n_chunks * train_size) + [0] * int(n_chunks * (1 - train_size))
+#     random.shuffle(l)
+#     train_tokens = torch.cat([tokens_chunks[i] for i, v in enumerate(l) if v])
+#     train_labels = torch.cat([labels_chunks[i] for i, v in enumerate(l) if v])
+#     val_tokens = torch.cat([tokens_chunks[i] for i, v in enumerate(l) if not v])
+#     val_labels = torch.cat([labels_chunks[i] for i, v in enumerate(l) if not v])
+#
+#     print(f"train_size: {train_size}")
+#     print(f"n_chunks: {n_chunks}")
+#     print(f"Train size: {len(train_tokens):,} obs")
+#     print(f"Val size: {len(val_tokens):,} obs")
+#     display_bar(l)
+#
+#     # Modify last layer
+#     model = Transformer(
+#         vocab_size=vocab_size,
+#         block_size=block_size,
+#         emb_size=emb_size,
+#         n_layer=n_layer,
+#         n_head=n_head,
+#         dropout=dropout,
+#         device=device,
+#     )
+#     new_head = nn.Sequential(
+#         nn.Linear(emb_size, emb_size * 2),
+#         nn.ReLU(),
+#         nn.Linear(emb_size * 2, len(ft_targets_map[1][0])),
+#     )
+#     if reload:
+#         model.lm_head = new_head
+#         model.load_state_dict(torch.load(cfg.ft_wts, map_location=torch.device(device)))
+#     else:
+#         model.load_state_dict(torch.load(cfg.pt_wts, map_location=torch.device(device)))
+#         model.lm_head = new_head
+#     m = model.to(device)
+#
+#     @torch.no_grad()
+#     def estimate_loss():
+#         out = []
+#         model.eval()
+#         for tokens, labels in [(train_tokens, train_labels), (val_tokens, val_labels)]:
+#             losses = torch.zeros(eval_iters, device=device)
+#             accs = torch.zeros(eval_iters, device=device)
+#             for k in range(eval_iters):
+#                 X, Y = get_batch(tokens, block_size, batch_size, device, y=labels)
+#                 logits, loss = model(X, Y)
+#                 preds = F.softmax(logits, dim=-1).argmax(dim=-1)
+#                 acc = torch.sum(preds == Y.view(-1)) / Y.view(-1).size(0)
+#                 losses[k] = loss.item()
+#                 accs[k] = acc
+#             out.append([losses.mean(), accs.mean()])
+#         model.train()
+#         return out
+#
+#     optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
+#     for step in tqdm(range(max_iters)):
+#         if (step % eval_interval == 0) or (iter == max_iters - 1):
+#             [train_loss, train_acc], [val_loss, val_acc] = estimate_loss()
+#             with logging_redirect_tqdm():
+#                 logger.info(f"Step {step}:")
+#                 logger.info(f"Loss: train {train_loss:.4f}, val {val_loss:.4f} ")
+#                 logger.info(f"Acc: train {train_acc:.4f}, val {val_acc:.4f} ")
+#             wandb.log(
+#                 {
+#                     "train_loss": train_loss,
+#                     "val_loss": val_loss,
+#                     "train_acc": train_acc,
+#                     "val_acc": val_acc,
+#                 }
+#             )
+#         xb, yb = get_batch(train_tokens, block_size, batch_size, device, y=train_labels)
+#         _, loss = m(xb, yb)
+#         optimizer.zero_grad(set_to_none=True)
+#         loss.backward()
+#         optimizer.step()
+#
+#     wandb.finish()
+#
+#     # Save weights
+#     torch.save(model.state_dict(), cfg.ft_wts)
+#     write_pkl(params, cfg.ft_params)
 
 
 if __name__ == "__main__":
@@ -347,6 +347,6 @@ if __name__ == "__main__":
                     pre_train(checkpoint_id=argv[2], resume=False)
                 case _:
                     raise ValueError("Invalid resume flag.")
-        case "fine_tune":
-            resume = True if argv[2] == "resume" else False
-            fine_tune(resume)
+        # case "fine_tune":
+        #     resume = True if argv[2] == "resume" else False
+        #     fine_tune(resume)
