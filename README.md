@@ -267,7 +267,7 @@ python src/cgpos/eval/train.py
 ...
 ```
 
-Hyperparameter range and model selection are adjustable via [config file](https://github.com/tejomaygadgil/cgpos/blob/main/conf/main.yaml).
+Hyperparameter range and model selection are adjustable via [config file](https://github.com/tejomaygadgil/cgpos/blob/main/config/config.yaml).
 
 # References
 ## Help
