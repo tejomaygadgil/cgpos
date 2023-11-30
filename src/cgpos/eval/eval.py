@@ -96,7 +96,7 @@ def eval_model(config: DictConfig):
 
         # Export model
         logger.info("Exporting model")
-        best_model_dir = os.path.join(config.eval.models_dir, "pos_tagger.pkl")
+        best_model_dir = config.model
         export_pkl(best_model, best_model_dir)
 
         # Generate report

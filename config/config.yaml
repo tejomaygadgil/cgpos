@@ -33,8 +33,8 @@ train:
   f1_average: "macro"
   export_pred: False
 
-eval:
-  models_dir: models
+# Best model directory
+model: models/pos_tagger.pkl
 
 param_grid:
   MultinomialNaiveBayes:
