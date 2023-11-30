@@ -1,22 +1,20 @@
 import unicodedata
 
-import hydra
 import streamlit as st
+import yaml
 from greek_accentuation.syllabify import syllabify
-from hydra import compose, initialize
 
 from src.cgpos.util.greek import is_greek, is_punctuation
 from src.cgpos.util.path import import_pkl
 
-# Load hydra params
-hydra.core.global_hydra.GlobalHydra.instance().clear()
-initialize("config", version_base=None)
-config = compose(config_name="config")
+# Load config
+with open("config/config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
 # Load files
-features_map = import_pkl(config.reference.features_map)
-targets_map = import_pkl(config.reference.targets_map)
-model = import_pkl(config.model)
+features_map = import_pkl(config["reference"]["features_map"])
+targets_map = import_pkl(config["reference"]["targets_map"])
+model = import_pkl(config["model"])
 # Get word
 input = st.text_input("Enter an Ancient Greek word to find its part of speech.")
 
