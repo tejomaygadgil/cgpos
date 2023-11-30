@@ -20,29 +20,30 @@ model = import_pkl(config.model)
 # Get word
 input = st.text_input("Enter an Ancient Greek word to find its part of speech.")
 
-# TODO check word is greek
+if len(input) > 0:
+    # TODO check word is greek
 
-# Normalize
-form = unicodedata.normalize("NFD", input)
-form = "".join([char for char in form if (is_greek(char) or is_punctuation(char))])
-form = unicodedata.normalize("NFC", form)
+    # Normalize
+    form = unicodedata.normalize("NFD", input)
+    form = "".join([char for char in form if (is_greek(char) or is_punctuation(char))])
+    form = unicodedata.normalize("NFC", form)
 
-# TODO Make sure it's only one word
+    # TODO Make sure it's only one word
 
-# Syllablize
-syllables = syllabify(form)
+    # Syllablize
+    syllables = syllabify(form)
 
-# Tokenize
-tokens = [features_map[syllable] for syllable in syllables]
+    # Tokenize
+    tokens = [features_map[syllable] for syllable in syllables]
 
-# Get prediction
-pred = model.predict([tokens])
-pp_pred = [targets_map[2][i][value] for i, value in enumerate(pred[0])]
-# pp_pred = targets_map
+    # Get prediction
+    pred = model.predict([tokens])
+    pp_pred = [targets_map[2][i][value] for i, value in enumerate(pred[0])]
+    # pp_pred = targets_map
 
-st.write(input)
-st.write([form])
-st.write([syllables])
-st.write([tokens])
-st.write(pred)
-st.write(pp_pred)
+    st.write(input)
+    st.write([form])
+    st.write([syllables])
+    st.write([tokens])
+    st.write(pred)
+    st.write(pp_pred)
