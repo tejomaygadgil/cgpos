@@ -5,7 +5,7 @@ description = ""
 authors = ["Tejomay Gadgil"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 dvc = "^2.10.0"
 hydra-core = "^1.1.1"
 pdoc3 = "^0.10.0"
@@ -17,6 +17,7 @@ greek-accentuation = {git = "https://github.com/jtauber/greek-accentuation.git"}
 scikit-learn = "^1.3.0"
 jupyter-dash = "^0.4.2"
 poetry-plugin-export = "^1.6.0"
+streamlit = "^1.28.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
