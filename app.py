@@ -1,6 +1,7 @@
 import unicodedata
 from string import printable
 
+import pandas as pd
 import streamlit as st
 import yaml
 from greek_accentuation.syllabify import syllabify
@@ -9,6 +10,7 @@ from src.cgpos.util.greek import is_greek, is_punctuation
 from src.cgpos.util.path import import_pkl
 
 
+# Define functions with caching to improve performance
 @st.cache_data
 def get_config():
     """
@@ -102,4 +104,9 @@ if len(input) > 0:
         pred = [pred[i] for i in reorder_map]  # Reorder
         pred = [value for value in pred if value[1] != "N/A"]
 
-        st.write(pred)
+        df = pd.DataFrame(pred)
+        df = df.transpose()
+        df.columns = df.iloc[0]
+        df = df[1:]
+
+        st.dataframe(df, hide_index=True)
