@@ -1,3 +1,4 @@
+import time
 import unicodedata
 from string import printable
 
@@ -42,13 +43,13 @@ def load_model(config):
 
 # Load data
 config = get_config()
-features_map, labels_long = load_maps(config)
+syl2tok, labels = load_maps(config)
 model = load_model(config)
 
 # Format labels
-labels_long = [
+labels = [
     [label.capitalize() if label != "N/A" else label for label in category]
-    for category in labels_long
+    for category in labels
 ]
 classes = [
     "Part of speech",
@@ -64,21 +65,46 @@ classes = [
 reorder_map = [0, 6, 1, 2, 7, 3, 4, 5, 8]
 
 # Start app
-"""
-# Ancient Greek Part of Speech Tagger
+st.title("Ancient Greek Part of Speech Tagger")
 
-One of the hardest things about learning Ancient Greek is having to memorize word ending tables so you know what is a verb, noun, and so on.
+st.subheader("Description", divider=True)
+
+"""
+One of the hardest things about learning Ancient Greek is having to memorize hundreds of word endings so you can recognize nouns, adjectives, verbs and so on.
 
 This app is trained on ___. Enter in Ancient Greek word to find its part of speech!
 """
 
 # Get word
 input_phrase = "Enter a word here"
-input = st.text_input(
-    label=input_phrase, value=input_phrase, label_visibility="collapsed"
-)
+# input = st.text_input(
+#    label=input_phrase,
+#    value=input_phrase,
+#    label_visibility="collapsed",
+# )
 
-if len(input) > 0:
+word_list = [
+    "ἄνθρωπος",
+    "κατηγορῆται",
+    "λεγομένων",
+    "συμπλοκὴν",
+]
+
+st.selectbox("Select something", word_list, key="input")
+start = st.button("Go")
+input = st.session_state.input
+
+# with st.expander("See explanation"):
+#    st.write(
+#        """
+#             The chart above shows some numbers I picked for you.
+#             I rolled actual dice for these, so they're *guaranteed* to
+#             be random.
+#             """
+#    )
+#    st.image("https://static.streamlit.io/examples/dice.jpg")
+
+if start and len(input) > 0:
     if set(input) - set(printable) == set():
         if input != input_phrase:
             st.write("Please enter a Greek word!")
@@ -94,12 +120,12 @@ if len(input) > 0:
 
         # Convert syllables to tokens
         syllables = syllabify(form)
-        tokens = [features_map[syllable] for syllable in syllables]
+        tokens = [syl2tok[syllable] for syllable in syllables]
 
         # Get prediction
         pred = model.predict([tokens])
         pred = [
-            [classes[i], labels_long[i][value]] for i, value in enumerate(pred[0])
+            [classes[i], labels[i][value]] for i, value in enumerate(pred[0])
         ]  # Get text label
         pred = [pred[i] for i in reorder_map]  # Reorder
         pred = [value for value in pred if value[1] != "N/A"]
@@ -109,4 +135,12 @@ if len(input) > 0:
         df.columns = df.iloc[0]
         df = df[1:]
 
-        st.dataframe(df, hide_index=True)
+        bar = st.progress(0)
+        for i in range(100):
+            # Update the progress bar with each iteration.
+            time.sleep(1e-2)
+            bar.progress(i + 1, text="Running model")
+
+        time.sleep(0.5)
+        st.table(df)
+        bar.progress(100, text="Done!")
