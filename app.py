@@ -10,6 +10,14 @@ from greek_accentuation.syllabify import syllabify
 from src.cgpos.util.greek import is_greek, is_punctuation
 from src.cgpos.util.path import import_pkl
 
+title = "Ancient Greek Part of Speech Tagger"
+
+# Configure page
+st.set_page_config(
+    page_title=title,
+    page_icon="🏺",
+)
+
 
 # Define functions with caching to improve performance
 @st.cache_data
@@ -65,7 +73,7 @@ classes = [
 reorder_map = [0, 6, 1, 2, 7, 3, 4, 5, 8]
 
 # Start app
-st.title("Ancient Greek Part of Speech Tagger")
+st.title(title)
 
 st.subheader("Description", divider=True)
 
