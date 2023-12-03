@@ -70,77 +70,74 @@ st.title("Ancient Greek Part of Speech Tagger")
 st.subheader("Description", divider=True)
 
 """
-One of the hardest things about learning Ancient Greek is having to memorize hundreds of word endings so you can recognize nouns, adjectives, verbs and so on.
+One of the hardest things about learning Ancient Greek is having to memorize hundreds of word endings to know whether a noun, verb, adjective, and so on.
 
 This app is trained on ___. Enter in Ancient Greek word to find its part of speech!
 """
 
-# Get word
-input_phrase = "Enter a word here"
-# input = st.text_input(
-#    label=input_phrase,
-#    value=input_phrase,
-#    label_visibility="collapsed",
-# )
+st.subheader("Model", divider=True)
 
-word_list = [
-    "ἄνθρωπος",
-    "κατηγορῆται",
-    "λεγομένων",
-    "συμπλοκὴν",
-]
+text_input = st.toggle("Enter my own word!")
 
-st.selectbox("Select something", word_list, key="input")
+if text_input:
+    # Get word
+    input_phrase = "Enter any Ancient Greek word."
+    input = st.text_input(
+        label=input_phrase,
+        placeholder="e.g. λόγος",
+    )
+
+else:
+    word_list = [
+        "ἄνθρωπος",
+        "κατηγορῆται",
+        "λεγομένων",
+        "συμπλοκὴν",
+    ]
+
+    input = st.selectbox("Select a word from the list.", word_list)
+
 start = st.button("Go")
-input = st.session_state.input
 
-# with st.expander("See explanation"):
-#    st.write(
-#        """
-#             The chart above shows some numbers I picked for you.
-#             I rolled actual dice for these, so they're *guaranteed* to
-#             be random.
-#             """
-#    )
-#    st.image("https://static.streamlit.io/examples/dice.jpg")
+metric = st.empty()
+dataframe = st.empty()
 
+st.write("About me")
+
+# Generate prediction
 if start and len(input) > 0:
     if set(input) - set(printable) == set():
-        if input != input_phrase:
-            st.write("Please enter a Greek word!")
+        st.write("Please enter a Greek word!")
     else:
-        # Normalize
-        form = unicodedata.normalize("NFD", input)
-        form = "".join(
-            [char for char in form if (is_greek(char) or is_punctuation(char))]
-        )
-        form = unicodedata.normalize("NFC", form)
+        with metric, st.spinner("Generating prediction."):
+            # Normalize
+            form = unicodedata.normalize("NFD", input)
+            form = "".join(
+                [char for char in form if (is_greek(char) or is_punctuation(char))]
+            )
+            form = unicodedata.normalize("NFC", form)
 
-        # TODO Make sure it's only one word
+            # TODO Make sure it's only one word
 
-        # Convert syllables to tokens
-        syllables = syllabify(form)
-        tokens = [syl2tok[syllable] for syllable in syllables]
+            # Convert syllables to tokens
+            syllables = syllabify(form)
+            tokens = [syl2tok[syllable] for syllable in syllables]
 
-        # Get prediction
-        pred = model.predict([tokens])
-        pred = [
-            [classes[i], labels[i][value]] for i, value in enumerate(pred[0])
-        ]  # Get text label
-        pred = [pred[i] for i in reorder_map]  # Reorder
-        pred = [value for value in pred if value[1] != "N/A"]
+            # Get prediction
+            pred = model.predict([tokens])
+            pred = [
+                [classes[i], labels[i][value]] for i, value in enumerate(pred[0])
+            ]  # Get text label
+            pred = [pred[i] for i in reorder_map]  # Reorder
+            pred = [value for value in pred if value[1] != "N/A"]
 
-        df = pd.DataFrame(pred)
-        df = df.transpose()
-        df.columns = df.iloc[0]
-        df = df[1:]
+            # Format output
+            df = pd.DataFrame(pred)
+            df = df.transpose()
+            df.columns = df.iloc[0]
+            df = df[1:]
 
-        bar = st.progress(0)
-        for i in range(100):
-            # Update the progress bar with each iteration.
-            time.sleep(1e-2)
-            bar.progress(i + 1, text="Running model")
+            time.sleep(1.25)
 
-        time.sleep(0.5)
-        st.table(df)
-        bar.progress(100, text="Done!")
+        metric.metric("Part of Speech", df.iloc[0, 0])
+        dataframe.dataframe(df.iloc[:, 1:], hide_index=True)
