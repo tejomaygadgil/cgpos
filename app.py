@@ -81,9 +81,9 @@ with st.columns([0.2, 1, 0.2])[1]:
 st.subheader("Description", divider=True)
 
 """
-One of the hardest things about learning Ancient Greek is having to memorize [hundreds of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) so you can tell you if a word is a noun, verb, adjective, and so on.
+One of the hardest things about learning Ancient Greek is having to memorize [hundreds of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) to tell if a word is a noun, verb, adjective, and so on.
 
-I decided to make this process less painful by training a Machine Learning model using the [Ancient Greek and Latin Dependency Treebank](http://perseusdl.github.io/treebank_data/) to predict part of speech for any given word in Ancient Greek.
+I decided to speed up this process by training a Machine Learning model using the [Ancient Greek and Latin Dependency Treebank](http://perseusdl.github.io/treebank_data/) to predict part of speech for any given word in Ancient Greek.
 
 Select a word from the list below — or enter your own! — to try it out.
 """
