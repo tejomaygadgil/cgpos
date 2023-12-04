@@ -107,17 +107,14 @@ else:
 
 start = st.button("Go")
 
-metric = st.empty()
-dataframe = st.empty()
-
-st.write("About me")
+result = st.container()
 
 # Generate prediction
 if start and len(input) > 0:
     if set(input) - set(printable) == set():
         st.write("Please enter a Greek word!")
     else:
-        with metric, st.spinner("Generating prediction."):
+        with result, st.spinner("Generating prediction."):
             # Normalize
             form = unicodedata.normalize("NFD", input)
             form = "".join(
@@ -147,5 +144,5 @@ if start and len(input) > 0:
 
             time.sleep(1.25)
 
-        metric.metric("Part of Speech", df.iloc[0, 0])
-        dataframe.dataframe(df.iloc[:, 1:], hide_index=True)
+        result.metric("Part of Speech", df.iloc[0, 0])
+        result.dataframe(df.iloc[:, 1:], hide_index=True)
