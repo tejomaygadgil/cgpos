@@ -83,14 +83,14 @@ st.subheader("Description", divider=True)
 """
 One of the hardest things about learning Ancient Greek is having to memorize [hundreds of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) so you can tell you if a word is a noun, verb, adjective, and so on.
 
-To help make this less painful, I trained a Machine Learning model using the [Ancient Greek and Latin Dependency Treebank](http://perseusdl.github.io/treebank_data/) to predict part of speech for any given word in Ancient Greek.
+I decided to make this process less painful by training a Machine Learning model using the [Ancient Greek and Latin Dependency Treebank](http://perseusdl.github.io/treebank_data/) to predict part of speech for any given word in Ancient Greek.
 
 Select a word from the list below — or enter your own! — to try it out.
 """
 
 st.subheader("Get predictions", divider=True)
 
-text_input = st.toggle("Toggle to enter your own word!")
+text_input = st.toggle("Enter your own word!")
 
 if text_input:
     # Get word
@@ -108,13 +108,13 @@ else:
         "συμπλοκὴν",
     ]
 
-    input = st.selectbox("Select a word from the list.", word_list)
+    input = st.selectbox("Select from the list.", word_list)
 
 start = st.button("Go")
 
 result = st.container()
 
-st.subheader("About the model", divider=True)
+st.subheader("Model details", divider=True)
 
 """
 The underlying model is a [Naive Bayes classifier](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) trained on syllable-based tokenization. In contrast to many NLP approaches, accents were not removed in order to preserve as much data as possible.
@@ -124,7 +124,7 @@ I chose this method because syllables and accent patterns so informative in Gree
 Please see the [GitHub repository](https://github.com/tejomaygadgil/cgpos) for details on model performance and implementation.
 """
 
-st.subheader("About the author", divider=True)
+st.subheader("About me", divider=True)
 
 st.image("https://tejomaygadgil.github.io/profile.jpg", width=200)
 
@@ -156,20 +156,17 @@ if start and len(input) > 0:
             tokens = [syl2tok[syllable] for syllable in syllables]
 
             # Get prediction
-            pred = model.predict([tokens])
-            pred = [
-                [classes[i], labels[i][value]] for i, value in enumerate(pred[0])
+            preds = model.predict([tokens])
+            preds = [
+                [classes[i], labels[i][value]] for i, value in enumerate(preds[0])
             ]  # Get text label
-            pred = [pred[i] for i in reorder_map]  # Reorder
-            pred = [value for value in pred if value[1] != "N/A"]
+            preds = [preds[i] for i in reorder_map]  # Reorder
+            preds = [value for value in preds if value[1] != "N/A"]
 
-            # Format output
-            df = pd.DataFrame(pred)
-            df = df.transpose()
-            df.columns = df.iloc[0]
-            df = df[1:]
+            time.sleep(1.25)  # For smoother UI
 
-            time.sleep(1.25)
-
-        result.metric("", df.iloc[0, 0])
-        result.dataframe(df.iloc[:, 1:], hide_index=True)
+        result.metric("", f"{input} is a {preds[0][1].lower()}!")
+        result.write("Details:")
+        result.dataframe(
+            pd.DataFrame(preds[1:]).set_index(0).transpose(), hide_index=True
+        )
