@@ -114,28 +114,27 @@ start = st.button("Go")
 
 result = st.container()
 
-with st.expander("Learn more"):
-    st.subheader("About the model", divider=True)
+st.subheader("About the model", divider=True)
 
-    """
-    The underlying model is a [Naive Bayes classifier](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) trained on syllable-based tokenization. In contrast to many NLP approaches, accents were not removed in order to preserve as much data as possible.
+"""
+The underlying model is a [Naive Bayes classifier](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) trained on syllable-based tokenization. In contrast to many NLP approaches, accents were not removed in order to preserve as much data as possible.
 
-    I chose this method because syllables and accent patterns so informative in Greek that I wanted to see how a simple model would perform given the right features. (As it turns out, pretty well!)
+I chose this method because syllables and accent patterns so informative in Greek that I wanted to see how a simple model would perform given the right features. (As it turns out, pretty well!)
 
-    Please see the [GitHub repository](https://github.com/tejomaygadgil/cgpos) for details on model performance and implementation.
-    """
+Please see the [GitHub repository](https://github.com/tejomaygadgil/cgpos) for details on model performance and implementation.
+"""
 
-    st.subheader("About the author", divider=True)
+st.subheader("About the author", divider=True)
 
-    st.image("https://tejomaygadgil.github.io/profile.jpg", width=200)
+st.image("https://tejomaygadgil.github.io/profile.jpg", width=200)
 
-    """
-    Hi there, I'm [Tejomay](https://tejomaygadgil.github.io/about.html)!
+"""
+Hi there, I'm [Tejomay](https://tejomaygadgil.github.io/about.html)!
 
-    I am passionate about building NLP tools to make it easier to learn language.
+I am passionate about building NLP tools to make it easier to learn language.
 
-    Find me on [GitHub](https://github.com/tejomaygadgil), [LinkedIn](https://www.linkedin.com/in/tejomay-gadgil/), or [my blog](https://tejomaygadgil.github.io/)!
-    """
+Find me on [GitHub](https://github.com/tejomaygadgil), [LinkedIn](https://www.linkedin.com/in/tejomay-gadgil/), or [my blog](https://tejomaygadgil.github.io/)!
+"""
 
 # Generate prediction
 if start and len(input) > 0:
