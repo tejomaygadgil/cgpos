@@ -75,17 +75,22 @@ reorder_map = [0, 6, 1, 2, 7, 3, 4, 5, 8]
 # Start app
 st.title(title)
 
+with st.columns([0.2, 1, 0.2])[1]:
+    st.image(image="hydria.jpg", caption="Pictured: Someone trying to learn Greek")
+
 st.subheader("Description", divider=True)
 
 """
-One of the hardest things about learning Ancient Greek is having to memorize hundreds of word endings to know whether a noun, verb, adjective, and so on.
+One of the hardest things about learning Ancient Greek is having to memorize [hundreds of word endings](https://en.wiktionary.org/wiki/Appendix:Ancient_Greek_grammar_tables) so you can tell you if a word is a noun, verb, adjective, and so on.
 
-This app is trained on ___. Enter in Ancient Greek word to find its part of speech!
+To help make this less painful, I trained a Machine Learning model using the [Ancient Greek and Latin Dependency Treebank](http://perseusdl.github.io/treebank_data/) to predict part of speech for any given word in Ancient Greek.
+
+Select a word from the list below — or enter your own! — to try it out.
 """
 
-st.subheader("Model", divider=True)
+st.subheader("Get predictions", divider=True)
 
-text_input = st.toggle("Enter my own word!")
+text_input = st.toggle("Toggle to enter your own word!")
 
 if text_input:
     # Get word
@@ -108,6 +113,29 @@ else:
 start = st.button("Go")
 
 result = st.container()
+
+with st.expander("Learn more"):
+    st.subheader("About the model", divider=True)
+
+    """
+    The underlying model is a [Naive Bayes classifier](https://en.wikipedia.org/wiki/Naive_Bayes_classifier) trained on syllable-based tokenization. In contrast to many NLP approaches, accents were not removed in order to preserve as much data as possible.
+
+    I chose this method because syllables and accent patterns so informative in Greek that I wanted to see how a simple model would perform given the right features. (As it turns out, pretty well!)
+
+    Please see the [GitHub repository](https://github.com/tejomaygadgil/cgpos) for details on model performance and implementation.
+    """
+
+    st.subheader("About the author", divider=True)
+
+    st.image("https://tejomaygadgil.github.io/profile.jpg", width=200)
+
+    """
+    Hi there, I'm [Tejomay](https://tejomaygadgil.github.io/about.html)!
+
+    I am passionate about building NLP tools to make it easier to learn language.
+
+    Find me on [GitHub](https://github.com/tejomaygadgil), [LinkedIn](https://www.linkedin.com/in/tejomay-gadgil/), or [my blog](https://tejomaygadgil.github.io/)!
+    """
 
 # Generate prediction
 if start and len(input) > 0:
@@ -144,5 +172,5 @@ if start and len(input) > 0:
 
             time.sleep(1.25)
 
-        result.metric("Part of Speech", df.iloc[0, 0])
+        result.metric("", df.iloc[0, 0])
         result.dataframe(df.iloc[:, 1:], hide_index=True)
